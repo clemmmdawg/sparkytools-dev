@@ -741,9 +741,6 @@
       </p>
     </footer>
 
-    <!-- Theme toggle — fixed bottom-left; managed by src/js/ui/theme.js -->
-    <button class="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button>
-
     <!-- Drawer overlay + panel (position: fixed — outside .container) -->
     <div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
     <nav class="drawer" id="nav-drawer" aria-label="Calculator menu">
@@ -803,6 +800,12 @@
               data-label="About"
               data-accent="var(--primary)">
         <span class="drawer-item-icon">ℹ️</span>About
+      </button>
+
+      <div class="drawer-divider"></div>
+      <button class="drawer-item theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+        <span class="drawer-item-icon">🌙</span>
+        <span class="theme-toggle-label">Dark mode</span>
       </button>
     </nav>
 

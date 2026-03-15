@@ -465,35 +465,10 @@ body {
 }
 
 
-/* ── Theme toggle button (fixed, bottom-left) ── */
-.theme-toggle {
-  position:        fixed;
-  bottom:          20px;
-  left:            20px;
-  width:           44px;
-  height:          44px;
-  border-radius:   50%;
-  border:          2px solid var(--border);
-  background:      var(--card-bg);
-  color:           var(--primary);
-  font-size:       1.2rem;
-  line-height:     1;
-  cursor:          pointer;
-  box-shadow:      var(--shadow);
-  z-index:         200;
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-  transition:      background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.15s;
-}
-
-.theme-toggle:hover {
-  transform:  scale(1.08);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-}
-
-.theme-toggle:active {
-  transform: scale(0.95);
+.drawer-divider {
+  height:     1px;
+  background: var(--border);
+  margin:     8px 0;
 }
 
 

@@ -98,8 +98,8 @@ export function initNavigation() {
       }
 
       closeDrawer();
-      const navBar = document.querySelector('.nav-bar');
-      window.scrollTo({ top: navBar ? navBar.offsetTop : 0, behavior: 'smooth' });
+      const header = document.querySelector('.site-header');
+      window.scrollTo({ top: header ? header.offsetTop + header.offsetHeight : 0, behavior: 'smooth' });
     });
   });
 }
