@@ -12,7 +12,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION   = 'sparkytools-v10.5.0';
+const CACHE_VERSION   = 'sparkytools-v0.9.0';
 const FONTS_CACHE     = 'sparkytools-fonts-v1';
 
 /**
