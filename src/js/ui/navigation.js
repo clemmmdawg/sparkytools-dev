@@ -98,7 +98,8 @@ export function initNavigation() {
       }
 
       closeDrawer();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const navBar = document.querySelector('.nav-bar');
+      window.scrollTo({ top: navBar ? navBar.offsetTop : 0, behavior: 'smooth' });
     });
   });
 }
