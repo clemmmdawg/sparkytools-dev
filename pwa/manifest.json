@@ -11,13 +11,13 @@
   "categories": ["utilities", "productivity"],
   "icons": [
     {
-      "src": "../public/icons/bolt.png",
+      "src": "../img/bolt.png",
       "sizes": "any",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "../public/icons/bolt.png",
+      "src": "../img/bolt.png",
       "sizes": "any",
       "type": "image/png",
       "purpose": "maskable"

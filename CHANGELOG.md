@@ -52,7 +52,7 @@ All notable changes to SparkyTools are documented in this file.
 
 ---
 
-## [10.5.0] - 2026-03-12 - Service Load Refinements
+## [0.9.0] - 2026-03-12 - Service Load Refinements
 
 ### Fixed
 - **Cooking equipment not appearing in shed results** — `hasShedLoads()` was not checking `cookingLoads`, so `shedResult` was never computed when only cooking loads were shed. Both `runStandard` and `runOptional` also skipped the entire cooking block when all cooking was shed; they now always render sub-items for every cooking row.
@@ -86,7 +86,7 @@ All notable changes to SparkyTools are documented in this file.
 - **NEC data inlined into `data-loader.js`** — All five JSON datasets (conduit, conductors, boxfill, pullbox, serviceLoad) embedded directly as object literals. Eliminates all network fetch requests; works on any host including Playcode.io which returned 403 for `.json` files in subdirectories.
 - **`nec-data.js` script tag removed** from `index.html` (file still exists in `src/data/2023/` but is no longer loaded).
 - **`data-loader.js` exports** — Added `window.NECDataLoader` assignment alongside the existing CommonJS export.
-- **Service worker** bumped to cache version `sparkytools-v10.5.0`.
+- **Service worker** bumped to cache version `sparkytools-v0.9.0`.
 
 ### Optional Method 220.82(C) HVAC Rewrite (`service-load.js`)
 - **Bug: HVAC was included in `allLoads`** and subject to the 220.82(B) two-tier demand factor — it should be added after. Fixed.
@@ -157,7 +157,7 @@ All notable changes to SparkyTools are documented in this file.
   - `src/js/ui/theme.js` — New module handling initialization, toggle, and OS preference sync.
 - **Progressive Web App (PWA)**
   - `pwa/manifest.json` — App name, standalone display, brand colors, SVG icon.
-  - `public/icons/icon.svg` — Lightning bolt app icon on brand dark background.
+  - `img/bolt.png` — Lightning bolt app icon on brand dark background.
   - `pwa/service-worker.js` — Cache-first strategy for app assets; stale-while-revalidate for Google Fonts. `skipWaiting` + `clients.claim()` for immediate activation. Graceful per-asset fallback via `Promise.allSettled`.
   - PWA meta tags added to `index.html` — `<link rel="manifest">`, iOS `apple-mobile-web-app-*` meta, `apple-touch-icon`, `theme-color`.
   - Service worker registration in `app.js` with `updatefound` listener.

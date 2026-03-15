@@ -6,7 +6,13 @@
  *   .nav-bar         — sticky bar showing active tool name + hamburger button
  *   .drawer-overlay  — click-to-close dim layer (position: fixed)
  *   .drawer          — slide-in panel (position: fixed, right side)
- *     .drawer-item   — one per tool; carries data-target, data-label, data-accent
+ *     .drawer-item   — one per tool; carries data-target, data-hash, data-label, data-accent
+ *
+ * Hash routing:
+ *   Each drawer item has a data-hash attribute (e.g. "service", "about").
+ *   Navigating to index.html#transformer opens that section directly, and
+ *   clicking a drawer item updates the URL hash so links are bookmarkable.
+ *   Browser back/forward navigation is supported via the hashchange event.
  */
 
 /**
@@ -24,12 +30,38 @@ export function initNavigation() {
   const sections    = document.querySelectorAll('.tool-section');
   const items       = document.querySelectorAll('.drawer-item');
 
-  // Sync bar state with the initially-active drawer item
-  const initialActive = document.querySelector('.drawer-item.active');
-  if (initialActive) {
-    _syncBar(initialActive, barLabel, accentDot);
-    _syncActiveBorder(initialActive);
+  // ── Activate a section by its drawer item ──────────────────────────────────
+
+  function activateItem(item) {
+    const targetId = item.dataset.target;
+    items.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    _syncBar(item, barLabel, accentDot);
+    _syncActiveBorder(item);
+    sections.forEach(s => s.classList.toggle('active', s.id === targetId));
   }
+
+  // ── Hash routing ───────────────────────────────────────────────────────────
+
+  function activateHash(hash) {
+    const slug  = hash.replace(/^#/, '');
+    const match = [...items].find(i => i.dataset.hash === slug);
+    if (match) activateItem(match);
+  }
+
+  // On first load: honour the URL hash, or fall back to the HTML-active item
+  if (location.hash) {
+    activateHash(location.hash);
+  } else {
+    const initialActive = document.querySelector('.drawer-item.active');
+    if (initialActive) {
+      _syncBar(initialActive, barLabel, accentDot);
+      _syncActiveBorder(initialActive);
+    }
+  }
+
+  // Back / forward navigation
+  window.addEventListener('hashchange', () => activateHash(location.hash));
 
   // ── Drawer open / close ──────────────────────────────────────────────────
 
@@ -58,21 +90,16 @@ export function initNavigation() {
 
   items.forEach(item => {
     item.addEventListener('click', () => {
-      const targetId = item.dataset.target;
+      activateItem(item);
 
-      // Update active state
-      items.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      // Sync top bar label + dot
-      _syncBar(item, barLabel, accentDot);
-      _syncActiveBorder(item);
-
-      // Switch visible section
-      sections.forEach(s => s.classList.toggle('active', s.id === targetId));
+      // Update URL without triggering hashchange (pushState doesn't fire it)
+      if (item.dataset.hash) {
+        history.pushState(null, '', '#' + item.dataset.hash);
+      }
 
       closeDrawer();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const navBar = document.querySelector('.nav-bar');
+      window.scrollTo({ top: navBar ? navBar.offsetTop : 0, behavior: 'smooth' });
     });
   });
 }
