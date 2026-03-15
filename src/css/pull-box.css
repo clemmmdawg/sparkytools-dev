@@ -1,0 +1,62 @@
+/* pull-box.css — pull box run rows and SVG visualizer */
+
+/* ── 14. Pull Box: run row header, rows & visualizer ── */
+
+/* Column header row — mirrors .pb-run-row grid */
+.pb-run-header {
+  display:               grid;
+  grid-template-columns: 24px 0.8fr 0.9fr 1fr 1fr 36px;
+  gap:                   8px;
+  align-items:           center;
+  margin-bottom:         6px;
+  padding:               0 2px;
+  font-size:             0.62rem;
+  font-weight:           700;
+  text-transform:        uppercase;
+  color:                 var(--text-muted);
+}
+
+/* Each conduit run row */
+.pb-run-row {
+  display:               grid;
+  grid-template-columns: 24px 0.8fr 0.9fr 1fr 1fr 36px;
+  gap:                   8px;
+  align-items:           center;
+  margin-bottom:         8px;
+  background:            var(--surface-row);
+  padding:               6px 10px;
+  border-radius:         6px;
+}
+
+.pb-run-row select {
+  height:    38px;
+  font-size: 0.83rem;
+  padding:   5px 6px;
+}
+
+/* Text cells within the run row */
+.pb-run-text {
+  font-size:     0.875rem;
+  font-weight:   600;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pull Box face SVG container */
+.pb-visualizer-container {
+  width:         100%;
+  max-width:     400px;
+  height:        220px;
+  margin:        20px auto;
+  border:        1px solid var(--border);
+  border-radius: var(--radius);
+  background:    var(--surface-inset);
+  overflow:      hidden;
+}
+
+#pb-svg {
+  width:   100%;
+  height:  100%;
+  display: block;
+}

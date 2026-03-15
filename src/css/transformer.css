@@ -1,0 +1,206 @@
+/* transformer.css — Transformer Calculator                                    */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Input grid ── */
+.tc-grid {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   12px 18px;
+  margin-bottom:         16px;
+}
+
+.tc-grid--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.tc-field {
+  display:        flex;
+  flex-direction: column;
+  gap:            5px;
+}
+
+.tc-field label {
+  font-size:   0.82rem;
+  font-weight: 600;
+  color:       var(--text);
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  flex-wrap:   wrap;
+}
+
+.tc-nec-ref {
+  font-size:    0.7rem;
+  font-weight:  600;
+  color:        var(--accent-blue);
+  background:   color-mix(in srgb, var(--accent-blue) 12%, transparent);
+  border:       1px solid color-mix(in srgb, var(--accent-blue) 25%, transparent);
+  padding:      1px 5px;
+  border-radius: 4px;
+  white-space:  nowrap;
+  cursor:       help;
+}
+
+.tc-field input,
+.tc-field select {
+  width:         100%;
+  padding:       9px 11px;
+  border:        1px solid var(--border);
+  border-radius: 7px;
+  background:    var(--card-bg);
+  color:         var(--text);
+  font-size:     0.9rem;
+  font-family:   inherit;
+  box-sizing:    border-box;
+  transition:    border-color 0.15s, box-shadow 0.15s;
+}
+
+.tc-field input:focus,
+.tc-field select:focus {
+  outline:      none;
+  border-color: var(--primary);
+  box-shadow:   0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
+}
+
+.tc-field input.tc-error {
+  border-color: var(--danger);
+  background:   color-mix(in srgb, var(--danger) 8%, var(--card-bg));
+}
+
+/* ── Line diagram ── */
+.tc-diagram {
+  background:    var(--surface-inset);
+  border:        1px solid var(--border);
+  border-radius: 10px;
+  padding:       10px 6px 6px;
+  margin-bottom: 20px;
+  overflow:      hidden;
+}
+
+.tc-diagram svg {
+  width:   100%;
+  height:  auto;
+  display: block;
+}
+
+/* ── Results section ── */
+.tc-results {
+  display: none;
+}
+.tc-results.visible { display: block; }
+
+/* Section title above each result card */
+.tc-section-title {
+  font-size:      0.7rem;
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color:          var(--text-muted);
+  margin:         0 0 8px;
+}
+
+/* Result card */
+.tc-card {
+  background:    var(--card-bg);
+  border:        2px solid var(--accent-blue);
+  border-radius: 10px;
+  padding:       14px 16px;
+  margin-bottom: 12px;
+}
+
+.tc-card--ocpd      { border-color: var(--accent-red);   }
+.tc-card--conductor { border-color: var(--accent-green);  }
+
+.tc-card-title {
+  font-size:      0.7rem;
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color:          var(--accent-blue);
+  margin-bottom:  10px;
+}
+.tc-card--ocpd      .tc-card-title { color: var(--accent-red);   }
+.tc-card--conductor .tc-card-title { color: var(--accent-green);  }
+
+/* Metrics row */
+.tc-metrics {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       16px 24px;
+}
+
+.tc-metric {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+}
+
+.tc-metric-value {
+  font-size:   1.2rem;
+  font-weight: 700;
+  color:       var(--text);
+}
+
+.tc-metric-value--lg {
+  font-size: 1.5rem;
+  color:     var(--accent-blue);
+}
+.tc-card--ocpd      .tc-metric-value--lg { color: var(--accent-red);   }
+.tc-card--conductor .tc-metric-value--lg { color: var(--accent-green);  }
+
+.tc-metric-label {
+  font-size:      0.68rem;
+  font-weight:    600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color:          var(--text-muted);
+}
+
+/* Divider between metric groups inside a card */
+.tc-metric-divider {
+  width:      1px;
+  background: var(--divider);
+  align-self: stretch;
+  margin:     0 4px;
+}
+
+/* Card note at bottom */
+.tc-card-note {
+  font-size:   0.75rem;
+  color:       var(--text-muted);
+  border-top:  1px solid var(--divider);
+  padding-top: 10px;
+  margin-top:  12px;
+  line-height: 1.5;
+}
+
+/* Tap rule description */
+.tc-tap-desc {
+  font-size:   0.78rem;
+  color:       var(--text-muted);
+  margin:      6px 0 0;
+  line-height: 1.5;
+  font-style:  italic;
+}
+
+/* Assumptions footer */
+.tc-assumptions {
+  font-size:     0.75rem;
+  color:         var(--text-muted);
+  background:    var(--surface-inset);
+  border:        1px solid var(--border);
+  border-radius: 7px;
+  padding:       10px 14px;
+  line-height:   1.6;
+  margin-top:    4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .tc-grid--3 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 360px) {
+  .tc-grid,
+  .tc-grid--3 { grid-template-columns: 1fr; }
+}
