@@ -157,7 +157,7 @@ All notable changes to SparkyTools are documented in this file.
   - `src/js/ui/theme.js` — New module handling initialization, toggle, and OS preference sync.
 - **Progressive Web App (PWA)**
   - `pwa/manifest.json` — App name, standalone display, brand colors, SVG icon.
-  - `public/icons/icon.svg` — Lightning bolt app icon on brand dark background.
+  - `img/bolt.png` — Lightning bolt app icon on brand dark background.
   - `pwa/service-worker.js` — Cache-first strategy for app assets; stale-while-revalidate for Google Fonts. `skipWaiting` + `clients.claim()` for immediate activation. Graceful per-asset fallback via `Promise.allSettled`.
   - PWA meta tags added to `index.html` — `<link rel="manifest">`, iOS `apple-mobile-web-app-*` meta, `apple-touch-icon`, `theme-color`.
   - Service worker registration in `app.js` with `updatefound` listener.

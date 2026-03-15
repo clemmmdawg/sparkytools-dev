@@ -149,7 +149,7 @@ sparkytools-dev/
 │   └── data/2023/               # NEC data JSON (reference copies)
 │
 ├── pwa/manifest.json
-└── public/icons/
+└── img/
 ```
 
 ---

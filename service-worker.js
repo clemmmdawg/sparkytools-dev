@@ -57,7 +57,7 @@ const APP_ASSETS = [
 
   // PWA assets
   '/pwa/manifest.json',
-  '/public/icons/icon.svg',
+  '/img/bolt.png',
 ];
 
 // ── Install ────────────────────────────────────────────────────────────────────
