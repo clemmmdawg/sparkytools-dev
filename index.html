@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Inter typeface via Google Fonts — provides a clean, readable UI font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="src/css/base.css">
+    <link rel="stylesheet" href="src/css/conduit-fill.css">
+    <link rel="stylesheet" href="src/css/box-fill.css">
+    <link rel="stylesheet" href="src/css/pull-box.css">
+    <link rel="stylesheet" href="src/css/service-load.css">
+    <link rel="stylesheet" href="src/css/transformer.css">
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="pwa/manifest.json">
+
+    <!-- iOS home screen / splash config (Safari ignores the manifest for these) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SparkyTools">
+    <link rel="apple-touch-icon" href="public/icons/bolt.png">
+
+    <!-- Browser tab / toolbar color — kept in sync with --primary -->
+    <meta name="theme-color" content="#2c3e50">
+
+    <!-- Content Security Policy — blocks inline scripts and unauthorised external scripts -->
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none';">
+
+    <title>SparkyTools — NEC Electrical Calculators</title>
+    <meta name="description" content="Free, open-source NEC electrical calculators: conduit fill, voltage drop, box fill, and pull box sizing. No account required. Works offline.">
+  </head>
+  <body>
+
+    <div class="container">
+
+      <!-- ── Site Header ── -->
+      <header class="site-header">
+        <h1>Sparky ⚡ Tools</h1>
+        <p>Free tools for electricians.</p>
+      </header>
+
+      <!-- ── Sticky top bar ── -->
+      <div class="nav-bar" role="navigation" aria-label="Electrical Tools">
+        <div class="nav-bar-title">
+          <span class="nav-accent-dot" id="nav-accent-dot"></span>
+          <span id="nav-bar-label">Service Sizing</span>
+        </div>
+        <button class="nav-bar-btn" id="nav-drawer-btn"
+                aria-label="Open calculator menu"
+                aria-expanded="false"
+                aria-controls="nav-drawer">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           CONDUIT FILL CALCULATOR
+           Reference: NEC 300.17 / Chapter 9, Table 1
+           Fill limits: 53% (1 wire), 31% (2 wires), 40% (3+ wires)
+           ══════════════════════════════════════════════════════════ -->
+      <section id="conduit-tool" class="card card--blue tool-section" aria-labelledby="conduit-fill-heading">
+        <header class="card-header">
+          <h2 id="conduit-fill-heading">Conduit Fill Calculator</h2>
+        </header>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="conduit-type" data-tip="EMT and RMC are most common. PVC is used in wet/underground locations. FMC/LFMC for flexible connections.">
+              Conduit Type
+            </label>
+            <select id="conduit-type" aria-describedby="conduit-type-tip">
+              <!-- Populated dynamically by script.js from CONDUIT_DATA -->
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="conduit-size">Trade Size</label>
+            <select id="conduit-size" aria-label="Conduit trade size in inches">
+              <!-- Populated dynamically when conduit type changes -->
+            </select>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div id="wire-list-container">
+          <div class="wire-header" aria-hidden="true">
+            <span></span>
+            <span>Wire Type</span>
+            <span>Construction</span>
+            <span>Size</span>
+            <span>Qty</span>
+            <span></span>
+          </div>
+          <div id="wire-list" role="list" aria-label="Conductor list">
+          </div>
+        </div>
+
+        <button class="add-btn" id="add-wire-btn" type="button">+ Add Conductor</button>
+
+        <div class="visualizer-container" role="img" aria-label="Conduit fill cross-section visualizer">
+          <svg id="conduit-svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <circle class="conduit-ring" cx="50" cy="50" r="48" stroke-width="2" />
+            <g id="wire-group"></g>
+          </svg>
+        </div>
+
+        <div class="results-panel">
+          <div class="meter-container" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Conduit fill percentage">
+            <div id="fill-bar" class="meter-fill"></div>
+          </div>
+          <div class="stats">
+            <div class="stat-box">
+              <span class="label">Fill %</span>
+              <span id="fill-percent" class="value" aria-live="polite">0%</span>
+            </div>
+            <div class="stat-box">
+              <span class="label">Min. Size (<span id="current-type-label">EMT</span>)</span>
+              <span id="min-size-recommend" class="value" aria-live="polite">--</span>
+            </div>
+          </div>
+          <div id="status-box" class="status-pill" role="status" aria-live="polite">Add Wires to Begin</div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
+           VOLTAGE DROP CALCULATOR
+           Reference: NEC 210.19(A)(1) Informational Note
+           Recommendation: ≤3% for branch circuits, ≤5% combined
+           Formula: VD = (K × I × D × M) / CM
+           ══════════════════════════════════════════════════════════ -->
+      <section id="voltage-tool" class="card card--yellow tool-section" aria-labelledby="voltage-drop-heading">
+        <header class="card-header">
+          <h2 id="voltage-drop-heading">Voltage Drop Calculator</h2>
+        </header>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="vd-material">Material</label>
+            <select id="vd-material">
+              <option value="CU">Copper (CU)</option>
+              <option value="AL">Aluminum (AL)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="vd-size">Wire Size</label>
+            <select id="vd-size">
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="vd-voltage">Voltage</label>
+            <select id="vd-voltage">
+              <option value="120">120V</option>
+              <option value="208">208V</option>
+              <option value="240">240V</option>
+              <option value="277">277V</option>
+              <option value="480">480V</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="vd-phase">Phase</label>
+            <select id="vd-phase">
+              <option value="1">1-Phase (2-wire)</option>
+              <option value="3">3-Phase</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="vd-amps">Load (Amps)</label>
+            <input type="number" id="vd-amps" value="20" min="0" step="1">
+          </div>
+          <div class="input-group">
+            <label for="vd-dist">Length (One-way ft)</label>
+            <input type="number" id="vd-dist" value="100" min="0" step="1">
+          </div>
+        </div>
+
+        <div class="stats stats--boxed stats--2x2">
+          <div class="stat-box">
+            <span class="label">Voltage Loss</span>
+            <span id="vd-total" class="value" aria-live="polite">0.00 V</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Percentage</span>
+            <span id="vd-percent" class="value" aria-live="polite">0.00%</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Max Length (≤3%)</span>
+            <span id="vd-max-length" class="value" aria-live="polite">-- ft</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Rec. Wire Size</span>
+            <span id="vd-rec-size" class="value" aria-live="polite">--</span>
+          </div>
+        </div>
+        <div id="vd-status" class="status-pill" role="status" aria-live="polite">--</div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
+           BOX FILL CALCULATOR
+           Reference: NEC 314.16 / Table 314.16(B)
+           Accounts for conductors, devices (yokes), clamps, and grounds.
+           ══════════════════════════════════════════════════════════ -->
+      <section id="box-tool" class="card card--green tool-section" aria-labelledby="box-fill-heading">
+        <header class="card-header">
+          <h2 id="box-fill-heading">Box Fill Calculator</h2>
+        </header>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="box-select">Standard Box Size</label>
+            <select id="box-select">
+              <option value="custom">Custom (Input below)</option>
+              <option value="18.0">4 × 1-1/2″ Square (18.0 in³)</option>
+              <option value="21.0" selected>4 × 2-1/8″ Square (21.0 in³)</option>
+              <option value="30.3">4-11/16 × 1-1/2″ Square (30.3 in³)</option>
+              <option value="42.0">4-11/16 × 2-1/8″ Square (42.0 in³)</option>
+              <option value="12.5">3 × 2 × 2-1/2″ Device Box (12.5 in³)</option>
+              <option value="22.5">1-Gang Plastic (22.5 in³)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="box-volume">Box Volume (in³)</label>
+            <input type="number" id="box-volume" value="21.0" step="0.1" min="0">
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="box-header" aria-hidden="true">
+          <span>Wire Size</span>
+          <span>Qty</span>
+          <span>Vol. Each</span>
+          <span></span>
+        </div>
+        <div id="box-wire-list" role="list" aria-label="Box conductor list">
+        </div>
+
+        <button class="add-btn" id="add-box-wire-btn" type="button">+ Add Conductor</button>
+
+        <hr class="divider">
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="box-yokes">Devices (Yokes)</label>
+            <input type="number" id="box-yokes" value="1" min="0">
+          </div>
+          <div class="input-group">
+            <label for="box-clamps" data-tip="Internal clamps and supports count as 1 allowance each group, based on the largest conductor in the box.">
+              Clamps/Supports (?)
+            </label>
+            <select id="box-clamps">
+              <option value="0">None</option>
+              <option value="1">Clamps (1 Allowance)</option>
+              <option value="1">Supports (1 Allowance)</option>
+              <option value="2">Both (2 Allowances)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="box-grounds">Equipment Grounds</label>
+            <select id="box-grounds">
+              <option value="0">No</option>
+              <option value="1">Yes (1 Allowance)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats stats--boxed">
+          <div class="stat-box">
+            <span class="label">Required Vol.</span>
+            <span id="box-req-vol" class="value" aria-live="polite">0.00 in³</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Remaining</span>
+            <span id="box-rem-vol" class="value" aria-live="polite">0.00 in³</span>
+          </div>
+        </div>
+        <div id="box-status" class="status-pill" role="status" aria-live="polite">--</div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
+           PULL BOX SIZING CALCULATOR
+           Reference: NEC 314.28
+           (A)(1) Straight pulls: min dimension ≥ 8 × largest trade size
+           (A)(2) Angle/U-pulls: min dimension ≥ 6 × largest + sum of others
+                  on same wall. U-pulls also require 6 × spacing between entries.
+           ══════════════════════════════════════════════════════════ -->
+      <section id="pull-tool" class="card card--orange tool-section" aria-labelledby="pull-box-heading">
+        <header class="card-header">
+          <h2 id="pull-box-heading">Pull Box Sizing Calculator</h2>
+        </header>
+
+        <div class="pb-visualizer-container" role="img" aria-label="Pull box face diagram">
+          <svg id="pb-svg" viewBox="0 0 300 220" aria-hidden="true" focusable="false">
+            <text x="150" y="110" text-anchor="middle" dominant-baseline="middle"
+                  fill="#b0bec5" font-size="13" font-family="Inter, sans-serif">
+              Add conduit runs to visualize
+            </text>
+          </svg>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="pb-conduit-size">Conduit Trade Size</label>
+            <select id="pb-conduit-size" aria-label="Conduit trade size">
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="pb-pull-type">Pull Type</label>
+            <select id="pb-pull-type">
+              <option value="straight">Straight</option>
+              <option value="angle">Angle</option>
+              <option value="u">U-Pull</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="pb-entry-side">Conduit Enters</label>
+            <select id="pb-entry-side">
+              <option value="left">Left Wall</option>
+              <option value="right">Right Wall</option>
+              <option value="top">Top Wall</option>
+              <option value="bottom">Bottom Wall</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="pb-exit-side">Conduit Exits</label>
+            <select id="pb-exit-side" aria-label="Conduit exit side">
+            </select>
+          </div>
+        </div>
+
+        <button class="add-btn" id="pb-add-btn" type="button">+ Add Conduit Run</button>
+
+        <hr class="divider">
+
+        <div class="pb-run-header" aria-hidden="true">
+          <span></span>
+          <span>Size</span>
+          <span>Pull Type</span>
+          <span>Enters</span>
+          <span>Exits</span>
+          <span></span>
+        </div>
+        <div id="pb-run-list" role="list" aria-label="Conduit run list">
+        </div>
+
+        <div class="stats stats--boxed">
+          <div class="stat-box">
+            <span class="label">Min. Width (W)</span>
+            <span id="pb-min-width" class="value" aria-live="polite">--</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Min. Height (H)</span>
+            <span id="pb-min-height" class="value" aria-live="polite">--</span>
+          </div>
+        </div>
+        <div id="pb-status" class="status-pill" role="status" aria-live="polite">
+          Add conduit runs to begin
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           TRANSFORMER CALCULATOR
+           Reference: NEC T450.3(B), T310.16, 240.21(C)
+           ══════════════════════════════════════════════════════════ -->
+      <section id="transformer-tool" class="card card--blue tool-section" aria-labelledby="transformer-heading">
+        <header class="card-header">
+          <h2 id="transformer-heading">Transformer Calculator</h2>
+        </header>
+        <p class="tool-desc">Select voltages, phase, and enter kVA — primary/secondary currents, OCPD, and conductor sizes update live.</p>
+
+        <hr class="divider">
+
+        <!-- ── Inputs ── -->
+        <div class="tc-grid tc-grid--3">
+
+          <div class="tc-field">
+            <label for="tc-phase">Phase</label>
+            <select id="tc-phase">
+              <option value="1">1Ø  Single-Phase</option>
+              <option value="3">3Ø  Three-Phase</option>
+            </select>
+          </div>
+
+          <div class="tc-field">
+            <label for="tc-vpri">
+              Primary Voltage
+              <span class="tc-nec-ref" data-tip="Line-to-line voltage feeding the primary winding.">L-L</span>
+            </label>
+            <select id="tc-vpri"><!-- populated by JS --></select>
+          </div>
+
+          <div class="tc-field">
+            <label for="tc-vsec">
+              Secondary Voltage
+              <span class="tc-nec-ref" data-tip="L-N voltages (120 V, 277 V) are treated as single-phase regardless of primary phase selection.">L-L / L-N</span>
+            </label>
+            <select id="tc-vsec"><!-- populated by JS --></select>
+          </div>
+
+          <div class="tc-field">
+            <label for="tc-kva">kVA Rating</label>
+            <input type="number" id="tc-kva" placeholder="e.g. 75" min="0.1" step="any">
+          </div>
+
+          <div class="tc-field">
+            <label for="tc-tap-option">
+              Secondary OCPD Location
+              <span class="tc-nec-ref" data-tip="Where the secondary overcurrent device is installed. Affects minimum conductor sizing. NEC 240.21(C).">NEC 240.21(C)</span>
+            </label>
+            <select id="tc-tap-option">
+              <option value="at-terminals">At secondary terminals</option>
+              <option value="primary-ocpd">Primary OCPD only — 240.21(C)(1)</option>
+              <option value="10ft">≤ 10 ft tap — 240.21(C)(2)</option>
+              <option value="25ft">≤ 25 ft tap — 240.21(C)(3)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <p class="tc-tap-desc" id="tc-tap-desc"></p>
+
+        <hr class="divider">
+
+        <!-- ── Line Diagram ── -->
+        <div class="tc-diagram">
+          <svg id="tc-svg" viewBox="0 0 560 160" xmlns="http://www.w3.org/2000/svg"
+               role="img" aria-label="Transformer line diagram"></svg>
+        </div>
+
+        <!-- ── Results ── -->
+        <div id="tc-results" class="tc-results">
+
+          <!-- Fundamentals -->
+          <p class="tc-section-title">Transformer Values</p>
+          <div class="tc-card" style="margin-bottom:16px">
+            <div class="tc-card-title">🔵 Calculated Values</div>
+            <div class="tc-metrics">
+              <div class="tc-metric">
+                <div class="tc-metric-value tc-metric-value--lg" id="tc-ipri">—</div>
+                <div class="tc-metric-label">Primary FLA</div>
+              </div>
+              <div class="tc-metric-divider"></div>
+              <div class="tc-metric">
+                <div class="tc-metric-value tc-metric-value--lg" id="tc-isec">—</div>
+                <div class="tc-metric-label">Secondary FLA</div>
+              </div>
+              <div class="tc-metric-divider"></div>
+              <div class="tc-metric">
+                <div class="tc-metric-value" id="tc-ratio">—</div>
+                <div class="tc-metric-label">Turns Ratio</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OCPD -->
+          <p class="tc-section-title">NEC T450.3(B) — Overcurrent Protection</p>
+          <div class="tc-card tc-card--ocpd">
+            <div class="tc-card-title">🔴 OCPD Sizing</div>
+            <div class="tc-metrics">
+              <div class="tc-metric">
+                <div class="tc-metric-value tc-metric-value--lg" id="tc-pri-ocpd">—</div>
+                <div class="tc-metric-label">Primary OCPD</div>
+              </div>
+              <div class="tc-metric">
+                <div class="tc-metric-value" id="tc-pri-ocpd-pct">—</div>
+                <div class="tc-metric-label">of Primary FLA</div>
+              </div>
+              <div class="tc-metric-divider"></div>
+              <div class="tc-metric">
+                <div class="tc-metric-value tc-metric-value--lg" id="tc-sec-ocpd">—</div>
+                <div class="tc-metric-label">Secondary OCPD</div>
+              </div>
+              <div class="tc-metric">
+                <div class="tc-metric-value" id="tc-sec-ocpd-pct">—</div>
+                <div class="tc-metric-label">of Secondary FLA</div>
+              </div>
+            </div>
+            <div class="tc-card-note">
+              Primary-only protection: max <strong id="tc-pri-ocpd-pct2"></strong> of primary FLA — no secondary OCPD required.
+              If secondary protection is also provided, primary OCPD may be up to 250% of primary FLA
+              (<strong id="tc-pri-ocpd-ws">—</strong>).
+              Next standard size up per NEC 240.6(A).
+            </div>
+          </div>
+
+          <!-- Conductors -->
+          <p class="tc-section-title">NEC T310.16 — Conductors (75°C Cu THWN)</p>
+          <div class="tc-card tc-card--conductor">
+            <div class="tc-card-title">🟢 Conductor Sizing</div>
+            <div class="tc-metrics">
+              <div class="tc-metric">
+                <div class="tc-metric-value tc-metric-value--lg" id="tc-pri-wire">—</div>
+                <div class="tc-metric-label">Primary Conductors</div>
+              </div>
+              <div class="tc-metric">
+                <div class="tc-metric-value" id="tc-pri-wire-amps">—</div>
+                <div class="tc-metric-label">Rated / Required</div>
+              </div>
+              <div class="tc-metric-divider"></div>
+              <div class="tc-metric">
+                <div class="tc-metric-value tc-metric-value--lg" id="tc-sec-wire">—</div>
+                <div class="tc-metric-label">Secondary Conductors</div>
+              </div>
+              <div class="tc-metric">
+                <div class="tc-metric-value" id="tc-sec-wire-amps">—</div>
+                <div class="tc-metric-label">Rated / Required</div>
+              </div>
+            </div>
+            <div class="tc-card-note" id="tc-tap-note"></div>
+          </div>
+
+          <!-- Assumptions -->
+          <p class="tc-assumptions">
+            📋 <strong>Assumptions:</strong> Conductors sized per <strong>NEC T310.16, 75°C Cu THWN</strong> in conduit, single set, no derating.
+            Apply NEC 310.15 correction factors for high-temperature locations or high conduit fill.
+            Always verify with the current NEC and a licensed electrician.
+          </p>
+
+        </div><!-- /#tc-results -->
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════════════════════════════
+           RESIDENTIAL SERVICE LOAD CALCULATOR
+           NEC 220.40–220.53  Standard Method
+           NEC 220.82         Optional Method — New Dwelling
+           NEC 220.83         Optional Method — Existing Dwelling
+           ═══════════════════════════════════════════════════════════════════ -->
+      <section id="service-tool" class="card card--red tool-section active" aria-labelledby="service-load-heading">
+
+        <!-- Print-only header -->
+        <div class="sl-print-header">
+          <h1 class="sl-print-title">⚡ SparkyTools — Residential Service Load Calculation</h1>
+          <div class="sl-print-meta">
+            <span>Date: <span id="sl-print-date"></span></span>
+            <span>SparkyTools v10 · NEC 2023 · Verify with a licensed electrician</span>
+          </div>
+        </div>
+
+        <header class="card-header">
+          <h2 id="service-load-heading" data-tip="Calculates required service size per NEC 220.40–220.53 (Standard) and NEC 220.82/220.83 (Optional). Supports load shedding for generator/ATS sizing and 220.83 new-load annotation for existing dwellings.">Residential Service and Generator Sizing</h2>
+        </header>
+
+        <!-- ── 1. Calculation Setup ───────────────────────────────────── -->
+        <fieldset class="sl-fieldset">
+          <legend class="sl-legend">Calculation Setup</legend>
+          <div class="sl-row">
+            <div class="sl-field sl-field--wide">
+              <label for="sl-job-name">Job Name / Address <span class="sl-optional-label">(optional)</span></label>
+              <input type="text" id="sl-job-name" class="sl-static-input" placeholder="e.g. 123 Main St — Smith Residence" aria-label="Job name or address" maxlength="120">
+            </div>
+            <div class="sl-field sl-field--wide">
+              <label for="sl-dwelling-type">
+                Dwelling Type <span class="sl-nec-ref" data-tip="New dwellings use NEC 220.82 (10,000 VA @ 100% + remainder @ 40%). Existing dwellings use NEC 220.83 (8,000 VA @ 100% + remainder @ 40%). Also unlocks the 'New Load' toggle on each row for 220.83 documentation.">220.82 / 220.83</span>
+              </label>
+              <select id="sl-dwelling-type" class="sl-static-input" aria-label="Dwelling type">
+                <option value="new">New Dwelling</option>
+                <option value="existing">Existing Dwelling</option>
+              </select>
+            </div>
+            <div class="sl-field sl-field--wide">
+              <label for="sl-method">
+                Calculation Method <span class="sl-nec-ref" data-tip="Standard Method (220.40–220.53) applies individual NEC demand factors to each load category.">220.40–220.53</span><span class="sl-nec-ref" data-tip="Optional Method (220.82/220.83) lumps all loads and applies a two-tier factor. Both are NEC-compliant — use whichever yields a better result or is required by your AHJ.">220.82 / 220.83</span>
+              </label>
+              <select id="sl-method" class="sl-static-input" aria-label="Calculation method">
+                <option value="standard">Standard Method (220.40–220.53)</option>
+                <option value="optional">Optional Method (220.82 / 220.83)</option>
+              </select>
+            </div>
+            <!-- Existing service size — only shown for existing dwellings (CSS: .has-existing) -->
+            <div class="sl-field sl-existing-service-row">
+              <label for="sl-existing-service"
+                data-tip="Optional. Enter the existing service size in amps to get an adequacy check in the results — whether the existing service can handle the calculated load.">
+                Existing Service Size (A)
+                <span class="sl-nec-ref">220.83</span>
+              </label>
+              <input type="number" id="sl-existing-service" class="sl-static-input" value="" min="60" step="25" placeholder="e.g. 200" aria-label="Existing service amperage">
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ── 2. General Loads ───────────────────────────────────────── -->
+        <fieldset class="sl-fieldset">
+          <legend class="sl-legend">
+            General Loads
+          </legend>
+          <div class="sl-row sl-circuit-row">
+            <div class="sl-field sl-field--wide">
+              <label for="sl-sqft">
+                Dwelling Area (sq ft)
+                <span class="sl-nec-ref" data-tip="Total finished living area in sq ft. Does not include unfinished basements, open porches, or garages. NEC 220.12 requires 3 VA per sq ft for general lighting and receptacle loads.">220.12</span>
+              </label>
+              <input type="number" id="sl-sqft" class="sl-static-input" value="2000" min="100" step="50" aria-label="Dwelling area in square feet">
+            </div>
+            <div class="sl-field">
+              <label>
+                Small Appliance Circuits
+                <span class="sl-nec-ref" data-tip="NEC 220.52(A) requires a minimum of two 20A small appliance branch circuits (1,500 VA each) for kitchen/dining areas. Additional circuits beyond the minimum add 1,500 VA each.">220.52(A)</span>
+              </label>
+              <div class="sl-stepper">
+                <button id="sl-sa-dec" class="sl-step-btn" aria-label="Decrease small appliance circuits" type="button">−</button>
+                <input id="sl-sa-count" type="number" class="sl-step-val" value="2" min="0" readonly aria-label="Small appliance circuit count">
+                <button id="sl-sa-inc" class="sl-step-btn" aria-label="Increase small appliance circuits" type="button">+</button>
+              </div>
+            </div>
+            <div class="sl-field">
+              <label>
+                Laundry Circuits
+                <span class="sl-nec-ref" data-tip="NEC 220.52(B) requires a minimum of one 20A laundry branch circuit (1,500 VA). Additional laundry circuits add 1,500 VA each.">220.52(B)</span>
+              </label>
+              <div class="sl-stepper">
+                <button id="sl-laundry-dec" class="sl-step-btn" aria-label="Decrease laundry circuits" type="button">−</button>
+                <input id="sl-laundry-count" type="number" class="sl-step-val" value="1" min="0" readonly aria-label="Laundry circuit count">
+                <button id="sl-laundry-inc" class="sl-step-btn" aria-label="Increase laundry circuits" type="button">+</button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ── 3. Cooking Equipment ───────────────────────────────────── -->
+        <fieldset class="sl-fieldset">
+          <legend class="sl-legend">Cooking Equipment <span class="sl-nec-ref" data-tip="Add each cooking appliance separately. NEC Table 220.55 applies demand factors based on the number and size of units. Per Note 4, a cooktop and wall oven(s) on the same branch circuit or feeder are treated as a single range — add them both and the calculator combines them automatically.">220.55</span></legend>
+          <div id="sl-cooking-list"></div>
+          <button id="sl-add-cooking-btn" class="add-btn" type="button">+ Add Cooking Equipment</button>
+        </fieldset>
+
+        <!-- ── 4. Dryers ──────────────────────────────────────────────── -->
+        <fieldset class="sl-fieldset">
+          <legend class="sl-legend">
+            Electric Dryers <span class="sl-nec-ref" data-tip="Enter the nameplate VA rating. NEC 220.54 requires a minimum of 5,000 VA per dryer regardless of nameplate. For multiple dryers, Table 220.54 applies a demand factor (e.g. 2 dryers = 100%, 3 = 100%, 4 = 85%, 5 = 75%). Gas dryers do not count.">220.54</span>
+          </legend>
+          <div id="sl-dryer-list"></div>
+          <button id="sl-add-dryer-btn" class="add-btn" type="button">+ Add Electric Dryer</button>
+        </fieldset>
+
+        <!-- ── 5. Fixed Appliances ────────────────────────────────────── -->
+        <fieldset class="sl-fieldset">
+          <legend class="sl-legend">
+            Fixed Appliances <span class="sl-nec-ref" data-tip="Permanently wired appliances on dedicated circuits: dishwasher, water heater, garbage disposal, well pump, garage door opener, bathroom exhaust fans, etc. Does not include ranges, dryers, HVAC, or cord-and-plug connected appliances.">220.53</span>
+          </legend>
+          <div id="sl-fixed-list"></div>
+          <button id="sl-add-fixed-btn" class="add-btn" type="button">+ Add Appliance</button>
+        </fieldset>
+
+        <!-- ── 6. HVAC ────────────────────────────────────────────────── -->
+        <fieldset class="sl-fieldset">
+          <legend class="sl-legend">
+            HVAC <span class="sl-nec-ref" data-tip="Standard Method (220.60): The larger of the cooling or heating group is used at 100% — the smaller group is omitted as non-coincident.">220.60</span><span class="sl-nec-ref" data-tip="Optional Method (220.82(C)): Only the largest group by nameplate total is selected, then demand factors apply — A/C and heat pumps at 100%; electric resistance heat at 65% (fewer than 4 units) or 40% (4 or more units). Use the nameplate ampere or kVA rating from the unit's data plate.">220.82(C)</span>
+          </legend>
+          <div id="sl-hvac-list"></div>
+          <button id="sl-add-hvac-btn" class="add-btn" type="button">+ Add HVAC Unit</button>
+        </fieldset>
+
+        <!-- ── 7. Custom Loads ────────────────────────────────────────── -->
+        <fieldset class="sl-fieldset">
+          <legend class="sl-legend">
+            Custom Loads <span class="sl-nec-ref" data-tip="Standard Method: Per NEC 220.14, loads not addressed elsewhere in Article 220 are calculated at 100% of nameplate VA.">220.14</span><span class="sl-nec-ref" data-tip="Optional Method: Custom loads are added at nameplate and folded into the 220.82(B) demand factor pool along with all other general loads before the two-tier factor is applied.">220.82(B)</span>
+          </legend>
+          <p class="sl-fieldset-hint">Use for any permanently connected load not covered by the sections above — pool equipment, workshop subpanels, EV chargers, etc.</p>
+          <div id="sl-custom-list"></div>
+          <button id="sl-add-custom-btn" class="add-btn" type="button">+ Add Custom Load</button>
+        </fieldset>
+
+        <!-- ── Print-only input summary ──────────────────────────────── -->
+        <div id="sl-print-summary" class="sl-print-summary" aria-hidden="true"></div>
+
+        <!-- ── Results ───────────────────────────────────────────────── -->
+        <div id="sl-results" class="sl-results" aria-live="polite"></div>
+
+        <!-- ── Print button ──────────────────────────────────────────── -->
+        <div class="sl-print-row">
+          <button id="sl-clear-btn" class="sl-clear-btn" type="button">↺ Clear</button>
+          <button id="sl-print-btn" class="sl-print-btn" type="button">🖨 Print / Save PDF</button>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           ABOUT
+           ══════════════════════════════════════════════════════════ -->
+      <section id="about-tool" class="card tool-section" aria-labelledby="about-heading">
+
+        <div class="about-hero">
+          <div class="about-hero-icon">⚡</div>
+          <h2 id="about-heading">Sparky Tools</h2>
+          <span class="about-version">v10.5.0</span>
+          <p class="about-tagline">Free, open-source NEC electrical calculators for electricians. No account, no tracking, works offline.</p>
+        </div>
+
+        <div class="about-grid">
+          <!-- Donate -->
+          <div class="about-info-card">
+            <h4>☕ Support the Project</h4>
+            <p>Sparky Tools is free forever. If it saves you time on the job, a coffee keeps the lights on.</p>
+            <!-- TODO: replace href with your actual donation link -->
+            <a class="about-donate-btn" href="https://ko-fi.com/sparkytools" target="_blank" rel="noopener">
+              ☕ Buy Me a Coffee
+            </a>
+          </div>
+
+          <!-- License -->
+          <div class="about-info-card">
+            <h4>📄 License &amp; Source</h4>
+            <p>Released under the GNU AGPL v3. Source code must remain open if you distribute or host this app.</p>
+            <a class="about-link-btn" href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener">
+              📄 View AGPL v3 License
+            </a>
+            <!-- TODO: replace href with your actual repo URL -->
+            <a class="about-link-btn" href="https://github.com/sparkytools/sparkytools" target="_blank" rel="noopener">
+              💻 Source Code
+            </a>
+          </div>
+        </div>
+
+        <div class="about-disclaimer">
+          ⚠️ <strong>Disclaimer:</strong> Always verify calculations with a licensed electrician and the current edition of the National Electrical Code (NEC). This tool is provided for reference only and does not constitute engineering or legal advice.
+        </div>
+
+      </section>
+
+    </div><!-- /.container -->
+
+    <footer class="site-footer">
+      <p class="footer-meta">
+        Sparky Tools &nbsp;·&nbsp; Free as in freedom. Free as in beer.
+      </p>
+    </footer>
+
+    <!-- Theme toggle — fixed bottom-left; managed by src/js/ui/theme.js -->
+    <button class="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button>
+
+    <!-- Drawer overlay + panel (position: fixed — outside .container) -->
+    <div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
+    <nav class="drawer" id="nav-drawer" aria-label="Calculator menu">
+      <div class="drawer-header">
+        <h3>⚡ Sparky Tools</h3>
+        <button class="drawer-close" id="drawer-close" aria-label="Close menu">✕</button>
+      </div>
+
+      <div class="drawer-group-title">NEC Calculators</div>
+      <button class="drawer-item active"
+              data-target="service-tool"
+              data-label="Service Sizing"
+              data-accent="var(--accent-red)">
+        <span class="drawer-item-icon">⚡</span>Service Sizing
+      </button>
+      <button class="drawer-item"
+              data-target="transformer-tool"
+              data-label="Transformer"
+              data-accent="var(--accent-blue)">
+        <span class="drawer-item-icon">🔄</span>Transformer
+      </button>
+      <button class="drawer-item"
+              data-target="conduit-tool"
+              data-label="Conduit Fill"
+              data-accent="var(--accent-blue)">
+        <span class="drawer-item-icon">🧰</span>Conduit Fill
+      </button>
+      <button class="drawer-item"
+              data-target="voltage-tool"
+              data-label="Voltage Drop"
+              data-accent="var(--accent-yellow)">
+        <span class="drawer-item-icon">🔋</span>Voltage Drop
+      </button>
+      <button class="drawer-item"
+              data-target="box-tool"
+              data-label="Box Fill"
+              data-accent="var(--accent-green)">
+        <span class="drawer-item-icon">📦</span>Box Fill
+      </button>
+      <button class="drawer-item"
+              data-target="pull-tool"
+              data-label="Pull Box Size"
+              data-accent="var(--accent-orange)">
+        <span class="drawer-item-icon">🪢</span>Pull Box Size
+      </button>
+
+      <div class="drawer-group-title">App</div>
+      <button class="drawer-item"
+              data-target="about-tool"
+              data-label="About"
+              data-accent="var(--primary)">
+        <span class="drawer-item-icon">ℹ️</span>About
+      </button>
+    </nav>
+
+    <!-- Load data loader first (IIFE pattern) -->
+    <script src="src/js/data-loader.js"></script>
+
+    <!-- Load main app module -->
+    <script type="module" src="src/js/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,992 @@
+/* base.css — tokens, reset, layout, nav, inputs, buttons, results, tooltips, toast, responsive */
+
+/* ============================================================
+   SparkyTools – Stylesheet
+   ============================================================
+   Sections:
+     1.  CSS Custom Properties (design tokens)
+     2.  Dark mode overrides (system preference + manual toggle)
+     3.  Base reset & body
+     4.  Page layout
+     5.  Site header
+     6.  Site footer
+     7.  Cards
+     8.  Tool navigation (segmented control)
+     9.  Conduit ring & theme toggle button
+     10. Form controls (labels, inputs, selects)
+     11. Input row grid
+     12. Buttons (add / remove)
+     13. Conduit Fill: wire list header & rows
+     14. Conduit Fill: SVG visualizer
+     15. Box Fill: wire row header & rows
+     16. Pull Box: run row header, rows & visualizer
+     17. Results panel (meter bar, stats, status pill)
+     18. Tooltips
+     19. Update toast
+     20. Responsive overrides (≤480px)
+   ============================================================ */
+
+
+/* ── 1. CSS Custom Properties (design tokens) ── */
+:root {
+  /* Brand / structure */
+  --primary:          #2c3e50;
+  --accent-blue:      #5291cf;   /* Conduit Fill card accent */
+  --accent-yellow:    #f1c40f;   /* Voltage Drop card accent */
+  --accent-green:     #27ae60;   /* Box Fill card accent */
+  --accent-orange:    #e67e22;   /* Pull Box card accent */
+  --accent-red:       #c0392b;   /* Service Load card accent */
+  --danger:           #e74c3c;
+  --success:          #27ae60;
+
+  /* Surfaces */
+  --bg:               #eceff1;   /* Page background */
+  --card-bg:          #ffffff;   /* Card / modal background */
+  --surface-row:      #f8f9fa;   /* Wire/run list row backgrounds */
+  --surface-inset:    #f9fafb;   /* Inset panel backgrounds (stats, visualizer) */
+  --border:           #dfe6e9;   /* Input and card borders */
+  --divider:          #eeeeee;   /* Internal dividers within cards */
+  --text-muted:       rgba(44, 62, 80, 0.55);
+
+  /* Warning surface (footer disclaimer) */
+  --warn-bg:          #fff8e1;
+  --warn-border:      #ffe082;
+  --warn-text:        #5d4037;
+
+  /* Shape & depth */
+  --radius:           10px;
+  --shadow:           0 8px 24px rgba(0, 0, 0, 0.09);
+
+  /* Status pill colors — used by setStatus() in formatting.js */
+  --status-ok-bg:     #d4edda;
+  --status-ok-text:   #155724;
+  --status-err-bg:    #f8d7da;
+  --status-err-text:  #721c24;
+
+  /* Tool nav pill container background */
+  --nav-bg:           #dfe6e9;
+
+  /* SVG visualizer tokens — read by getCSSVar() in pull-box.js and conduit-fill CSS */
+  --svg-conduit-bg:   #eceff1;   /* conduit ring / pull box rectangle fill */
+  --svg-box-stroke:   #34495e;   /* SVG element stroke / border color */
+  --svg-dim-color:    #546e7a;   /* dimension annotation lines and text */
+  --svg-placeholder:  #b0bec5;   /* empty-state placeholder text */
+  --svg-wh-label:     #cfd8dc;   /* ghost W×H label inside pull box */
+}
+
+
+/* ── Dark mode — system preference (no manual override set) ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:             #111b27;
+    --card-bg:        #1b2a3b;
+    --surface-row:    #223044;
+    --surface-inset:  #1f2d3f;
+    --border:         #2d4156;
+    --divider:        #253647;
+    --primary:        #d4e1ef;
+    --text-muted:     rgba(180, 205, 230, 0.55);
+    --warn-bg:        #261e00;
+    --warn-border:    #4a3800;
+    --warn-text:      #e8c84a;
+    --shadow:         0 8px 24px rgba(0, 0, 0, 0.45);
+    --nav-bg:         #0e1825;
+    --svg-conduit-bg: #1f2d3f;
+    --svg-box-stroke: #7aa8cc;
+    --svg-dim-color:  #7098b8;
+    --svg-placeholder:#3a5470;
+    --svg-wh-label:   #2d4156;
+    --status-ok-bg:   #0d2b1a;
+    --status-ok-text: #6fcf97;
+    --status-err-bg:  #2b0d10;
+    --status-err-text:#f28b8b;
+    --danger:         #f28b8b;
+  }
+}
+
+/* ── Dark mode — explicit user override ── */
+[data-theme="dark"] {
+  --bg:             #111b27;
+  --card-bg:        #1b2a3b;
+  --surface-row:    #223044;
+  --surface-inset:  #1f2d3f;
+  --border:         #2d4156;
+  --divider:        #253647;
+  --primary:        #d4e1ef;
+  --text-muted:     rgba(180, 205, 230, 0.55);
+  --warn-bg:        #261e00;
+  --warn-border:    #4a3800;
+  --warn-text:      #e8c84a;
+  --shadow:         0 8px 24px rgba(0, 0, 0, 0.45);
+  --nav-bg:         #0e1825;
+  --svg-conduit-bg: #1f2d3f;
+  --svg-box-stroke: #7aa8cc;
+  --svg-dim-color:  #7098b8;
+  --svg-placeholder:#3a5470;
+  --svg-wh-label:   #2d4156;
+  --status-ok-bg:   #0d2b1a;
+  --status-ok-text: #6fcf97;
+  --status-err-bg:  #2b0d10;
+  --status-err-text:#f28b8b;
+  --danger:         #f28b8b;
+}
+
+/* ── Light mode — explicit user override (overrides system dark preference) ── */
+[data-theme="light"] {
+  --bg:             #eceff1;
+  --card-bg:        #ffffff;
+  --surface-row:    #f8f9fa;
+  --surface-inset:  #f9fafb;
+  --border:         #dfe6e9;
+  --divider:        #eeeeee;
+  --primary:        #2c3e50;
+  --text-muted:     rgba(44, 62, 80, 0.55);
+  --warn-bg:        #fff8e1;
+  --warn-border:    #ffe082;
+  --warn-text:      #5d4037;
+  --shadow:         0 8px 24px rgba(0, 0, 0, 0.09);
+  --nav-bg:         #dfe6e9;
+  --svg-conduit-bg: #eceff1;
+  --svg-box-stroke: #34495e;
+  --svg-dim-color:  #546e7a;
+  --svg-placeholder:#b0bec5;
+  --svg-wh-label:   #cfd8dc;
+}
+
+
+/* ── 2. Base reset & body ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family:   "Inter", "Segoe UI", system-ui, sans-serif;
+  background:    var(--bg);
+  color:         var(--primary);
+  margin:        0;
+  padding:       20px 16px 48px;
+  touch-action:  manipulation; /* prevents double-tap zoom on mobile */
+}
+
+
+/* ── 3. Page layout ── */
+.container {
+  max-width:      640px;
+  margin:         0 auto;
+  display:        flex;
+  flex-direction: column;
+  gap:            24px;
+}
+
+
+/* ── 4. Site header ── */
+.site-header {
+  text-align: center;
+  padding:    8px 0 4px;
+}
+
+.site-header h1 {
+  margin:         0 0 4px;
+  font-size:      2rem;
+  letter-spacing: -0.5px;
+}
+
+.site-header p {
+  margin:    0;
+  opacity:   0.6;
+  font-size: 0.9rem;
+}
+
+
+/* ── 5. Site footer ── */
+.site-footer {
+  text-align: center;
+  padding:    24px 16px 8px;
+  color:      var(--text-muted);
+}
+
+.footer-notice {
+  font-size:     0.8rem;
+  line-height:   1.6;
+  margin:        0 auto 10px;
+  max-width:     480px;
+  background:    var(--warn-bg);
+  border:        1px solid var(--warn-border);
+  border-radius: var(--radius);
+  padding:       10px 14px;
+  color:         var(--warn-text);
+}
+
+.footer-meta {
+  font-size: 0.75rem;
+  margin:    0;
+  opacity:   0.7;
+}
+
+.footer-meta a {
+  color:                 var(--primary);
+  text-decoration:       underline;
+  text-underline-offset: 2px;
+}
+
+.footer-meta a:hover {
+  opacity: 0.75;
+}
+
+
+/* ── 6. Cards ── */
+.card {
+  background:    var(--card-bg);
+  padding:       24px;
+  border-radius: var(--radius);
+  box-shadow:    var(--shadow);
+  border-top:    7px solid var(--primary);
+}
+
+/* Per-tool accent colors on the card top border */
+.card--blue   { border-top-color: var(--accent-blue); }
+.card--yellow { border-top-color: var(--accent-yellow); }
+.card--green  { border-top-color: var(--accent-green); }
+.card--orange { border-top-color: var(--accent-orange); }
+.card--red    { border-top-color: var(--accent-red); }
+
+.card-header {
+  margin-bottom: 20px;
+}
+
+.card-header h2 {
+  margin:      0;
+  font-size:   1.2rem;
+  font-weight: 700;
+}
+
+/* Thin horizontal rule between logical sections within a card */
+.divider {
+  border:     0;
+  border-top: 1px solid var(--divider);
+  margin:     16px 0;
+}
+
+/* Tool sections are hidden by default; navigation.js adds .active to show one */
+.tool-section {
+  display: none;
+}
+
+.tool-section.active {
+  display: block;
+}
+
+
+/* ── 7. Tool navigation — sticky top bar + slide-in drawer ── */
+
+/* Top bar: shows active tool name + hamburger button */
+.nav-bar {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  background:      var(--nav-bg);
+  border-radius:   12px;
+  padding:         0 4px 0 16px;
+  height:          52px;
+  box-shadow:      0 4px 12px rgba(0, 0, 0, 0.08);
+  position:        sticky;
+  top:             10px;
+  z-index:         100;
+}
+
+.nav-bar-title {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  font-size:   0.9rem;
+  font-weight: 700;
+  color:       var(--primary);
+  min-width:   0;        /* allow text truncation */
+}
+
+.nav-bar-title span:last-child {
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-accent-dot {
+  width:        9px;
+  height:       9px;
+  border-radius: 50%;
+  flex-shrink:  0;
+  background:   var(--accent-red);
+  transition:   background 0.2s ease;
+}
+
+/* Hamburger button */
+.nav-bar-btn {
+  width:           44px;
+  height:          44px;
+  flex-shrink:     0;
+  border:          none;
+  background:      var(--card-bg);
+  border-radius:   8px;
+  cursor:          pointer;
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             5px;
+  box-shadow:      0 1px 4px rgba(0, 0, 0, 0.10);
+  transition:      background 0.15s;
+}
+
+.nav-bar-btn:hover  { background: var(--border); }
+
+.hamburger-line {
+  width:         18px;
+  height:        2px;
+  background:    var(--primary);
+  border-radius: 2px;
+}
+
+/* Dim overlay behind the open drawer */
+.drawer-overlay {
+  display:    none;
+  position:   fixed;
+  inset:      0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index:    200;
+  animation:  drawer-fade-in 0.2s ease;
+}
+.drawer-overlay.open { display: block; }
+
+@keyframes drawer-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slide-in drawer panel */
+.drawer {
+  position:    fixed;
+  top:         0;
+  right:       0;
+  bottom:      0;
+  width:       min(300px, 85vw);
+  background:  var(--card-bg);
+  box-shadow:  -8px 0 32px rgba(0, 0, 0, 0.18);
+  z-index:     201;
+  overflow-y:  auto;
+  transform:   translateX(100%);
+  transition:  transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 32px;
+}
+.drawer.open { transform: translateX(0); }
+
+.drawer-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         18px 18px 14px;
+  border-bottom:   1px solid var(--divider);
+  position:        sticky;
+  top:             0;
+  background:      var(--card-bg);
+  z-index:         1;
+}
+
+.drawer-header h3 {
+  margin:      0;
+  font-size:   1rem;
+  font-weight: 700;
+  color:       var(--primary);
+}
+
+.drawer-close {
+  width:         36px;
+  height:        36px;
+  border:        none;
+  background:    var(--surface-inset);
+  border-radius: 8px;
+  cursor:        pointer;
+  font-size:     1rem;
+  color:         var(--primary);
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    background 0.15s;
+}
+.drawer-close:hover { background: var(--border); }
+
+.drawer-group-title {
+  font-size:      0.65rem;
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color:          var(--text-muted);
+  padding:        16px 18px 6px;
+}
+
+.drawer-item {
+  display:      flex;
+  align-items:  center;
+  gap:          12px;
+  padding:      11px 18px;
+  font-size:    0.875rem;
+  font-weight:  500;
+  color:        var(--primary);
+  cursor:       pointer;
+  border:       none;
+  background:   transparent;
+  width:        100%;
+  text-align:   left;
+  transition:   background 0.12s;
+  border-left:  3px solid transparent;
+}
+
+.drawer-item:hover  { background: var(--surface-row); }
+
+.drawer-item.active {
+  background:        var(--surface-row);
+  border-left-color: var(--accent-red); /* overridden per-item by JS */
+  font-weight:       700;
+}
+
+.drawer-item-icon {
+  font-size:   1.1rem;
+  width:       24px;
+  text-align:  center;
+  flex-shrink: 0;
+}
+
+
+/* Conduit ring fill/stroke — controlled here so dark mode overrides apply cleanly */
+.conduit-ring {
+  fill:   var(--svg-conduit-bg);
+  stroke: var(--svg-box-stroke);
+}
+
+
+/* ── Theme toggle button (fixed, bottom-left) ── */
+.theme-toggle {
+  position:        fixed;
+  bottom:          20px;
+  left:            20px;
+  width:           44px;
+  height:          44px;
+  border-radius:   50%;
+  border:          2px solid var(--border);
+  background:      var(--card-bg);
+  color:           var(--primary);
+  font-size:       1.2rem;
+  line-height:     1;
+  cursor:          pointer;
+  box-shadow:      var(--shadow);
+  z-index:         200;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  transition:      background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.15s;
+}
+
+.theme-toggle:hover {
+  transform:  scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+
+
+
+/* Labels are uppercase micro-text above each control */
+label {
+  display:        block;
+  font-size:      0.7rem;
+  font-weight:    700;
+  margin-bottom:  5px;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+select,
+input[type="number"],
+input[type="text"] {
+  width:         100%;
+  padding:       10px 12px;
+  border:        2px solid var(--border);
+  border-radius: 6px;
+  font-size:     1rem;
+  height:        44px; /* AGENT_GUIDE minimum for mobile tap targets */
+  background:    var(--card-bg);
+  color:         var(--primary);
+  transition:    border-color 0.15s;
+  appearance:    auto; /* Preserve native OS styling for selects */
+}
+
+select:focus,
+input[type="number"]:focus,
+input[type="text"]:focus {
+  outline:      none;
+  border-color: var(--primary);
+}
+
+
+/* ── 9. Input row grid ── */
+
+/* auto-fit creates equal columns at ≥130px; wraps on narrow screens */
+.input-row {
+  display:               grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap:                   12px;
+  margin-bottom:         14px;
+}
+
+.input-group {
+  min-width: 0; /* Prevents grid cell overflow on wide content */
+}
+
+
+/* ── 10. Buttons ── */
+
+/* Primary CTA — "Add Conductor" etc. */
+.add-btn {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           5px;
+  padding:       10px 18px;
+  margin-top:    10px;
+  background:    var(--primary);
+  color:         var(--card-bg);
+  border:        none;
+  border-radius: 8px;
+  font-size:     0.88rem;
+  font-weight:   700;
+  cursor:        pointer;
+  transition:    opacity 0.15s, transform 0.1s;
+}
+
+.add-btn + .add-btn { margin-left: 8px; }
+.add-btn:hover  { opacity: 0.85; }
+.add-btn:active { transform: scale(0.98); }
+
+/* Destructive icon button — "×" remove row */
+.remove-btn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           36px;
+  height:          36px;
+  background:      var(--status-err-bg);
+  color:           var(--danger);
+  border:          1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+  border-radius:   6px;
+  font-size:       1.1rem;
+  font-weight:     700;
+  cursor:          pointer;
+  transition:      background 0.15s, color 0.15s;
+  flex-shrink:     0;
+}
+
+.remove-btn:hover {
+  background: color-mix(in srgb, var(--danger) 25%, var(--card-bg));
+  color:      var(--danger);
+}
+
+
+/* ── 15. Results panel ── */
+.results-panel {
+  margin-top: 4px;
+}
+
+/* Horizontal fill progress bar */
+.meter-container {
+  height:        10px;
+  background:    var(--divider);
+  border-radius: 10px;
+  overflow:      hidden;
+  margin-bottom: 14px;
+}
+
+.meter-fill {
+  height:        100%;
+  width:         0%;
+  background:    var(--success);
+  border-radius: 10px;
+  transition:    width 0.35s ease, background 0.35s ease;
+}
+
+/* Stats grid — one row of 2+ metric boxes */
+.stats {
+  display:       flex;
+  border-top:    1px solid var(--divider);
+  padding-top:   14px;
+  margin-bottom: 14px;
+}
+
+/* Boxed variant used in Voltage Drop and Box Fill cards */
+.stats--boxed {
+  background:    var(--surface-inset);
+  border:        1px solid var(--divider);
+  border-radius: var(--radius);
+  padding:       14px;
+  margin-top:    14px;
+  margin-bottom: 14px;
+}
+
+/* 2×2 grid variant — used by the Voltage Drop card's four stat boxes */
+.stats--2x2 {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   1px;
+  padding:               0;
+  overflow:              hidden;
+}
+
+.stats--2x2 .stat-box {
+  padding:     12px 8px;
+  border-left: none;
+}
+
+/* Top row cells get a bottom border to separate the two rows */
+.stats--2x2 .stat-box:nth-child(1),
+.stats--2x2 .stat-box:nth-child(2) {
+  border-bottom: 1px solid var(--divider);
+}
+
+/* Right column cells get a left border */
+.stats--2x2 .stat-box:nth-child(2),
+.stats--2x2 .stat-box:nth-child(4) {
+  border-left: 1px solid var(--divider);
+}
+
+.stats--2x2 .stat-box .value {
+  font-size: 1.25rem;
+}
+
+.stat-box {
+  flex:       1;
+  text-align: center;
+}
+
+/* Dividing line between adjacent stat boxes */
+.stat-box + .stat-box {
+  border-left: 1px solid var(--divider);
+}
+
+.stat-box .value {
+  font-size:   1.5rem;
+  font-weight: 800;
+  display:     block;
+  line-height: 1.2;
+  margin-top:  4px;
+}
+
+.stat-box .label {
+  font-size:      0.68rem;
+  font-weight:    700;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+}
+
+/* Status pill — shows GOOD / OVERFILL / OK etc. with color coding */
+.status-pill {
+  padding:        10px 14px;
+  border-radius:  6px;
+  text-align:     center;
+  font-weight:    700;
+  font-size:      0.9rem;
+  letter-spacing: 0.02em;
+  background:     var(--divider);
+  color:          var(--primary);
+  transition:     background 0.3s, color 0.3s;
+}
+
+
+/* ── 16. Tooltips ── */
+/*
+  CSS handles hover state; navigation.js handles tap-toggle for touch devices
+  by adding/removing .active. Tooltip content comes from the data-tip attribute.
+
+  Accessibility note: This pattern is not fully keyboard-accessible. Screen
+  reader users won't see these tooltips. For strict WCAG compliance, replace
+  with aria-describedby + role="tooltip".
+*/
+[data-tip] {
+  position: relative;
+  cursor:   help;
+}
+
+[data-tip]::after {
+  content:        attr(data-tip);
+  position:       absolute;
+  bottom:         130%;
+  left:           50%;
+  transform:      translateX(-50%) scale(0.85);
+  opacity:        0;
+  background:     #34495e;
+  color:          #fff;
+  padding:        8px 12px;
+  border-radius:  6px;
+  font-size:      0.78rem;
+  font-weight:    400;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space:    normal;
+  width:          200px;
+  text-align:     center;
+  z-index:        100;
+  pointer-events: none;
+  transition:     opacity 0.18s ease, transform 0.18s ease;
+  box-shadow:     0 4px 12px rgba(0, 0, 0, 0.2);
+  line-height:    1.4;
+}
+
+/* Tooltip caret */
+[data-tip]::before {
+  content:          "";
+  position:         absolute;
+  bottom:           115%;
+  left:             50%;
+  transform:        translateX(-50%) scale(0.85);
+  opacity:          0;
+  border:           7px solid transparent;
+  border-top-color: #34495e;
+  z-index:          100;
+  pointer-events:   none;
+  transition:       opacity 0.18s ease, transform 0.18s ease;
+}
+
+[data-tip]:hover::after,
+[data-tip]:hover::before,
+[data-tip].active::after,
+[data-tip].active::before {
+  opacity:   1;
+  transform: translateX(-50%) scale(1);
+}
+
+
+/* ── 19. Update toast ── */
+/*
+  Shown by app.js when a new service worker has activated (new version deployed).
+  Fixed to bottom-right so it doesn't clash with the theme toggle (bottom-left).
+*/
+.update-toast {
+  position:       fixed;
+  bottom:         20px;
+  right:          20px;
+  display:        flex;
+  align-items:    center;
+  gap:            12px;
+  background:     var(--card-bg);
+  color:          var(--primary);
+  border:         2px solid var(--accent-blue);
+  border-radius:  var(--radius);
+  padding:        12px 16px;
+  box-shadow:     var(--shadow);
+  font-size:      0.875rem;
+  font-weight:    600;
+  z-index:        300;
+  animation:      toast-in 0.25s ease;
+}
+
+.update-toast__btn {
+  background:    var(--accent-blue);
+  color:         #fff;
+  border:        none;
+  border-radius: 6px;
+  padding:       6px 12px;
+  font-size:     0.8rem;
+  font-weight:   700;
+  cursor:        pointer;
+  white-space:   nowrap;
+  transition:    opacity 0.15s;
+}
+
+.update-toast__btn:hover { opacity: 0.85; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ── 20. About section ── */
+.about-hero {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  text-align:      center;
+  padding:         8px 0 24px;
+  border-bottom:   1px solid var(--divider);
+  margin-bottom:   24px;
+}
+
+.about-hero-icon {
+  font-size:     3rem;
+  line-height:   1;
+  margin-bottom: 12px;
+}
+
+.about-hero h2 {
+  margin:      0 0 6px;
+  font-size:   1.4rem;
+  font-weight: 700;
+}
+
+.about-version {
+  display:       inline-block;
+  font-size:     0.7rem;
+  font-weight:   700;
+  background:    var(--surface-inset);
+  border:        1px solid var(--border);
+  color:         var(--text-muted);
+  padding:       2px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.about-tagline {
+  font-size:  0.875rem;
+  color:      var(--text-muted);
+  max-width:  320px;
+  line-height: 1.5;
+  margin:     0;
+}
+
+/* 2-col grid for the info cards (donate + license) */
+.about-grid {
+  display:               grid;
+  grid-template-columns: 1fr 1fr;
+  gap:                   12px;
+  margin-bottom:         20px;
+}
+
+.about-info-card {
+  background:    var(--surface-row);
+  border:        1px solid var(--border);
+  border-radius: var(--radius);
+  padding:       16px;
+}
+
+.about-info-card h4 {
+  margin:      0 0 6px;
+  font-size:   0.85rem;
+  font-weight: 700;
+  color:       var(--primary);
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+}
+
+.about-info-card p {
+  margin:      0 0 12px;
+  font-size:   0.78rem;
+  color:       var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Donate button */
+.about-donate-btn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             6px;
+  width:           100%;
+  padding:         9px 12px;
+  background:      var(--accent-yellow);
+  color:           #2c2c00;
+  font-size:       0.8rem;
+  font-weight:     700;
+  border:          none;
+  border-radius:   8px;
+  cursor:          pointer;
+  text-decoration: none;
+  transition:      opacity 0.15s, transform 0.1s;
+}
+.about-donate-btn:hover  { opacity: 0.88; }
+.about-donate-btn:active { transform: scale(0.97); }
+
+/* License / source link button */
+.about-link-btn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             6px;
+  width:           100%;
+  padding:         9px 12px;
+  background:      transparent;
+  color:           var(--primary);
+  font-size:       0.8rem;
+  font-weight:     600;
+  border:          1px solid var(--border);
+  border-radius:   8px;
+  cursor:          pointer;
+  text-decoration: none;
+  transition:      background 0.15s;
+  margin-top:      6px;
+}
+.about-link-btn:hover { background: var(--surface-inset); }
+.about-link-btn + .about-link-btn { margin-top: 6px; }
+
+/* Disclaimer box inside About */
+.about-disclaimer {
+  font-size:     0.78rem;
+  line-height:   1.6;
+  background:    var(--warn-bg);
+  border:        1px solid var(--warn-border);
+  border-radius: var(--radius);
+  padding:       10px 14px;
+  color:         var(--warn-text);
+  margin-top:    20px;
+}
+
+@media (max-width: 480px) {
+  .about-grid { grid-template-columns: 1fr; }
+}
+
+
+/* ── 21. Responsive overrides (≤480px) ── */
+@media (max-width: 480px) {
+  body  { padding: 12px 10px 40px; }
+  .card { padding: 18px 14px; }
+
+  /*
+    On very small screens the conduit fill wire header is hidden — the inputs
+    are self-labeling via aria-label and visual context. Rows reflow to two lines.
+  */
+  .wire-header { display: none; }
+
+  .wire-row {
+    grid-template-columns: 24px 1fr 1fr 36px;
+    grid-template-rows:    auto auto;
+    gap:                   6px;
+    background:            var(--surface-row);
+    padding:               8px;
+    border-radius:         6px;
+    margin-bottom:         10px;
+  }
+
+  /* Row 1: swatch | type | quantity | remove */
+  .wire-row .color-swatch { grid-row: 1; grid-column: 1; }
+  .wire-row .w-type       { grid-row: 1; grid-column: 2; }
+  .wire-row .w-qty        { grid-row: 1; grid-column: 3; }
+  .wire-row .remove-btn   { grid-row: 1; grid-column: 4; }
+
+  /* Row 2: (empty) | construction | size */
+  .wire-row .w-const { grid-row: 2; grid-column: 2; }
+  .wire-row .w-size  { grid-row: 2; grid-column: 3; }
+
+  /* Box fill rows: tighten column widths on small screens */
+  .box-header,
+  .box-wire-row {
+    grid-template-columns: 1.5fr 0.7fr 0.9fr 36px;
+  }
+
+  .stat-box .value { font-size: 1.2rem; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════ */

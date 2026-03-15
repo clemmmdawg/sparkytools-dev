@@ -1,0 +1,26 @@
+{
+  "name": "SparkyTools — NEC Electrical Calculators",
+  "short_name": "SparkyTools",
+  "description": "Free NEC-compliant electrical calculators for electricians. Works offline.",
+  "start_url": "../",
+  "scope": "../",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eceff1",
+  "theme_color": "#2c3e50",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "../public/icons/bolt.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../public/icons/bolt.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
