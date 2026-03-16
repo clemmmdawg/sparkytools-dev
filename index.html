@@ -381,66 +381,117 @@
         <header class="card-header">
           <h2 id="transformer-heading">Transformer Calculator</h2>
         </header>
-        <p class="tool-desc">Select voltages, phase, and enter kVA — primary/secondary currents, OCPD, and conductor sizes update live.</p>
+        <p class="tool-desc">Select voltages and enter kVA — phase is inferred automatically. OCPD and conductor sizes update live.</p>
 
         <hr class="divider">
 
-        <!-- ── Inputs ── -->
-        <div class="tc-grid tc-grid--3">
+        <!-- ── Unified visual: inputs + one-line diagram ── -->
+        <div class="tc-visual">
 
-          <div class="tc-field">
-            <label for="tc-phase">Phase</label>
-            <select id="tc-phase">
-              <option value="1">1Ø  Single-Phase</option>
-              <option value="3">3Ø  Three-Phase</option>
-            </select>
+          <!-- Input strip -->
+          <div class="tc-vis-ctrl">
+            <div class="tc-vis-ctrl-pri">
+              <label class="tc-vis-label" for="tc-vpri">
+                Primary Voltage <span class="tc-nec-ref" data-tip="Line-to-line voltage feeding the primary winding.">L-L</span>
+              </label>
+              <select id="tc-vpri" class="tc-vis-select"><!-- populated by JS --></select>
+            </div>
+            <div class="tc-vis-ctrl-mid">
+              <label class="tc-vis-label" for="tc-kva">kVA Rating</label>
+              <input id="tc-kva" class="tc-vis-input" type="number" placeholder="e.g. 75" min="0.1" step="any">
+            </div>
+            <div class="tc-vis-ctrl-sec">
+              <label class="tc-vis-label" for="tc-vsec">
+                Secondary Voltage <span class="tc-nec-ref" data-tip="L-N voltages (120 V, 277 V) are treated as single-phase regardless of primary selection.">L-L / L-N</span>
+              </label>
+              <select id="tc-vsec" class="tc-vis-select"><!-- populated by JS --></select>
+              <label class="tc-vis-label" for="tc-tap-option" style="margin-top:8px">
+                OCPD Location <span class="tc-nec-ref" data-tip="Where the secondary overcurrent device is installed. Affects minimum conductor sizing. NEC 240.21(C).">NEC 240.21(C)</span>
+              </label>
+              <select id="tc-tap-option" class="tc-vis-select">
+                <option value="at-terminals">At secondary terminals</option>
+                <option value="primary-ocpd">Primary OCPD only — 240.21(C)(1)</option>
+                <option value="10ft">≤ 10 ft tap — 240.21(C)(2)</option>
+                <option value="25ft">≤ 25 ft tap — 240.21(C)(3)</option>
+              </select>
+            </div>
           </div>
 
-          <div class="tc-field">
-            <label for="tc-vpri">
-              Primary Voltage
-              <span class="tc-nec-ref" data-tip="Line-to-line voltage feeding the primary winding.">L-L</span>
-            </label>
-            <select id="tc-vpri"><!-- populated by JS --></select>
-          </div>
+          <!-- One-line diagram -->
+          <div class="tc-vis-row">
 
-          <div class="tc-field">
-            <label for="tc-vsec">
-              Secondary Voltage
-              <span class="tc-nec-ref" data-tip="L-N voltages (120 V, 277 V) are treated as single-phase regardless of primary phase selection.">L-L / L-N</span>
-            </label>
-            <select id="tc-vsec"><!-- populated by JS --></select>
-          </div>
+            <!-- Primary OCPD -->
+            <div class="tc-vis-ocpd tc-vis-ocpd--pri">
+              <span class="tc-vis-ocpd-tag">OCPD</span>
+              <span class="tc-vis-ocpd-val" id="tc-vis-pri-ocpd">—</span>
+              <span class="tc-vis-ocpd-sub">Primary</span>
+            </div>
 
-          <div class="tc-field">
-            <label for="tc-kva">kVA Rating</label>
-            <input type="number" id="tc-kva" placeholder="e.g. 75" min="0.1" step="any">
-          </div>
+            <!-- Primary wire -->
+            <div class="tc-vis-wire tc-vis-wire--pri">
+              <div class="tc-vis-wire-above">
+                <span class="tc-vis-wire-size" id="tc-vis-pri-wire-size">—</span>
+                <span class="tc-vis-wire-req"  id="tc-vis-pri-wire-req"></span>
+              </div>
+              <div class="tc-vis-wire-below">
+                <span class="tc-vis-wire-fla" id="tc-vis-pri-fla">—</span>
+              </div>
+            </div>
 
-          <div class="tc-field">
-            <label for="tc-tap-option">
-              Secondary OCPD Location
-              <span class="tc-nec-ref" data-tip="Where the secondary overcurrent device is installed. Affects minimum conductor sizing. NEC 240.21(C).">NEC 240.21(C)</span>
-            </label>
-            <select id="tc-tap-option">
-              <option value="at-terminals">At secondary terminals</option>
-              <option value="primary-ocpd">Primary OCPD only — 240.21(C)(1)</option>
-              <option value="10ft">≤ 10 ft tap — 240.21(C)(2)</option>
-              <option value="25ft">≤ 25 ft tap — 240.21(C)(3)</option>
-            </select>
-          </div>
+            <!-- Transformer -->
+            <div class="tc-vis-xfmr">
+              <div class="tc-vis-xfmr-volts">
+                <span class="tc-vis-xfmr-v--pri" id="tc-vis-vpri">—</span>
+                <span class="tc-vis-xfmr-v--sec" id="tc-vis-vsec">—</span>
+              </div>
+              <svg class="tc-vis-xfmr-svg" viewBox="0 0 60 44"
+                   xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- Primary coils (3 clockwise arcs, left of center) -->
+                <path class="tc-vis-coil tc-vis-coil--pri"
+                      d="M 19,8 A 4.667,4.667 0 0,1 19,17.33
+                                 A 4.667,4.667 0 0,1 19,26.67
+                                 A 4.667,4.667 0 0,1 19,36"
+                      fill="none" stroke-width="1.8"/>
+                <!-- Center divider -->
+                <line x1="30" y1="6" x2="30" y2="38" class="tc-vis-xfmr-div"/>
+                <!-- Secondary coils (3 counter-clockwise arcs, right of center) -->
+                <path class="tc-vis-coil tc-vis-coil--sec"
+                      d="M 41,8 A 4.667,4.667 0 0,0 41,17.33
+                                 A 4.667,4.667 0 0,0 41,26.67
+                                 A 4.667,4.667 0 0,0 41,36"
+                      fill="none" stroke-width="1.8"/>
+              </svg>
+              <div class="tc-vis-xfmr-info">
+                <span id="tc-vis-kva">—</span>
+                <!-- Phase badge: static for 480/208 V; toggleable for 240 V -->
+                <button type="button" id="tc-vis-phase" class="tc-vis-phase-badge">—</button>
+              </div>
+            </div>
 
-        </div>
+            <!-- Secondary wire -->
+            <div class="tc-vis-wire tc-vis-wire--sec">
+              <div class="tc-vis-wire-above">
+                <span class="tc-vis-wire-size" id="tc-vis-sec-wire-size">—</span>
+                <span class="tc-vis-wire-req"  id="tc-vis-sec-wire-req"></span>
+              </div>
+              <div class="tc-vis-wire-below">
+                <span class="tc-vis-wire-fla" id="tc-vis-sec-fla">—</span>
+              </div>
+            </div>
+
+            <!-- Secondary OCPD -->
+            <div class="tc-vis-ocpd tc-vis-ocpd--sec" id="tc-vis-sec-ocpd-box">
+              <span class="tc-vis-ocpd-tag">OCPD</span>
+              <span class="tc-vis-ocpd-val" id="tc-vis-sec-ocpd">—</span>
+              <span class="tc-vis-ocpd-sub">Secondary</span>
+            </div>
+
+          </div><!-- /.tc-vis-row -->
+        </div><!-- /.tc-visual -->
 
         <p class="tc-tap-desc" id="tc-tap-desc"></p>
 
         <hr class="divider">
-
-        <!-- ── Line Diagram ── -->
-        <div class="tc-diagram">
-          <svg id="tc-svg" viewBox="0 0 560 160" xmlns="http://www.w3.org/2000/svg"
-               role="img" aria-label="Transformer line diagram"></svg>
-        </div>
 
         <!-- ── Results ── -->
         <div id="tc-results" class="tc-results">

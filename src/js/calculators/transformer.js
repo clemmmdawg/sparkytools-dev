@@ -2,8 +2,8 @@
  * @file transformer.js
  * @description Transformer Calculator
  *
- * Given kVA, primary voltage, secondary voltage, and phase the calculator
- * provides live results for:
+ * Given kVA, primary voltage, secondary voltage (and inferred phase) the
+ * calculator provides live results for:
  *   - Primary and secondary full-load current
  *   - Primary OCPD per NEC T450.3(B)
  *   - Secondary OCPD per NEC T450.3(B)
@@ -11,10 +11,14 @@
  *   - Secondary conductor size per NEC T310.16 (75°C Cu THWN)
  *   - Secondary conductor tap rule per NEC 240.21(C)
  *
+ * Phase is inferred from primary voltage (480 V / 208 V → 3Ø; 240 V → 1Ø).
+ * A small toggle badge on the transformer symbol lets users override the 240 V
+ * default to 3Ø when needed (e.g. 240 V delta systems).
+ *
  * Results update live on every input change.
  */
 
-import { getEl, getCSSVar } from '../utils/formatting.js';
+import { getEl } from '../utils/formatting.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NEC Tables
@@ -82,6 +86,30 @@ const SEC_VOLTAGES = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Phase inference
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Phase override state — null means auto (follow inferPhase).
+ * Only relevant when primary voltage is 240 V.
+ * @type {"1"|"3"|null}
+ */
+let phaseOverride = null;
+
+/**
+ * Returns the effective phase for the current primary voltage.
+ * - 480 V / 208 V → always "3" (three-phase)
+ * - 240 V → "1" by default; respects phaseOverride when set
+ * @param {number} vpri
+ * @returns {"1"|"3"}
+ */
+function getPhase(vpri) {
+  if (vpri === 480 || vpri === 208) return "3";
+  if (vpri === 240 && phaseOverride) return phaseOverride;
+  return "1";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Core calculation
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -108,11 +136,9 @@ function calculate(kva, vpri, vsec, phase, secLN, tap) {
   const ratio = vpri / vsec;
 
   // ── NEC T450.3(B) OCPD ───────────────────────────────────────────────────
-  // Primary-only protection: ≤125% (FLA ≥ 9A) or ≤167% (FLA < 9A)
   const priPct       = ipri >= 9 ? 1.25 : 1.67;
   const priOCPD      = nextOCPD(ipri * priPct);
 
-  // Secondary OCPD: ≤125% (FLA ≥ 9A) or ≤167% (FLA < 9A)
   const secPct       = isec >= 9 ? 1.25 : 1.67;
   const secOCPD      = nextOCPD(isec * secPct);
 
@@ -127,27 +153,22 @@ function calculate(kva, vpri, vsec, phase, secLN, tap) {
   // Secondary: depends on tap rule
   let secWireAmps = isec * 1.25;
   let tapNote = "";
-  let secWireLabel = "";
 
   switch (tap) {
     case "at-terminals":
-      secWireAmps  = isec * 1.25;
-      tapNote      = `OCPD at secondary terminals — conductors sized ≥ 125% of secondary FLA (${fmt(isec)} A × 125% = ${fmt(secWireAmps)} A min).`;
+      secWireAmps = isec * 1.25;
+      tapNote     = `OCPD at secondary terminals — conductors sized ≥ 125% of secondary FLA (${fmt(isec)} A × 125% = ${fmt(secWireAmps)} A min).`;
       break;
 
     case "primary-ocpd":
-      // 240.21(C)(1): secondary conductor ampacity × (Vsec/Vpri) ≥ primary OCPD rating
-      // → sec conductor ampacity ≥ primary OCPD ÷ ratio = priOCPD × (Vsec/Vpri)
       {
         const reflected = priOCPD != null ? priOCPD / ratio : isec * 1.25;
         secWireAmps = Math.max(isec * 1.25, reflected);
         tapNote = `Protected by primary OCPD [NEC 240.21(C)(1)] — no secondary OCPD required at transformer. Secondary conductor ampacity ≥ primary OCPD (${priOCPD} A) ÷ turns ratio (${fmt(ratio, 2)}) = ${fmt(reflected)} A.`;
-        secWireLabel = "No OCPD req.";
       }
       break;
 
     case "10ft":
-      // 240.21(C)(2): conductor ampacity ≥ 1/10 of primary OCPD, single OCPD at far end
       {
         const tenPct = (priOCPD_ws ?? 0) * 0.10;
         secWireAmps  = Math.max(isec, tenPct);
@@ -156,7 +177,6 @@ function calculate(kva, vpri, vsec, phase, secLN, tap) {
       break;
 
     case "25ft":
-      // 240.21(C)(3): conductor ampacity ≥ 1/3 of primary conductor ampacity
       {
         const priAmp   = priWire ? (AMPACITY[priWire] ?? ipri) : ipri;
         const oneThird = priAmp / 3;
@@ -178,176 +198,7 @@ function calculate(kva, vpri, vsec, phase, secLN, tap) {
     priWire, priWireAmps,
     secWire, secWireAmps,
     tapNote,
-    secWireLabel,
   };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SVG Line Diagram
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Draws a simplified line diagram:
- * [Pri OCPD] ─── [Pri Wire] ─── [Transformer] ─── [Sec Wire] ─── [Sec OCPD]
- */
-function drawDiagram(r, kva, vpri, vsec, phase) {
-  const svg = getEl("tc-svg");
-  if (!svg) return;
-  svg.innerHTML = "";
-
-  const stroke      = getCSSVar("--svg-box-stroke");
-  const dim         = getCSSVar("--svg-dim-color");
-  const surfaceFill = getCSSVar("--svg-conduit-bg");
-  const accentPri   = getCSSVar("--accent-blue").trim()  || "#5291cf";
-  const accentSec   = getCSSVar("--accent-green").trim() || "#27ae60";
-  const accentRed   = getCSSVar("--accent-red").trim()   || "#c0392b";
-  const textColor   = stroke;
-
-  const ns = "http://www.w3.org/2000/svg";
-  function el(tag, attrs, parent) {
-    const e = document.createElementNS(ns, tag);
-    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
-    (parent ?? svg).appendChild(e);
-    return e;
-  }
-
-  const W = 560, H = 160;
-  const midY = 62; // wire centerline
-
-  // ── Zones (x centers) ────────────────────────────────────────────────────
-  const Z = {
-    priOCPD:  62,
-    priWire:  168,
-    xfmr:     280,
-    secWire:  392,
-    secOCPD:  498,
-  };
-
-  // Helper: add text with wrapping at a fixed width
-  function label(lines, cx, y, color, size = "10", weight = "400", anchor = "middle") {
-    lines.forEach((line, i) => {
-      el("text", {
-        x: cx, y: y + i * 13,
-        fill: color,
-        "font-size": size,
-        "font-weight": weight,
-        "font-family": "Inter, sans-serif",
-        "text-anchor": anchor,
-        "dominant-baseline": "auto",
-      }).textContent = line;
-    });
-  }
-
-  // ── Horizontal wire lines ─────────────────────────────────────────────────
-  // Pri OCPD right edge → Pri wire left edge
-  function hline(x1, x2, y, color, w = 1.8) {
-    el("line", { x1, y1: y, x2, y2: y, stroke: color, "stroke-width": w, "stroke-linecap": "round" });
-  }
-
-  // Line: pri OCPD box right → xfmr left
-  hline(Z.priOCPD + 22, Z.xfmr - 30, midY, accentPri);
-  // Line: xfmr right → sec OCPD box left
-  hline(Z.xfmr + 30, Z.secOCPD - 22, midY, accentSec);
-
-  // ── Primary OCPD box ──────────────────────────────────────────────────────
-  const bw = 44, bh = 28;
-  el("rect", {
-    x: Z.priOCPD - bw / 2, y: midY - bh / 2,
-    width: bw, height: bh,
-    fill: surfaceFill, stroke: accentRed,
-    "stroke-width": "2", rx: "5",
-  });
-  label(["OCPD"], Z.priOCPD, midY - 6, accentRed, "9.5", "700");
-  label([r ? `${r.priOCPD} A` : "—"], Z.priOCPD, midY + 7, accentRed, "9.5", "700");
-
-  // Primary OCPD bottom label
-  label(["Primary", "OCPD"], Z.priOCPD, midY + bh / 2 + 8, dim, "9");
-
-  // ── Primary wire label ────────────────────────────────────────────────────
-  const wireY = midY - 16;
-  label(
-    r && r.priWire ? [`#${r.priWire} AWG`, "Cu THWN"] : ["—"],
-    Z.priWire, wireY, accentPri, "9.5", "600"
-  );
-  label([r ? `${fmt(r.priWireAmps)} A req.` : ""], Z.priWire, wireY + 26, dim, "8.5");
-
-  // ── Transformer box ───────────────────────────────────────────────────────
-  const tw = 60, th = 44;
-  el("rect", {
-    x: Z.xfmr - tw / 2, y: midY - th / 2,
-    width: tw, height: th,
-    fill: surfaceFill, stroke,
-    "stroke-width": "2", rx: "6",
-  });
-  // Coil bumps on primary side (3 bumps, left of center line)
-  const coilCX = Z.xfmr - 11, coilTop = midY - 14, coilBtm = midY + 14;
-  const bumpR = (coilBtm - coilTop) / 6;
-  let d = `M ${coilCX},${coilTop}`;
-  for (let i = 0; i < 3; i++) {
-    d += ` A ${bumpR} ${bumpR} 0 0 1 ${coilCX},${coilTop + bumpR * 2 * (i + 1)}`;
-  }
-  el("path", { d, stroke: accentPri, "stroke-width": "1.8", fill: "none" });
-
-  // Center divider line
-  el("line", {
-    x1: Z.xfmr, y1: midY - th / 2 + 4,
-    x2: Z.xfmr, y2: midY + th / 2 - 4,
-    stroke: dim, "stroke-width": "1", "stroke-dasharray": "3 2",
-  });
-
-  // Coil bumps on secondary side (3 bumps, right of center line)
-  const coilCX2 = Z.xfmr + 11;
-  let d2 = `M ${coilCX2},${coilTop}`;
-  for (let i = 0; i < 3; i++) {
-    d2 += ` A ${bumpR} ${bumpR} 0 0 0 ${coilCX2},${coilTop + bumpR * 2 * (i + 1)}`;
-  }
-  el("path", { d: d2, stroke: accentSec, "stroke-width": "1.8", fill: "none" });
-
-  // Transformer labels below box
-  const kvaStr  = kva  ? `${kva} kVA`  : "— kVA";
-  const phaseStr = phase === "3" ? "3Ø" : "1Ø";
-  label([kvaStr, phaseStr], Z.xfmr, midY + th / 2 + 10, textColor, "9.5", "700");
-
-  // Voltage labels above transformer
-  const vpriStr = vpri ? `${vpri} V` : "—";
-  const vsecStr = vsec ? `${vsec} V` : "—";
-  label([vpriStr], Z.xfmr - 18, midY - th / 2 - 14, accentPri, "9.5", "600");
-  label([vsecStr], Z.xfmr + 18, midY - th / 2 - 14, accentSec, "9.5", "600");
-
-  // ── Secondary wire label ──────────────────────────────────────────────────
-  label(
-    r && r.secWire ? [`#${r.secWire} AWG`, "Cu THWN"] : ["—"],
-    Z.secWire, wireY, accentSec, "9.5", "600"
-  );
-  label([r ? `${fmt(r.secWireAmps)} A req.` : ""], Z.secWire, wireY + 26, dim, "8.5");
-
-  // ── Secondary OCPD box ────────────────────────────────────────────────────
-  const secOCPDText = r
-    ? (r.secOCPD != null ? `${r.secOCPD} A` : "N/A")
-    : "—";
-  const secOCPDColor = (r && r.secOCPD == null) ? dim : accentRed;
-
-  el("rect", {
-    x: Z.secOCPD - bw / 2, y: midY - bh / 2,
-    width: bw, height: bh,
-    fill: surfaceFill, stroke: secOCPDColor,
-    "stroke-width": "2", rx: "5",
-  });
-  label(["OCPD"], Z.secOCPD, midY - 6, secOCPDColor, "9.5", "700");
-  label([secOCPDText], Z.secOCPD, midY + 7, secOCPDColor, "9.5", "700");
-
-  label(["Secondary", "OCPD"], Z.secOCPD, midY + bh / 2 + 8, dim, "9");
-
-  // ── FLA labels below wire line ────────────────────────────────────────────
-  const flaY = midY + 44;
-  label(
-    r ? [`${fmt(r.ipri, 2)} A FLA`] : ["—"],
-    Z.priWire, flaY, accentPri, "9"
-  );
-  label(
-    r ? [`${fmt(r.isec, 2)} A FLA`] : ["—"],
-    Z.secWire, flaY, accentSec, "9"
-  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -365,22 +216,74 @@ function showResults(on) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Render
+// Visual diagram updates
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Update voltage labels and kVA/phase labels on the transformer symbol. */
+function updateVisualLabels(kva, vpri, vsec, phase) {
+  setText("tc-vis-vpri", vpri ? `${vpri} V` : "—");
+  setText("tc-vis-vsec", vsec ? `${vsec} V` : "—");
+  setText("tc-vis-kva",  kva  ? `${kva} kVA` : "—");
+
+  // Phase badge
+  const badge = document.getElementById("tc-vis-phase");
+  if (badge) {
+    badge.textContent = phase === "3" ? "3Ø" : "1Ø";
+    const is240 = vpri === 240;
+    badge.classList.toggle("tc-vis-phase--toggle", is240);
+    badge.disabled = !is240;
+  }
+}
+
+/** Populate wire sizes, required amps, and FLA labels on the diagram. */
+function updateVisualResults(r) {
+  // Primary OCPD
+  setText("tc-vis-pri-ocpd", r.priOCPD != null ? `${r.priOCPD} A` : "—");
+  // Primary wire
+  setText("tc-vis-pri-wire-size", r.priWire ? `#${r.priWire} AWG Cu THWN` : "—");
+  setText("tc-vis-pri-wire-req",  r.priWire ? `${fmt(r.priWireAmps)} A req.` : "");
+  setText("tc-vis-pri-fla",       `${fmt(r.ipri, 2)} A FLA`);
+  // Secondary OCPD
+  const secBox = document.getElementById("tc-vis-sec-ocpd-box");
+  if (secBox) secBox.classList.toggle("tc-vis-ocpd--dim", r.secOCPD == null);
+  setText("tc-vis-sec-ocpd", r.secOCPD != null ? `${r.secOCPD} A` : "N/A");
+  // Secondary wire
+  setText("tc-vis-sec-wire-size", r.secWire ? `#${r.secWire} AWG Cu THWN` : "—");
+  setText("tc-vis-sec-wire-req",  r.secWire ? `${fmt(r.secWireAmps)} A req.` : "");
+  setText("tc-vis-sec-fla",       `${fmt(r.isec, 2)} A FLA`);
+}
+
+/** Reset all computed labels on the diagram back to placeholder dashes. */
+function clearVisualResults() {
+  setText("tc-vis-pri-ocpd", "—");
+  setText("tc-vis-pri-wire-size", "—");
+  setText("tc-vis-pri-wire-req",  "");
+  setText("tc-vis-pri-fla",       "—");
+  setText("tc-vis-sec-ocpd", "—");
+  setText("tc-vis-sec-wire-size", "—");
+  setText("tc-vis-sec-wire-req",  "");
+  setText("tc-vis-sec-fla",       "—");
+  const secBox = document.getElementById("tc-vis-sec-ocpd-box");
+  if (secBox) secBox.classList.remove("tc-vis-ocpd--dim");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Render results cards
 // ─────────────────────────────────────────────────────────────────────────────
 
 function renderResults(r) {
   // Currents
-  setText("tc-ipri", r.ipri != null ? `${fmt(r.ipri, 2)} A` : "—");
-  setText("tc-isec", r.isec != null ? `${fmt(r.isec, 2)} A` : "—");
+  setText("tc-ipri",  r.ipri  != null ? `${fmt(r.ipri,  2)} A` : "—");
+  setText("tc-isec",  r.isec  != null ? `${fmt(r.isec,  2)} A` : "—");
   setText("tc-ratio", r.ratio != null ? `${fmt(r.ratio, 3)} : 1` : "—");
 
   // OCPD
-  setText("tc-pri-ocpd",     r.priOCPD   != null ? `${r.priOCPD} A`  : "—");
-  setText("tc-pri-ocpd-pct", r.priPct);
+  setText("tc-pri-ocpd",      r.priOCPD   != null ? `${r.priOCPD} A` : "—");
+  setText("tc-pri-ocpd-pct",  r.priPct);
   setText("tc-pri-ocpd-pct2", r.priPct);
-  setText("tc-sec-ocpd",    r.secOCPDLabel);
-  setText("tc-sec-ocpd-pct", r.secOCPD != null ? r.secPct : "—");
-  setText("tc-pri-ocpd-ws", r.priOCPD_ws != null ? `${r.priOCPD_ws} A` : "—");
+  setText("tc-sec-ocpd",      r.secOCPDLabel);
+  setText("tc-sec-ocpd-pct",  r.secOCPD != null ? r.secPct : "—");
+  setText("tc-pri-ocpd-ws",   r.priOCPD_ws != null ? `${r.priOCPD_ws} A` : "—");
 
   // Conductors
   setText("tc-pri-wire",      r.priWire ? `#${r.priWire} AWG Cu THWN` : "—");
@@ -388,42 +291,6 @@ function renderResults(r) {
   setText("tc-sec-wire",      r.secWire ? `#${r.secWire} AWG Cu THWN` : "—");
   setText("tc-sec-wire-amps", r.secWire ? `${AMPACITY[r.secWire]} A rated  /  ${fmt(r.secWireAmps)} A req.` : "—");
   setText("tc-tap-note", r.tapNote);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Update — called on every input change
-// ─────────────────────────────────────────────────────────────────────────────
-
-function update() {
-  const kva   = parseFloat(document.getElementById("tc-kva")?.value);
-  const vpri  = parseFloat(document.getElementById("tc-vpri")?.value);
-  const vsecEl = document.getElementById("tc-vsec");
-  const vsec  = parseFloat(vsecEl?.value);
-  const phase = document.getElementById("tc-phase")?.value ?? "1";
-  const tap   = document.getElementById("tc-tap-option")?.value ?? "at-terminals";
-
-  // Determine if selected secondary voltage is L-N
-  const selectedSecOpt = vsecEl?.options[vsecEl.selectedIndex];
-  const secLN = selectedSecOpt?.dataset.ln === "true";
-
-  // Mark kva field error if empty/invalid
-  const kvaEl = document.getElementById("tc-kva");
-  if (kvaEl) kvaEl.classList.toggle("tc-error", !kva || kva <= 0);
-
-  const valid = kva > 0 && vpri > 0 && vsec > 0;
-
-  if (valid) {
-    const r = calculate(kva, vpri, vsec, phase, secLN, tap);
-    renderResults(r);
-    drawDiagram(r, kva, vpri, vsec, phase);
-    showResults(true);
-  } else {
-    drawDiagram(null, kva || null, vpri || null, vsec || null, phase);
-    showResults(false);
-  }
-
-  // Update tap description
-  updateTapDesc(tap);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -442,6 +309,46 @@ function updateTapDesc(tap) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Update — called on every input change
+// ─────────────────────────────────────────────────────────────────────────────
+
+function update() {
+  const vpri   = parseFloat(document.getElementById("tc-vpri")?.value);
+  const vsecEl = document.getElementById("tc-vsec");
+  const vsec   = parseFloat(vsecEl?.value);
+  const kva    = parseFloat(document.getElementById("tc-kva")?.value);
+  const tap    = document.getElementById("tc-tap-option")?.value ?? "at-terminals";
+
+  // Reset phase override whenever the primary voltage moves away from 240 V
+  if (vpri !== 240) phaseOverride = null;
+  const phase = getPhase(vpri);
+
+  // Determine if selected secondary voltage is L-N
+  const selectedSecOpt = vsecEl?.options[vsecEl.selectedIndex];
+  const secLN = selectedSecOpt?.dataset.ln === "true";
+
+  // Mark kVA field error if empty/invalid
+  const kvaEl = document.getElementById("tc-kva");
+  if (kvaEl) kvaEl.classList.toggle("tc-error", !kva || kva <= 0);
+
+  // Always update static visual labels
+  updateVisualLabels(kva || null, vpri || null, vsec || null, phase);
+
+  const valid = kva > 0 && vpri > 0 && vsec > 0;
+  if (valid) {
+    const r = calculate(kva, vpri, vsec, phase, secLN, tap);
+    renderResults(r);
+    updateVisualResults(r);
+    showResults(true);
+  } else {
+    clearVisualResults();
+    showResults(false);
+  }
+
+  updateTapDesc(tap);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Init
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -455,7 +362,7 @@ export function init(_necData) {
       o.textContent = v.label;
       vpriSel.appendChild(o);
     });
-    vpriSel.value = "480"; // default: 480V primary
+    vpriSel.value = "480";
   }
 
   // Populate secondary voltage dropdown
@@ -468,19 +375,24 @@ export function init(_necData) {
       if (v.ln) o.dataset.ln = "true";
       vsecSel.appendChild(o);
     });
-    vsecSel.value = "208"; // default: 208V secondary
+    vsecSel.value = "208";
   }
 
   // Wire up all inputs for live updates
-  ["tc-kva", "tc-vpri", "tc-vsec", "tc-phase", "tc-tap-option"].forEach(id => {
+  ["tc-kva", "tc-vpri", "tc-vsec", "tc-tap-option"].forEach(id => {
     document.getElementById(id)?.addEventListener("change", update);
-    document.getElementById(id)?.addEventListener("input", update);
+    document.getElementById(id)?.addEventListener("input",  update);
   });
 
-  // Redraw on theme change
-  document.addEventListener("themechange", update);
+  // Phase toggle badge (only active for 240 V primary)
+  document.getElementById("tc-vis-phase")?.addEventListener("click", () => {
+    const vpri = parseFloat(document.getElementById("tc-vpri")?.value);
+    if (vpri !== 240) return;
+    phaseOverride = getPhase(vpri) === "1" ? "3" : "1";
+    update();
+  });
 
-  // Initial draw (blank — no kVA entered yet)
-  drawDiagram(null, 480, 208, "1");
+  // Initial state (no kVA entered yet)
+  updateVisualLabels(null, 480, 208, "3");
   updateTapDesc("at-terminals");
 }

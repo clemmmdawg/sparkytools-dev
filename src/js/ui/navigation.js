@@ -28,7 +28,7 @@ export function initNavigation() {
   const barLabel    = document.getElementById('nav-bar-label');
   const accentDot   = document.getElementById('nav-accent-dot');
   const sections    = document.querySelectorAll('.tool-section');
-  const items       = document.querySelectorAll('.drawer-item');
+  const items       = document.querySelectorAll('.drawer-item:not(.theme-toggle)');
 
   // ── Activate a section by its drawer item ──────────────────────────────────
 
