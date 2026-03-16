@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="src/css/pull-box.css">
     <link rel="stylesheet" href="src/css/service-load.css">
     <link rel="stylesheet" href="src/css/transformer.css">
+    <link rel="stylesheet" href="src/css/ohms-law.css">
 
     <!-- PWA manifest -->
     <link rel="manifest" href="pwa/manifest.json">
@@ -584,6 +585,67 @@
       </section>
 
 
+      <!-- ══════════════════════════════════════════════════════════
+           OHM'S LAW / POWER WHEEL CALCULATOR
+           ══════════════════════════════════════════════════════════ -->
+      <section id="ohms-tool" class="card tool-section" aria-labelledby="ohms-law-heading">
+        <header class="card-header">
+          <h2 id="ohms-law-heading">Ohm's Law / Power Wheel</h2>
+        </header>
+
+        <!-- Wheel with input overlay -->
+        <div class="ow-wheel-wrap">
+          <svg id="ow-svg" viewBox="0 0 320 320"
+               xmlns="http://www.w3.org/2000/svg"
+               aria-label="Power wheel showing Ohm's Law formulas"
+               role="img">
+          </svg>
+
+          <!-- Input cells overlaid at center of wheel -->
+          <div class="ow-inputs" aria-label="Enter any two values to solve">
+            <!-- P — top-left (matches P quadrant) -->
+            <div class="ow-input-cell ow-input-cell--P">
+              <label class="ow-input-label" for="ow-P">P</label>
+              <input id="ow-P" class="ow-input-field" type="number"
+                     placeholder="—" min="0" step="any" aria-label="Power in watts">
+              <span class="ow-input-unit">W</span>
+            </div>
+            <!-- I — top-right (matches I quadrant) -->
+            <div class="ow-input-cell ow-input-cell--I">
+              <label class="ow-input-label" for="ow-I">I</label>
+              <input id="ow-I" class="ow-input-field" type="number"
+                     placeholder="—" min="0" step="any" aria-label="Current in amps">
+              <span class="ow-input-unit">A</span>
+            </div>
+            <!-- V — bottom-left (matches V quadrant) -->
+            <div class="ow-input-cell ow-input-cell--V">
+              <label class="ow-input-label" for="ow-V">V</label>
+              <input id="ow-V" class="ow-input-field" type="number"
+                     placeholder="—" min="0" step="any" aria-label="Voltage in volts">
+              <span class="ow-input-unit">V</span>
+            </div>
+            <!-- R — bottom-right (matches R quadrant) -->
+            <div class="ow-input-cell ow-input-cell--R">
+              <label class="ow-input-label" for="ow-R">R</label>
+              <input id="ow-R" class="ow-input-field" type="number"
+                     placeholder="—" min="0" step="any" aria-label="Resistance in ohms">
+              <span class="ow-input-unit">Ω</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="ow-actions">
+          <button id="ow-calc-btn"  class="ow-btn ow-btn--calc"  type="button">Calculate</button>
+          <button id="ow-clear-btn" class="ow-btn ow-btn--clear" type="button">Clear</button>
+        </div>
+
+        <!-- Status / hint message -->
+        <p id="ow-status" class="ow-status ow-status--hint">Enter any two values, then click Calculate.</p>
+
+      </section>
+
+
       <!-- ═══════════════════════════════════════════════════════════════════
            RESIDENTIAL SERVICE LOAD CALCULATOR
            NEC 220.40–220.53  Standard Method
@@ -840,6 +902,13 @@
               data-label="Pull Box Size"
               data-accent="var(--accent-orange)">
         <span class="drawer-item-icon">📐</span>Pull Box Size
+      </button>
+      <button class="drawer-item"
+              data-target="ohms-tool"
+              data-hash="ohms"
+              data-label="Ohm's Law"
+              data-accent="var(--accent-orange)">
+        <span class="drawer-item-icon">⚙️</span>Ohm's Law
       </button>
 
       <div class="drawer-group-title">App</div>

@@ -16,6 +16,7 @@ import * as BoxFill from './calculators/box-fill.js';
 import * as PullBox from './calculators/pull-box.js';
 import * as ServiceLoad from './calculators/service-load.js';
 import * as Transformer from './calculators/transformer.js';
+import * as OhmsLaw from './calculators/ohms-law.js';
 
 /**
  * Main initialization function
@@ -32,6 +33,7 @@ async function init() {
     PullBox.init(necData);
     ServiceLoad.init(necData);
     Transformer.init(necData);
+    OhmsLaw.init(necData);
     
     // Initialize UI components
     initNavigation();
