@@ -586,62 +586,68 @@
 
 
       <!-- ══════════════════════════════════════════════════════════
-           OHM'S LAW / POWER WHEEL CALCULATOR
+           OHM'S LAW CALCULATOR
            ══════════════════════════════════════════════════════════ -->
-      <section id="ohms-tool" class="card tool-section" aria-labelledby="ohms-law-heading">
+      <section id="ohms-tool" class="card card--orange tool-section" aria-labelledby="ohms-law-heading">
         <header class="card-header">
-          <h2 id="ohms-law-heading">Ohm's Law / Power Wheel</h2>
+          <h2 id="ohms-law-heading">Ohm's Law</h2>
         </header>
 
-        <!-- Wheel with input overlay -->
-        <div class="ow-wheel-wrap">
-          <svg id="ow-svg" viewBox="0 0 320 320"
-               xmlns="http://www.w3.org/2000/svg"
-               aria-label="Power wheel showing Ohm's Law formulas"
-               role="img">
-          </svg>
+        <!-- Row 1: Voltage + Current -->
+        <div class="input-row">
+          <div class="input-group">
+            <label for="ol-V">Voltage</label>
+            <div class="ol-field-wrap">
+              <input id="ol-V" type="number" placeholder="—" step="any" min="0" aria-label="Voltage in volts">
+              <span class="ol-unit">V</span>
+              <button class="remove-btn ol-clear-field" data-target="ol-V" aria-label="Clear voltage" title="Clear">×</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="ol-I">Current</label>
+            <div class="ol-field-wrap">
+              <input id="ol-I" type="number" placeholder="—" step="any" min="0" aria-label="Current in amps">
+              <span class="ol-unit">A</span>
+              <button class="remove-btn ol-clear-field" data-target="ol-I" aria-label="Clear current" title="Clear">×</button>
+            </div>
+          </div>
+        </div>
 
-          <!-- Input cells overlaid at center of wheel -->
-          <div class="ow-inputs" aria-label="Enter any two values to solve">
-            <!-- P — top-left (matches P quadrant) -->
-            <div class="ow-input-cell ow-input-cell--P">
-              <label class="ow-input-label" for="ow-P">P</label>
-              <input id="ow-P" class="ow-input-field" type="number"
-                     placeholder="—" min="0" step="any" aria-label="Power in watts">
-              <span class="ow-input-unit">W</span>
+        <!-- Row 2: Resistance + Power -->
+        <div class="input-row">
+          <div class="input-group">
+            <label for="ol-R">Resistance</label>
+            <div class="ol-field-wrap">
+              <input id="ol-R" type="number" placeholder="—" step="any" min="0" aria-label="Resistance in ohms">
+              <span class="ol-unit">Ω</span>
+              <button class="remove-btn ol-clear-field" data-target="ol-R" aria-label="Clear resistance" title="Clear">×</button>
             </div>
-            <!-- I — top-right (matches I quadrant) -->
-            <div class="ow-input-cell ow-input-cell--I">
-              <label class="ow-input-label" for="ow-I">I</label>
-              <input id="ow-I" class="ow-input-field" type="number"
-                     placeholder="—" min="0" step="any" aria-label="Current in amps">
-              <span class="ow-input-unit">A</span>
-            </div>
-            <!-- V — bottom-left (matches V quadrant) -->
-            <div class="ow-input-cell ow-input-cell--V">
-              <label class="ow-input-label" for="ow-V">V</label>
-              <input id="ow-V" class="ow-input-field" type="number"
-                     placeholder="—" min="0" step="any" aria-label="Voltage in volts">
-              <span class="ow-input-unit">V</span>
-            </div>
-            <!-- R — bottom-right (matches R quadrant) -->
-            <div class="ow-input-cell ow-input-cell--R">
-              <label class="ow-input-label" for="ow-R">R</label>
-              <input id="ow-R" class="ow-input-field" type="number"
-                     placeholder="—" min="0" step="any" aria-label="Resistance in ohms">
-              <span class="ow-input-unit">Ω</span>
+          </div>
+          <div class="input-group">
+            <label for="ol-P">Power</label>
+            <div class="ol-field-wrap">
+              <input id="ol-P" type="number" placeholder="—" step="any" min="0" aria-label="Power in watts">
+              <span class="ol-unit">W</span>
+              <button class="remove-btn ol-clear-field" data-target="ol-P" aria-label="Clear power" title="Clear">×</button>
             </div>
           </div>
         </div>
 
         <!-- Action buttons -->
-        <div class="ow-actions">
-          <button id="ow-calc-btn"  class="ow-btn ow-btn--calc"  type="button">Calculate</button>
-          <button id="ow-clear-btn" class="ow-btn ow-btn--clear" type="button">Clear</button>
+        <div class="ol-actions">
+          <button id="ol-calc-btn" class="add-btn" type="button">Calculate</button>
+          <button id="ol-clear-btn" class="add-btn ol-btn-clear-all" type="button">Clear All</button>
         </div>
 
         <!-- Status / hint message -->
-        <p id="ow-status" class="ow-status ow-status--hint">Enter any two values, then click Calculate.</p>
+        <p id="ol-status" class="ol-status ol-status--hint">Enter any two values, then press Calculate.</p>
+
+        <hr class="divider">
+
+        <!-- PIRE wheel reference image (to be supplied) -->
+        <div class="ol-pire-wrap" id="ol-pire-wrap">
+          <p class="ol-pire-placeholder">PIRE wheel image coming soon</p>
+        </div>
 
       </section>
 
