@@ -1,89 +1,260 @@
 /* transformer.css — Transformer Calculator                                    */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Input grid ── */
-.tc-grid {
-  display:               grid;
-  grid-template-columns: 1fr 1fr;
-  gap:                   12px 18px;
-  margin-bottom:         16px;
-}
-
-.tc-grid--3 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.tc-field {
-  display:        flex;
-  flex-direction: column;
-  gap:            5px;
-}
-
-.tc-field label {
-  font-size:   0.82rem;
-  font-weight: 600;
-  color:       var(--text);
-  display:     flex;
-  align-items: center;
-  gap:         6px;
-  flex-wrap:   wrap;
-}
-
+/* ── NEC reference badge (shared with other tools) ── */
 .tc-nec-ref {
-  font-size:    0.7rem;
-  font-weight:  600;
-  color:        var(--accent-blue);
-  background:   color-mix(in srgb, var(--accent-blue) 12%, transparent);
-  border:       1px solid color-mix(in srgb, var(--accent-blue) 25%, transparent);
-  padding:      1px 5px;
+  font-size:     0.7rem;
+  font-weight:   600;
+  color:         var(--accent-blue);
+  background:    color-mix(in srgb, var(--accent-blue) 12%, transparent);
+  border:        1px solid color-mix(in srgb, var(--accent-blue) 25%, transparent);
+  padding:       1px 5px;
   border-radius: 4px;
-  white-space:  nowrap;
-  cursor:       help;
+  white-space:   nowrap;
+  cursor:        help;
 }
 
-.tc-field input,
-.tc-field select {
-  width:         100%;
-  padding:       9px 11px;
+/* ══════════════════════════════════════════════════════════
+   UNIFIED VISUAL (inputs + one-line diagram)
+   ══════════════════════════════════════════════════════════ */
+
+.tc-visual {
+  background:    var(--surface-inset);
   border:        1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 10px;
+  padding:       14px 14px 12px;
+  margin-bottom: 6px;
+  overflow-x:    auto;
+}
+
+/* ── Input strip ── */
+.tc-vis-ctrl {
+  display:               grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap:                   0 16px;
+  margin-bottom:         14px;
+  align-items:           start;
+}
+
+.tc-vis-ctrl-pri { width: 100%; }
+.tc-vis-ctrl-mid { min-width: 110px; }
+.tc-vis-ctrl-sec { display: flex; flex-direction: column; gap: 0; width: 100%; }
+
+.tc-vis-label {
+  display:        flex;
+  align-items:    center;
+  gap:            5px;
+  font-size:      0.72rem;
+  font-weight:    600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color:          var(--text-muted);
+  margin-bottom:  4px;
+}
+
+.tc-vis-select,
+.tc-vis-input {
+  width:         100%;
+  padding:       7px 10px;
+  border:        1px solid var(--border);
+  border-radius: 6px;
   background:    var(--card-bg);
   color:         var(--text);
-  font-size:     0.9rem;
+  font-size:     0.85rem;
   font-family:   inherit;
   box-sizing:    border-box;
   transition:    border-color 0.15s, box-shadow 0.15s;
 }
-
-.tc-field input:focus,
-.tc-field select:focus {
+.tc-vis-select:focus,
+.tc-vis-input:focus {
   outline:      none;
   border-color: var(--primary);
   box-shadow:   0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
 }
-
-.tc-field input.tc-error {
+.tc-vis-input.tc-error {
   border-color: var(--danger);
   background:   color-mix(in srgb, var(--danger) 8%, var(--card-bg));
 }
 
-/* ── Line diagram ── */
-.tc-diagram {
-  background:    var(--surface-inset);
+/* ── One-line diagram row ── */
+.tc-vis-row {
+  display:     flex;
+  align-items: stretch;
+  min-height:  90px;
+  min-width:   460px;
+}
+
+/* ── OCPD boxes ── */
+.tc-vis-ocpd {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             1px;
+  border:          2px solid var(--accent-red);
+  border-radius:   6px;
+  padding:         6px 10px;
+  min-width:       62px;
+  background:      var(--card-bg);
+  flex-shrink:     0;
+  align-self:      center;
+  text-align:      center;
+  transition:      border-color 0.2s, opacity 0.2s;
+}
+.tc-vis-ocpd-tag {
+  font-size:      0.6rem;
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color:          var(--accent-red);
+}
+.tc-vis-ocpd-val {
+  font-size:   1rem;
+  font-weight: 700;
+  color:       var(--accent-red);
+  line-height: 1.1;
+}
+.tc-vis-ocpd-sub {
+  font-size: 0.6rem;
+  color:     var(--text-muted);
+}
+/* Dim secondary OCPD when not required */
+.tc-vis-ocpd--sec.tc-vis-ocpd--dim {
+  border-color: var(--border);
+  opacity:      0.45;
+}
+.tc-vis-ocpd--sec.tc-vis-ocpd--dim .tc-vis-ocpd-tag,
+.tc-vis-ocpd--sec.tc-vis-ocpd--dim .tc-vis-ocpd-val { color: var(--text-muted); }
+
+/* ── Wire sections ── */
+.tc-vis-wire {
+  flex:     1;
+  position: relative;
+  display:  flex;
+  flex-direction: column;
+  min-width: 100px;
+}
+/* Horizontal wire line at 50% */
+.tc-vis-wire::before {
+  content:        '';
+  position:       absolute;
+  top:            50%;
+  left:           0;
+  right:          0;
+  height:         2px;
+  transform:      translateY(-50%);
+  pointer-events: none;
+  z-index:        0;
+}
+.tc-vis-wire--pri::before { background: var(--accent-blue);  }
+.tc-vis-wire--sec::before { background: var(--accent-green); }
+
+.tc-vis-wire-above,
+.tc-vis-wire-below {
+  flex:       1;
+  display:    flex;
+  flex-direction: column;
+  align-items: center;
+  position:   relative;
+  z-index:    1;
+  gap:        1px;
+}
+.tc-vis-wire-above {
+  justify-content: flex-end;
+  padding-bottom:  5px;
+}
+.tc-vis-wire-below {
+  justify-content: flex-start;
+  padding-top:     5px;
+}
+
+.tc-vis-wire-size {
+  font-size:   0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tc-vis-wire--pri .tc-vis-wire-size { color: var(--accent-blue);  }
+.tc-vis-wire--sec .tc-vis-wire-size { color: var(--accent-green); }
+
+.tc-vis-wire-req,
+.tc-vis-wire-fla {
+  font-size:  0.68rem;
+  color:      var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Transformer center ── */
+.tc-vis-xfmr {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             3px;
+  flex-shrink:     0;
+  padding:         0 6px;
+  align-self:      center;
+}
+
+.tc-vis-xfmr-volts {
+  display:     flex;
+  gap:         10px;
+  font-size:   0.72rem;
+  font-weight: 600;
+}
+.tc-vis-xfmr-v--pri { color: var(--accent-blue);  }
+.tc-vis-xfmr-v--sec { color: var(--accent-green); }
+
+.tc-vis-xfmr-svg {
+  width:         60px;
+  height:        44px;
+  border:        2px solid var(--svg-box-stroke, var(--border));
+  border-radius: 6px;
+  background:    var(--card-bg);
+  display:       block;
+  flex-shrink:   0;
+}
+.tc-vis-coil--pri { stroke: var(--accent-blue);  }
+.tc-vis-coil--sec { stroke: var(--accent-green); }
+.tc-vis-xfmr-div  {
+  stroke:           var(--text-muted);
+  stroke-width:     1;
+  stroke-dasharray: 3 2;
+}
+
+.tc-vis-xfmr-info {
+  display:     flex;
+  align-items: center;
+  gap:         5px;
+  font-size:   0.72rem;
+  font-weight: 700;
+  color:       var(--text);
+  white-space: nowrap;
+}
+
+/* Phase badge — static by default, clickable when 240 V primary */
+.tc-vis-phase-badge {
+  font-size:   0.72rem;
+  font-weight: 700;
+  color:       var(--text);
+  background:  transparent;
+  border:      none;
+  padding:     0;
+  cursor:      default;
+  font-family: inherit;
+}
+.tc-vis-phase-badge.tc-vis-phase--toggle {
   border:        1px solid var(--border);
-  border-radius: 10px;
-  padding:       10px 6px 6px;
-  margin-bottom: 20px;
-  overflow:      hidden;
+  border-radius: 4px;
+  padding:       1px 5px;
+  cursor:        pointer;
+  transition:    background 0.12s;
 }
+.tc-vis-phase-badge.tc-vis-phase--toggle:hover { background: var(--surface-row); }
 
-.tc-diagram svg {
-  width:   100%;
-  height:  auto;
-  display: block;
-}
+/* ══════════════════════════════════════════════════════════
+   RESULTS SECTION
+   ══════════════════════════════════════════════════════════ */
 
-/* ── Results section ── */
 .tc-results {
   display: none;
 }
@@ -107,7 +278,6 @@
   padding:       14px 16px;
   margin-bottom: 12px;
 }
-
 .tc-card--ocpd      { border-color: var(--accent-red);   }
 .tc-card--conductor { border-color: var(--accent-green);  }
 
@@ -128,19 +298,16 @@
   flex-wrap: wrap;
   gap:       16px 24px;
 }
-
 .tc-metric {
   display:        flex;
   flex-direction: column;
   gap:            2px;
 }
-
 .tc-metric-value {
   font-size:   1.2rem;
   font-weight: 700;
   color:       var(--text);
 }
-
 .tc-metric-value--lg {
   font-size: 1.5rem;
   color:     var(--accent-blue);
@@ -178,7 +345,7 @@
 .tc-tap-desc {
   font-size:   0.78rem;
   color:       var(--text-muted);
-  margin:      6px 0 0;
+  margin:      6px 0 16px;
   line-height: 1.5;
   font-style:  italic;
 }
@@ -196,11 +363,12 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 480px) {
-  .tc-grid--3 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 500px) {
+  .tc-vis-ctrl {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tc-vis-ctrl-mid { min-width: 0; }
 }
-
-@media (max-width: 360px) {
-  .tc-grid,
-  .tc-grid--3 { grid-template-columns: 1fr; }
+@media (max-width: 340px) {
+  .tc-vis-ctrl { grid-template-columns: 1fr; }
 }
