@@ -144,7 +144,7 @@ function buildWheel() {
     // Quantity letter
     const letter = el("text", {
       x:         pos.x,
-      y:         pos.y - 7,
+      y:         pos.y - 9,
       class:     `ow-label-letter ${quad.cls}`,
       transform: `rotate(${rot},${pos.x},${pos.y})`,
       "text-anchor":    "middle",
@@ -155,7 +155,7 @@ function buildWheel() {
     // Unit label
     const unit = el("text", {
       x:         pos.x,
-      y:         pos.y + 7,
+      y:         pos.y + 9,
       class:     "ow-label-unit",
       transform: `rotate(${rot},${pos.x},${pos.y})`,
       "text-anchor":    "middle",
@@ -278,12 +278,14 @@ function calculate() {
   }
 
   // Fill in derived values
+  // inputVals tracks which fields had valid user-provided values (null = not provided)
+  const inputVals = { P, I, V, R };
   const ids = { P: "ow-P", I: "ow-I", V: "ow-V", R: "ow-R" };
   for (const [key, id] of Object.entries(ids)) {
     const el = document.getElementById(id);
     if (!el) continue;
-    // Mark previously empty fields as derived
-    if (el.value === "" || el.dataset.derived === "true") {
+    // Update if the field was not a valid user-provided value, or was previously derived
+    if (inputVals[key] == null || el.dataset.derived === "true") {
       el.value = fmtVal(result[key]);
       el.dataset.derived = "true";
     }
