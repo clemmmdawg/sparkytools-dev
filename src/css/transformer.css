@@ -24,7 +24,7 @@
   border-radius: 10px;
   padding:       14px 14px 12px;
   margin-bottom: 6px;
-  overflow-x:    auto;
+  overflow: visible;
 }
 
 /* ── Input strip ── */
@@ -36,9 +36,9 @@
   align-items:           start;
 }
 
-.tc-vis-ctrl-pri { width: 100%; }
+.tc-vis-ctrl-pri { min-width: 0; width: 100%; }
 .tc-vis-ctrl-mid { min-width: 110px; }
-.tc-vis-ctrl-sec { display: flex; flex-direction: column; gap: 0; width: 100%; }
+.tc-vis-ctrl-sec { min-width: 0; display: flex; flex-direction: column; gap: 0; width: 100%; }
 
 .tc-vis-label {
   display:        flex;
@@ -81,7 +81,6 @@
   display:     flex;
   align-items: stretch;
   min-height:  90px;
-  min-width:   460px;
 }
 
 /* ── OCPD boxes ── */
@@ -132,7 +131,7 @@
   position: relative;
   display:  flex;
   flex-direction: column;
-  min-width: 100px;
+  min-width: 0;
 }
 /* Horizontal wire line at 50% */
 .tc-vis-wire::before {

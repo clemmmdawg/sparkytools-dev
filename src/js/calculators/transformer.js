@@ -73,8 +73,10 @@ function fmt(v, dp = 1) {
 
 const PRI_VOLTAGES = [
   { label: "480 V  (L-L)", value: 480 },
+  { label: "277 V  (L-N)", value: 277 },
   { label: "240 V  (L-L)", value: 240 },
   { label: "208 V  (L-L)", value: 208 },
+  { label: "120 V  (L-N)", value: 120 },
 ];
 
 const SEC_VOLTAGES = [
