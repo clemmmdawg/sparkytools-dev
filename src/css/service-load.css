@@ -94,7 +94,7 @@
   align-items: center;
   gap:         8px;
   flex-wrap:   wrap;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   padding:     10px 12px;
   background:  var(--card-bg);
   border:      1px solid var(--divider);
@@ -613,6 +613,21 @@ input[type="checkbox"].sl-themed-cb:checked::after {
 }
 .sl-adequacy--ok   { background: color-mix(in srgb, var(--accent-green) 12%, transparent); border: 1px solid color-mix(in srgb, var(--accent-green) 30%, transparent); color: var(--text); }
 .sl-adequacy--over { background: color-mix(in srgb, var(--danger, #e74c3c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--danger, #e74c3c) 30%, transparent); color: var(--text); }
+
+/* ── Responsive overrides (≤480px) ── */
+@media (max-width: 480px) {
+  /* Results table: scroll horizontally rather than overflow */
+  .sl-results { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sl-steps-table { min-width: 380px; }
+
+  /* Stepper: tighten buttons and value field */
+  .sl-step-btn { width: 32px; }
+  .sl-step-val { width: 44px; }
+
+  /* Load row type select: allow narrower min-width so it doesn't force row wrap */
+  .sl-load-row .sl-type { min-width: 100px; }
+  .sl-load-row .sl-name { min-width: 80px; }
+}
 
 /* ── Print-only elements — hidden on screen ── */
 .sl-print-header,

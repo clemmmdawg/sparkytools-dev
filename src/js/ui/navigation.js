@@ -126,6 +126,10 @@ function _syncActiveBorder(item) {
 /**
  * Initializes tooltip toggle functionality for touch / keyboard accessibility.
  * Tapping a [data-tip] element toggles its .active class; tapping elsewhere closes all.
+ *
+ * Uses capture phase so the handler fires before the browser processes label clicks.
+ * Without this, tapping a [data-tip] badge inside a <label for="..."> would bubble
+ * up to the label and open the associated select/input on mobile.
  */
 export function initTooltips() {
   document.addEventListener('click', e => {
@@ -133,6 +137,9 @@ export function initTooltips() {
     document.querySelectorAll('[data-tip].active').forEach(el => {
       if (el !== target) el.classList.remove('active');
     });
-    if (target) target.classList.toggle('active');
-  });
+    if (target) {
+      e.preventDefault(); // prevent label from forwarding click to its associated control
+      target.classList.toggle('active');
+    }
+  }, { capture: true });
 }
