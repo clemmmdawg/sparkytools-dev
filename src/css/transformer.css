@@ -361,6 +361,11 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 340px) {
+@media (max-width: 480px) {
+  /* Stack primary/secondary input columns vertically */
   .tc-vis-ctrl { grid-template-columns: 1fr; }
+
+  /* Allow the one-line diagram to scroll horizontally rather than squish */
+  .tc-visual { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tc-vis-row { min-width: 280px; }
 }

@@ -4,19 +4,19 @@
 .box-header {
   display:               grid;
   grid-template-columns: 2fr 1fr 1fr 36px;
-  gap:                   10px;
+  gap:                   8px;
   padding:               0 2px;
   font-size:             0.62rem;
   font-weight:           700;
   text-transform:        uppercase;
   color:                 var(--text-muted);
-  margin-bottom:         4px;
+  margin-bottom:         6px;
 }
 
 .box-wire-row {
   display:               grid;
   grid-template-columns: 2fr 1fr 1fr 36px;
-  gap:                   10px;
+  gap:                   8px;
   align-items:           center;
   margin-bottom:         8px;
   background:            var(--surface-row);

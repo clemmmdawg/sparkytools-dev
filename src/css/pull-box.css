@@ -43,6 +43,31 @@
   text-overflow: ellipsis;
 }
 
+/* ── Responsive overrides (≤480px) ── */
+@media (max-width: 480px) {
+  /* Hide the column header row — inputs are self-labeling via aria-label */
+  .pb-run-header { display: none; }
+
+  /* Reflow 6-column run row into 2 rows of 4 columns */
+  .pb-run-row {
+    grid-template-columns: 24px 1fr 1fr 36px;
+    grid-template-rows:    auto auto;
+    gap:                   6px;
+    padding:               8px;
+    margin-bottom:         10px;
+  }
+
+  /* Row 1: color swatch | size | pull type | remove */
+  .pb-run-row .color-swatch { grid-row: 1; grid-column: 1; }
+  .pb-run-row .pb-size      { grid-row: 1; grid-column: 2; }
+  .pb-run-row .pb-type      { grid-row: 1; grid-column: 3; }
+  .pb-run-row .remove-btn   { grid-row: 1; grid-column: 4; }
+
+  /* Row 2: (empty) | enters | exits */
+  .pb-run-row .pb-entry { grid-row: 2; grid-column: 2; }
+  .pb-run-row .pb-exit  { grid-row: 2; grid-column: 3; }
+}
+
 /* Pull Box face SVG container */
 .pb-visualizer-container {
   width:         100%;
