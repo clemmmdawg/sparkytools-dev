@@ -616,10 +616,6 @@ input[type="checkbox"].sl-themed-cb:checked::after {
 
 /* ── Responsive overrides (≤480px) ── */
 @media (max-width: 480px) {
-  /* Results table: scroll horizontally rather than overflow */
-  .sl-results { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .sl-steps-table { min-width: 380px; }
-
   /* Stepper: tighten buttons and value field */
   .sl-step-btn { width: 32px; }
   .sl-step-val { width: 44px; }
