@@ -25,10 +25,9 @@ function getVal(id) {
 
 function fmtVal(n) {
   if (n == null) return "";
-  if (n >= 1000) return (n / 1000).toPrecision(4).replace(/\.?0+$/, "") + "k";
-  if (n >= 100)  return n.toPrecision(4).replace(/\.?0+$/, "");
-  if (n >= 10)   return n.toPrecision(3).replace(/\.?0+$/, "");
-  return n.toPrecision(3).replace(/\.?0+$/, "");
+  // Use plain numeric strings — "k" suffix is rejected by type="number" inputs
+  if (n >= 100) return parseFloat(n.toPrecision(4)).toString();
+  return parseFloat(n.toPrecision(3)).toString();
 }
 
 /**

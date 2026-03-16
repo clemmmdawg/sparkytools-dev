@@ -31,11 +31,13 @@
 :root {
   /* Brand / structure */
   --primary:          #2c3e50;
-  --accent-blue:      #5291cf;   /* Conduit Fill card accent */
+  --text:             var(--primary);  /* alias — use wherever base text color is needed */
+  --accent-blue:      #5291cf;   /* Conduit Fill / Transformer card accent */
   --accent-yellow:    #f1c40f;   /* Voltage Drop card accent */
   --accent-green:     #27ae60;   /* Box Fill card accent */
   --accent-orange:    #e67e22;   /* Pull Box card accent */
   --accent-red:       #c0392b;   /* Service Load card accent */
+  --accent-purple:    #9b59b6;   /* Ohm's Law card accent */
   --danger:           #e74c3c;
   --success:          #27ae60;
 
@@ -173,11 +175,17 @@ body {
 
 /* ── 3. Page layout ── */
 .container {
-  max-width:      640px;
+  max-width:      720px;
   margin:         0 auto;
   display:        flex;
   flex-direction: column;
   gap:            24px;
+}
+
+/* ── Desktop: wider content area ── */
+@media (min-width: 768px) {
+  .container { max-width: 800px; }
+  .card       { padding: 28px 32px; }
 }
 
 
@@ -251,6 +259,7 @@ body {
 .card--green  { border-top-color: var(--accent-green); }
 .card--orange { border-top-color: var(--accent-orange); }
 .card--red    { border-top-color: var(--accent-red); }
+.card--purple { border-top-color: var(--accent-purple); }
 
 .card-header {
   margin-bottom: 20px;
@@ -267,6 +276,14 @@ body {
   border:     0;
   border-top: 1px solid var(--divider);
   margin:     16px 0;
+}
+
+/* Short description shown below a card title to explain the tool */
+.tool-desc {
+  margin:      -12px 0 16px;
+  font-size:   0.82rem;
+  color:       var(--text-muted);
+  line-height: 1.5;
 }
 
 /* Tool sections are hidden by default; navigation.js adds .active to show one */
