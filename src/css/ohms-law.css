@@ -5,7 +5,7 @@
 .ow-wheel-wrap {
   position:   relative;
   width:      100%;
-  max-width:  320px;
+  max-width:  380px;
   margin:     0 auto 20px;
   aspect-ratio: 1;
 }
@@ -38,8 +38,8 @@
 
 /* ── Formula text (inner ring) ── */
 .ow-formula-text {
-  font-size:   9px;
-  font-weight: 500;
+  font-size:   10.5px;
+  font-weight: 600;
   fill:        var(--text);
   font-family: inherit;
   pointer-events: none;
@@ -47,18 +47,18 @@
 
 /* ── Label ring text ── */
 .ow-label-letter {
-  font-size:   13px;
+  font-size:   15px;
   font-weight: 800;
   fill:        #fff;
   font-family: inherit;
   pointer-events: none;
 }
 .ow-label-unit {
-  font-size:   7px;
+  font-size:   8.5px;
   font-weight: 600;
-  fill:        rgba(255,255,255,0.9);
+  fill:        rgba(255,255,255,0.95);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   font-family: inherit;
   pointer-events: none;
 }
@@ -83,23 +83,23 @@
   top:       50%;
   left:      50%;
   transform: translate(-50%, -50%);
-  width:     43%;
+  width:     46%;
   aspect-ratio: 1;
   display:   grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows:    1fr 1fr;
-  gap:       6px;
+  gap:       8px;
 }
 
 .ow-input-cell {
   display:        flex;
   flex-direction: column;
   align-items:    center;
-  gap:            2px;
+  gap:            3px;
 }
 
 .ow-input-label {
-  font-size:   9px;
+  font-size:   10px;
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1;
@@ -112,12 +112,12 @@
 
 .ow-input-field {
   width:         100%;
-  padding:       3px 4px;
+  padding:       4px 4px;
   border:        1px solid var(--border);
   border-radius: 4px;
   background:    var(--card-bg);
   color:         var(--text);
-  font-size:     11px;
+  font-size:     12px;
   font-family:   inherit;
   text-align:    center;
   box-sizing:    border-box;
@@ -135,7 +135,8 @@
 }
 
 .ow-input-unit {
-  font-size:  8px;
+  font-size:  9px;
+  font-weight: 600;
   color:      var(--text-muted);
   line-height: 1;
 }
