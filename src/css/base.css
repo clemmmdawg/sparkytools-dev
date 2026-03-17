@@ -421,17 +421,20 @@ body {
   width:         36px;
   height:        36px;
   border:        none;
-  background:    var(--surface-inset);
+  background:    var(--status-err-bg);
   border-radius: 8px;
   cursor:        pointer;
   font-size:     1rem;
-  color:         var(--primary);
+  color:         var(--danger);
   display:       flex;
   align-items:   center;
   justify-content: center;
   transition:    background 0.15s;
 }
-.drawer-close:hover { background: var(--border); }
+.drawer-close:hover {
+  background: color-mix(in srgb, var(--danger) 25%, var(--card-bg));
+  color:      var(--danger);
+}
 
 .drawer-group-title {
   font-size:      0.65rem;
