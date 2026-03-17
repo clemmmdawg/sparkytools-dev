@@ -639,6 +639,34 @@ input[type="checkbox"].sl-themed-cb:checked::after {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 @media print {
+  /* ── Force light-mode tokens regardless of user's theme preference ── */
+  :root {
+    --bg:             #eceff1;
+    --card-bg:        #ffffff;
+    --surface-row:    #f8f9fa;
+    --surface-inset:  #f9fafb;
+    --border:         #dfe6e9;
+    --divider:        #eeeeee;
+    --primary:        #2c3e50;
+    --text:           #2c3e50;
+    --text-muted:     rgba(44, 62, 80, 0.55);
+    --warn-bg:        #fff8e1;
+    --warn-border:    #ffe082;
+    --warn-text:      #5d4037;
+    --shadow:         none;
+    --nav-bg:         #dfe6e9;
+    --status-ok-bg:   #d4edda;
+    --status-ok-text: #155724;
+    --status-err-bg:  #f8d7da;
+    --status-err-text:#721c24;
+    --danger:         #e74c3c;
+    --svg-conduit-bg: #eceff1;
+    --svg-box-stroke: #34495e;
+    --svg-dim-color:  #546e7a;
+    --svg-placeholder:#b0bec5;
+    --svg-wh-label:   #cfd8dc;
+  }
+
   /* ── Hide everything except the service-tool section ── */
   .site-header,
   .site-footer,
