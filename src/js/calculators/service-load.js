@@ -115,11 +115,12 @@ const COOKING_TYPES = [
 ];
 
 const HVAC_OPTIONS = [
-  { value: 'cooling', text: 'A/C Unit (Cooling)',         defaultVA: 3600  },
-  { value: 'cooling', text: 'Heat Pump — Cooling Mode',   defaultVA: 3600  },
-  { value: 'heating', text: 'Electric Heat — Baseboard',  defaultVA: 1500  },
-  { value: 'heating', text: 'Electric Heat — Furnace',    defaultVA: 5000  },
-  { value: 'heating', text: 'Heat Pump — Heating Mode',   defaultVA: 3600  },
+  { value: 'cooling', text: 'A/C Unit (Cooling)',           defaultVA: 3600  },
+  { value: 'cooling', text: 'Heat Pump — Cooling Mode',     defaultVA: 3600  },
+  { value: 'heating', text: 'Electric Heat — Baseboard',    defaultVA: 1500  },
+  { value: 'heating', text: 'Electric Heat — Heat Strips',  defaultVA: 5000  },
+  { value: 'heating', text: 'Electric Heat — Furnace',      defaultVA: 5000  },
+  { value: 'heating', text: 'Heat Pump — Heating Mode',     defaultVA: 3600  },
 ];
 
 const MAX_ROWS_PER_KIND = 20;

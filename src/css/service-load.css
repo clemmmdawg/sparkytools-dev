@@ -408,7 +408,33 @@
 #service-tool.has-existing.has-optional .sl-new-wrap { display: flex; }
 
 /* ── Circuit steppers ── */
-.sl-circuit-row { margin-bottom: 12px; }
+.sl-circuit-row {
+  flex-direction: row;
+  align-items:    flex-start;
+  flex-wrap:      wrap;
+  margin-bottom:  12px;
+}
+
+.sl-circuit-row .sl-field--wide {
+  flex: 2;
+  min-width: 180px;
+}
+
+.sl-circuit-row .sl-field:not(.sl-field--wide) {
+  flex: 1;
+  min-width: 140px;
+}
+
+@media (max-width: 480px) {
+  .sl-circuit-row {
+    flex-direction: column;
+  }
+  .sl-circuit-row .sl-field--wide,
+  .sl-circuit-row .sl-field:not(.sl-field--wide) {
+    flex: none;
+    min-width: 0;
+  }
+}
 
 .sl-stepper {
   display:     flex;
