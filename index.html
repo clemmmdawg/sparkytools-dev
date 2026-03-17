@@ -672,8 +672,11 @@
         </div>
 
         <header class="card-header">
-          <h2 id="service-load-heading" data-tip="Calculates required service size per NEC 220.40–220.53 (Standard) and NEC 220.82/220.83 (Optional). Supports load shedding for generator/ATS sizing and 220.83 new-load annotation for existing dwellings.">Residential Service and Generator Sizing</h2>
+          <h2 id="service-load-heading">Residential Service and Generator Sizing</h2>
         </header>
+        <p class="tool-desc">
+          Calculates required residential service size using the NEC Standard Method (220.40–220.53) or Optional Method (220.82/220.83). Each load row has two checkboxes: <strong>Shed</strong> excludes that load from a second calculation run, giving you a reduced service size for generator or ATS sizing; <strong>New</strong> marks the load as newly added, which is annotated in the 220.83 results for existing-dwelling upgrade documentation.
+        </p>
 
         <!-- ── 1. Calculation Setup ───────────────────────────────────── -->
         <fieldset class="sl-fieldset">
