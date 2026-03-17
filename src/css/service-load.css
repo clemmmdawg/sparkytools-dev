@@ -415,9 +415,9 @@
   margin-bottom:  12px;
 }
 
+/* Sq ft field spans the full row so the steppers wrap to the line below */
 .sl-circuit-row .sl-field--wide {
-  flex: 2;
-  min-width: 180px;
+  flex-basis: 100%;
 }
 
 .sl-circuit-row .sl-field:not(.sl-field--wide) {
@@ -426,10 +426,6 @@
 }
 
 @media (max-width: 480px) {
-  .sl-circuit-row {
-    flex-direction: column;
-  }
-  .sl-circuit-row .sl-field--wide,
   .sl-circuit-row .sl-field:not(.sl-field--wide) {
     flex: none;
     min-width: 0;
