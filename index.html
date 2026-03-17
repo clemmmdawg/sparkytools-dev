@@ -38,15 +38,109 @@
   </head>
   <body>
 
-    <div class="container">
+  <div class="page-layout">
 
-      <!-- ── Site Header ── -->
-      <header class="site-header">
-        <h1>Sparky ⚡ Tools</h1>
-        <p>Free tools for electricians.</p>
-      </header>
+    <!-- ── Left sidebar (desktop icon rail / mobile overlay) ── -->
+    <nav class="sidebar" id="sidebar" aria-label="Calculator menu">
+      <button class="sidebar-pin-btn" id="sidebar-pin" aria-label="Expand sidebar" title="Expand sidebar">
+        <span class="sidebar-logo" aria-hidden="true">⚡</span>
+        <span class="sidebar-wordmark">Sparky Tools</span>
+        <svg class="sidebar-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true" width="16" height="16">
+          <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
 
-      <!-- ── Sticky top bar ── -->
+      <div class="sidebar-scroll">
+        <div class="sidebar-group-title">NEC Calculators</div>
+
+        <button class="sidebar-item active"
+                data-target="service-tool"
+                data-hash="service"
+                data-label="Service Sizing"
+                data-accent="var(--accent-red)"
+                title="Service Sizing">
+          <span class="sidebar-item-icon">⚡</span>
+          <span class="sidebar-item-text">Service Sizing</span>
+        </button>
+        <button class="sidebar-item"
+                data-target="transformer-tool"
+                data-hash="transformer"
+                data-label="Transformer"
+                data-accent="var(--accent-blue)"
+                title="Transformer">
+          <span class="sidebar-item-icon">🔄</span>
+          <span class="sidebar-item-text">Transformer</span>
+        </button>
+        <button class="sidebar-item"
+                data-target="conduit-tool"
+                data-hash="conduit"
+                data-label="Conduit Fill"
+                data-accent="var(--accent-blue)"
+                title="Conduit Fill">
+          <span class="sidebar-item-icon">🔵</span>
+          <span class="sidebar-item-text">Conduit Fill</span>
+        </button>
+        <button class="sidebar-item"
+                data-target="voltage-tool"
+                data-hash="voltage"
+                data-label="Voltage Drop"
+                data-accent="var(--accent-yellow)"
+                title="Voltage Drop">
+          <span class="sidebar-item-icon">📉</span>
+          <span class="sidebar-item-text">Voltage Drop</span>
+        </button>
+        <button class="sidebar-item"
+                data-target="box-tool"
+                data-hash="box"
+                data-label="Box Fill"
+                data-accent="var(--accent-green)"
+                title="Box Fill">
+          <span class="sidebar-item-icon">📦</span>
+          <span class="sidebar-item-text">Box Fill</span>
+        </button>
+        <button class="sidebar-item"
+                data-target="pull-tool"
+                data-hash="pull"
+                data-label="Pull Box Size"
+                data-accent="var(--accent-orange)"
+                title="Pull Box Size">
+          <span class="sidebar-item-icon">📐</span>
+          <span class="sidebar-item-text">Pull Box Size</span>
+        </button>
+        <button class="sidebar-item"
+                data-target="ohms-tool"
+                data-hash="ohms"
+                data-label="Ohm's Law"
+                data-accent="var(--accent-purple)"
+                title="Ohm's Law">
+          <span class="sidebar-item-icon">⚙️</span>
+          <span class="sidebar-item-text">Ohm's Law</span>
+        </button>
+
+        <div class="sidebar-group-title">App</div>
+
+        <button class="sidebar-item"
+                data-target="about-tool"
+                data-hash="about"
+                data-label="About"
+                data-accent="var(--primary)"
+                title="About">
+          <span class="sidebar-item-icon">ℹ️</span>
+          <span class="sidebar-item-text">About</span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+        <button class="sidebar-item theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
+          <span class="sidebar-item-icon">🌙</span>
+          <span class="sidebar-item-text theme-toggle-label">Dark mode</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ── Main content ── -->
+    <div class="main-wrapper">
+
+      <!-- ── Mobile-only top bar ── -->
       <div class="nav-bar" role="navigation" aria-label="Electrical Tools">
         <div class="nav-bar-title">
           <span class="nav-accent-dot" id="nav-accent-dot"></span>
@@ -55,12 +149,20 @@
         <button class="nav-bar-btn" id="nav-drawer-btn"
                 aria-label="Open calculator menu"
                 aria-expanded="false"
-                aria-controls="nav-drawer">
+                aria-controls="sidebar">
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
         </button>
       </div>
+
+      <div class="container">
+
+      <!-- ── Site Header ── -->
+      <header class="site-header">
+        <h1>Sparky ⚡ Tools</h1>
+        <p>Free tools for electricians.</p>
+      </header>
 
 
       <!-- ══════════════════════════════════════════════════════════
@@ -858,80 +960,12 @@
       </p>
     </footer>
 
-    <!-- Drawer overlay + panel (position: fixed — outside .container) -->
-    <div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
-    <nav class="drawer" id="nav-drawer" aria-label="Calculator menu">
-      <div class="drawer-header">
-        <h3>⚡ Sparky Tools</h3>
-        <button class="drawer-close" id="drawer-close" aria-label="Close menu">✕</button>
-      </div>
+      </div><!-- /.container -->
+    </div><!-- /.main-wrapper -->
+  </div><!-- /.page-layout -->
 
-      <div class="drawer-group-title">NEC Calculators</div>
-      <button class="drawer-item active"
-              data-target="service-tool"
-              data-hash="service"
-              data-label="Service Sizing"
-              data-accent="var(--accent-red)">
-        <span class="drawer-item-icon">⚡</span>Service Sizing
-      </button>
-      <button class="drawer-item"
-              data-target="transformer-tool"
-              data-hash="transformer"
-              data-label="Transformer"
-              data-accent="var(--accent-blue)">
-        <span class="drawer-item-icon">🔄</span>Transformer
-      </button>
-      <button class="drawer-item"
-              data-target="conduit-tool"
-              data-hash="conduit"
-              data-label="Conduit Fill"
-              data-accent="var(--accent-blue)">
-        <span class="drawer-item-icon">🔵</span>Conduit Fill
-      </button>
-      <button class="drawer-item"
-              data-target="voltage-tool"
-              data-hash="voltage"
-              data-label="Voltage Drop"
-              data-accent="var(--accent-yellow)">
-        <span class="drawer-item-icon">📉</span>Voltage Drop
-      </button>
-      <button class="drawer-item"
-              data-target="box-tool"
-              data-hash="box"
-              data-label="Box Fill"
-              data-accent="var(--accent-green)">
-        <span class="drawer-item-icon">📦</span>Box Fill
-      </button>
-      <button class="drawer-item"
-              data-target="pull-tool"
-              data-hash="pull"
-              data-label="Pull Box Size"
-              data-accent="var(--accent-orange)">
-        <span class="drawer-item-icon">📐</span>Pull Box Size
-      </button>
-      <button class="drawer-item"
-              data-target="ohms-tool"
-              data-hash="ohms"
-              data-label="Ohm's Law"
-              data-accent="var(--accent-purple)">
-        <span class="drawer-item-icon">⚙️</span>Ohm's Law
-      </button>
-
-      <div class="drawer-group-title">App</div>
-      <button class="drawer-item"
-              data-target="about-tool"
-              data-hash="about"
-              data-label="About"
-              data-accent="var(--primary)">
-        <span class="drawer-item-icon">ℹ️</span>About
-      </button>
-
-      <div class="drawer-divider"></div>
-      <button class="drawer-item theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode">
-        <span class="drawer-item-icon">🌙</span>
-        <span class="theme-toggle-label">Dark mode</span>
-      </button>
-    </nav>
+  <!-- Mobile sidebar overlay -->
+  <div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
 
     <!-- Load data loader first (IIFE pattern) -->
     <script src="src/js/data-loader.js"></script>
