@@ -23,9 +23,15 @@ import * as OhmsLaw from './calculators/ohms-law.js';
  */
 async function init() {
   try {
+    // Initialize UI immediately — navigation must run before any async work so
+    // the URL hash is honoured on page load regardless of data-load timing.
+    initNavigation();
+    initTooltips();
+    initTheme();
+
     // Load NEC data (defaults to 2023)
     const necData = await NECDataLoader.loadNECData("2023");
-    
+
     // Initialize all calculators with data
     ConduitFill.init(necData);
     VoltageDrop.init(necData);
@@ -34,11 +40,6 @@ async function init() {
     ServiceLoad.init(necData);
     Transformer.init(necData);
     OhmsLaw.init(necData);
-    
-    // Initialize UI components
-    initNavigation();
-    initTooltips();
-    initTheme();
     
     console.log("⚡ SparkyTools initialized successfully");
 
