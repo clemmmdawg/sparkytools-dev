@@ -211,14 +211,16 @@
 
 .sl-shed-tag {
   display:       inline-block;
-  background:    var(--accent-orange);
-  color:         #fff;
+  background: color-mix(in srgb, var(--accent-orange) 10%, transparent);
+  color: var(--accent-orange);
   font-size:     0.65rem;
   font-weight:   700;
   padding:       2px 5px;
   border-radius: 3px;
   letter-spacing: 0.04em;
   vertical-align: middle;
+  border: 1px solid color-mix(in srgb, var(--accent-orange) 30%, transparent);
+  
 }
 
 /* NEC badge in table */
@@ -639,6 +641,34 @@ input[type="checkbox"].sl-themed-cb:checked::after {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 @media print {
+  /* ── Force light-mode tokens regardless of user's theme preference ── */
+  :root {
+    --bg:             #eceff1;
+    --card-bg:        #ffffff;
+    --surface-row:    #f8f9fa;
+    --surface-inset:  #f9fafb;
+    --border:         #dfe6e9;
+    --divider:        #eeeeee;
+    --primary:        #2c3e50;
+    --text:           #2c3e50;
+    --text-muted:     rgba(44, 62, 80, 0.55);
+    --warn-bg:        #fff8e1;
+    --warn-border:    #ffe082;
+    --warn-text:      #5d4037;
+    --shadow:         none;
+    --nav-bg:         #dfe6e9;
+    --status-ok-bg:   #d4edda;
+    --status-ok-text: #155724;
+    --status-err-bg:  #f8d7da;
+    --status-err-text:#721c24;
+    --danger:         #e74c3c;
+    --svg-conduit-bg: #eceff1;
+    --svg-box-stroke: #34495e;
+    --svg-dim-color:  #546e7a;
+    --svg-placeholder:#b0bec5;
+    --svg-wh-label:   #cfd8dc;
+  }
+
   /* ── Hide everything except the service-tool section ── */
   .site-header,
   .site-footer,
@@ -707,7 +737,10 @@ input[type="checkbox"].sl-themed-cb:checked::after {
 
   .sl-nec-badge  { color: #000 !important; background: #eee !important; font-size: 7pt; }
   .sl-step-note  { color: #555 !important; }
-  .sl-shed-tag   { background: #888 !important; }
+  .sl-shed-tag   {
+    background: #fde9d1 !important;
+    color: #e7861e !important;
+  }
   .sl-nc-tag     { background: #ccc !important; color: #333 !important; }
   .sl-new-badge  { background: #e8f5e9 !important; color: #2e7d32 !important; border-color: #a5d6a7 !important; }
 
