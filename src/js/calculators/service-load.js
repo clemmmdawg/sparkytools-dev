@@ -262,7 +262,7 @@ function collectRows(selector) {
     type:  row.querySelector('.sl-type')?.style.display === 'none'
              ? 'Custom'
              : row.querySelector('.sl-type')?.value?.trim() || '',
-    name:  (row.querySelector('.sl-custom-name-input')?.value?.trim()) || '',
+    name:  (row.querySelector('.sl-custom-name-input')?.value?.trim() || row.querySelector('.sl-name')?.value?.trim()) || '',
     watts: parseFloat(row.querySelector('.sl-watts')?.value)            || 0,
     shed:  row.querySelector('.sl-shed')?.checked  || false,
     isNew: row.querySelector('.sl-new')?.checked   || false,
