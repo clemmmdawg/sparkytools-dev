@@ -168,26 +168,12 @@ body {
   background:    var(--bg);
   color:         var(--primary);
   margin:        0;
-  padding:       0;
+  padding:       20px 16px 48px;
   touch-action:  manipulation; /* prevents double-tap zoom on mobile */
 }
 
 
 /* ── 3. Page layout ── */
-
-/* Outer flex shell: sidebar + main content side by side */
-.page-layout {
-  display:    flex;
-  min-height: 100vh;
-}
-
-/* Scrollable main area (everything to the right of the sidebar) */
-.main-wrapper {
-  flex:        1;
-  min-width:   0;
-  padding:     20px 16px 48px;
-}
-
 .container {
   max-width:      720px;
   margin:         0 auto;
@@ -197,7 +183,7 @@ body {
 }
 
 /* ── Desktop: wider content area ── */
-@media (min-width: 769px) {
+@media (min-width: 768px) {
   .container { max-width: 800px; }
   .card       { padding: 28px 32px; }
 }
@@ -310,139 +296,9 @@ body {
 }
 
 
-/* ── 7. Sidebar navigation ── */
+/* ── 7. Tool navigation — sticky top bar + slide-in drawer ── */
 
-/* ── Outer shell ── */
-.sidebar {
-  flex-shrink:    0;
-  width:          56px;
-  background:     var(--card-bg);
-  border-right:   1px solid var(--border);
-  overflow-x:     hidden;
-  transition:     width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  display:        flex;
-  flex-direction: column;
-  position:       sticky;
-  top:            0;
-  height:         100vh;
-  z-index:        100;
-}
-
-.sidebar--expanded { width: 220px; }
-
-.sidebar-scroll {
-  flex:           1;
-  overflow-y:     auto;
-  overflow-x:     hidden;
-  padding-bottom: 24px;
-}
-
-/* ── Header / pin-toggle button ── */
-.sidebar-pin-btn {
-  display:       flex;
-  align-items:   center;
-  gap:           10px;
-  padding:       0 14px;
-  height:        52px;
-  width:         100%;
-  background:    var(--card-bg);
-  border:        none;
-  border-bottom: 1px solid var(--border);
-  cursor:        pointer;
-  color:         var(--primary);
-  font-family:   inherit;
-  font-size:     0.9rem;
-  font-weight:   700;
-  white-space:   nowrap;
-  text-align:    left;
-  position:      sticky;
-  top:           0;
-  z-index:       1;
-  transition:    background 0.15s;
-}
-.sidebar-pin-btn:hover { background: var(--surface-row); }
-
-.sidebar-logo {
-  font-size:   1.1rem;
-  flex-shrink: 0;
-  width:       24px;
-  text-align:  center;
-  line-height: 1;
-}
-
-.sidebar-wordmark {
-  flex:        1;
-  white-space: nowrap;
-}
-
-.sidebar-chevron {
-  flex-shrink: 0;
-  opacity:     0.5;
-  transition:  transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sidebar--expanded .sidebar-chevron { transform: rotate(180deg); }
-
-/* ── Nav items ── */
-.sidebar-group-title {
-  font-size:      0.65rem;
-  font-weight:    700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color:          var(--text-muted);
-  padding:        14px 0 6px 18px;
-  white-space:    nowrap;
-}
-
-.sidebar-item {
-  display:         flex;
-  align-items:     center;
-  gap:             0;
-  padding:         10px 0;
-  justify-content: center;
-  font-size:       0.875rem;
-  font-weight:     500;
-  color:           var(--primary);
-  cursor:          pointer;
-  border:          none;
-  background:      transparent;
-  width:           100%;
-  text-align:      left;
-  transition:      background 0.12s, gap 0.25s, padding 0.25s, justify-content 0s;
-  border-left:     3px solid transparent;
-  white-space:     nowrap;
-}
-.sidebar--expanded .sidebar-item {
-  gap:             12px;
-  padding:         10px 14px;
-  justify-content: flex-start;
-}
-
-.sidebar-item:hover  { background: var(--surface-row); }
-.sidebar-item.active {
-  background:        var(--surface-row);
-  border-left-color: var(--accent-red);
-  font-weight:       700;
-}
-
-.sidebar-item-icon {
-  font-size:   1.1rem;
-  width:       24px;
-  text-align:  center;
-  flex-shrink: 0;
-}
-
-.sidebar-item-text {
-  white-space: nowrap;
-  overflow:    hidden;
-}
-
-.sidebar-divider {
-  height:     1px;
-  background: var(--border);
-  margin:     8px 0;
-}
-
-/* ── Mobile top bar (hidden on desktop) ── */
+/* Top bar: shows active tool name + hamburger button */
 .nav-bar {
   display:         flex;
   align-items:     center;
@@ -455,7 +311,6 @@ body {
   position:        sticky;
   top:             10px;
   z-index:         100;
-  margin-bottom:   16px;
 }
 
 .nav-bar-title {
@@ -465,7 +320,7 @@ body {
   font-size:   0.9rem;
   font-weight: 700;
   color:       var(--primary);
-  min-width:   0;
+  min-width:   0;        /* allow text truncation */
 }
 
 .nav-bar-title span:last-child {
@@ -475,14 +330,15 @@ body {
 }
 
 .nav-accent-dot {
-  width:         9px;
-  height:        9px;
+  width:        9px;
+  height:       9px;
   border-radius: 50%;
-  flex-shrink:   0;
-  background:    var(--accent-red);
-  transition:    background 0.2s ease;
+  flex-shrink:  0;
+  background:   var(--accent-red);
+  transition:   background 0.2s ease;
 }
 
+/* Hamburger button */
 .nav-bar-btn {
   width:           44px;
   height:          44px;
@@ -499,7 +355,8 @@ body {
   box-shadow:      0 1px 4px rgba(0, 0, 0, 0.10);
   transition:      background 0.15s;
 }
-.nav-bar-btn:hover { background: var(--border); }
+
+.nav-bar-btn:hover  { background: var(--border); }
 
 .hamburger-line {
   width:         18px;
@@ -508,7 +365,7 @@ body {
   border-radius: 2px;
 }
 
-/* Dim overlay behind the open sidebar on mobile */
+/* Dim overlay behind the open drawer */
 .drawer-overlay {
   display:    none;
   position:   fixed;
@@ -524,40 +381,115 @@ body {
   to   { opacity: 1; }
 }
 
-/* ── Desktop (≥769px): hide mobile top bar ── */
-@media (min-width: 769px) {
-  .nav-bar { display: none; }
+/* Slide-in drawer panel */
+.drawer {
+  position:    fixed;
+  top:         0;
+  left:       0;
+  bottom:      0;
+  width:       min(300px, 85vw);
+  background:  var(--card-bg);
+  box-shadow:  -8px 0 32px rgba(0, 0, 0, 0.18);
+  z-index:     201;
+  overflow-y:  auto;
+  transform:   translateX(-100%);
+  transition:  transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 32px;
+}
+.drawer.open { transform: translateX(0); }
+
+.drawer-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         18px 18px 14px;
+  border-bottom:   1px solid var(--divider);
+  position:        sticky;
+  top:             0;
+  background:      var(--card-bg);
+  z-index:         1;
 }
 
-/* ── Mobile (≤768px): sidebar becomes a left-edge overlay ── */
-@media (max-width: 768px) {
-  .sidebar {
-    position:   fixed;
-    top:        0;
-    left:       0;
-    bottom:     0;
-    width:      min(280px, 85vw) !important;
-    height:     100%;
-    transform:  translateX(-100%);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index:    201;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
-  }
-  .sidebar.open { transform: translateX(0); }
-
-  /* Always show full labels in the mobile overlay */
-  .sidebar-item {
-    gap:             12px;
-    padding:         10px 14px;
-    justify-content: flex-start;
-  }
-  .sidebar-group-title { padding: 14px 0 6px 18px; }
+.drawer-header h3 {
+  margin:      0;
+  font-size:   1rem;
+  font-weight: 700;
+  color:       var(--primary);
 }
+
+.drawer-close {
+  width:         36px;
+  height:        36px;
+  border:        none;
+  background:    var(--status-err-bg);
+  border-radius: 8px;
+  cursor:        pointer;
+  font-size:     1rem;
+  color:         var(--danger);
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    background 0.15s;
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+}
+.drawer-close:hover {
+  background: color-mix(in srgb, var(--danger) 25%, var(--card-bg));
+  color:      var(--danger);
+}
+
+.drawer-group-title {
+  font-size:      0.65rem;
+  font-weight:    700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color:          var(--text-muted);
+  padding:        16px 18px 6px;
+}
+
+.drawer-item {
+  display:      flex;
+  align-items:  center;
+  gap:          12px;
+  padding:      11px 18px;
+  font-size:    0.875rem;
+  font-weight:  500;
+  color:        var(--primary);
+  cursor:       pointer;
+  border:       none;
+  background:   transparent;
+  width:        100%;
+  text-align:   left;
+  transition:   background 0.12s;
+  border-left:  3px solid transparent;
+}
+
+.drawer-item:hover  { background: var(--surface-row); }
+
+.drawer-item.active {
+  background:        var(--surface-row);
+  border-left-color: var(--accent-red); /* overridden per-item by JS */
+  font-weight:       700;
+}
+
+.drawer-item-icon {
+  font-size:   1.1rem;
+  width:       24px;
+  text-align:  center;
+  flex-shrink: 0;
+}
+
 
 /* Conduit ring fill/stroke — controlled here so dark mode overrides apply cleanly */
 .conduit-ring {
   fill:   var(--svg-conduit-bg);
   stroke: var(--svg-box-stroke);
+}
+
+
+.drawer-divider {
+  height:     1px;
+  background: var(--border);
+  margin:     8px 0;
 }
 
 
@@ -1014,7 +946,7 @@ input[type="text"]:focus {
 
 /* ── 21. Responsive overrides (≤480px) ── */
 @media (max-width: 480px) {
-  .main-wrapper { padding: 12px 10px 40px; }
+  body  { padding: 12px 10px 40px; }
   .card { padding: 18px 14px; }
 
   /*

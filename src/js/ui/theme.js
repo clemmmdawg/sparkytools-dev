@@ -28,7 +28,7 @@ function isDarkActive() {
  * @param {boolean} dark - whether dark mode is currently active
  */
 function syncButton(btn, dark) {
-  const icon  = btn.querySelector(".sidebar-item-icon");
+  const icon  = btn.querySelector(".drawer-item-icon");
   const label = btn.querySelector(".theme-toggle-label");
   if (icon)  icon.textContent  = dark ? "☀️" : "🌙";
   if (label) label.textContent = dark ? "Light mode" : "Dark mode";
