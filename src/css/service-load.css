@@ -514,6 +514,10 @@
 .sl-shed-wrap { color: var(--accent-orange); }
 .sl-new-wrap  { color: var(--accent-green);  }
 
+/* Inline text variants for use outside the checkbox label (e.g. tool-desc) */
+.sl-shed-text { color: var(--accent-orange); font-weight: 600; }
+.sl-new-text  { color: var(--accent-green);  font-weight: 600; }
+
 /* ── Themed checkboxes ── */
 input[type="checkbox"].sl-themed-cb {
   appearance:         none;
