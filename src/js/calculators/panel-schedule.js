@@ -64,11 +64,22 @@ const VOLTAGE_OPTIONS = [
   { value: '120-1ph',     label: '120V Single Phase'     },
 ];
 
-const SUB_LABELS = {
-  tandem: ['A', 'B'],
-  triple: ['120V ①', '240V', '120V ②'],
-  quad:   ['240V A', '240V B'],
-};
+// Sub-labels are voltage-dependent for triple and quad breakers
+function getSubLabels(type) {
+  const v = state.panelInfo.voltage;
+  if (type === 'tandem') return ['A', 'B'];
+  if (type === 'triple') {
+    if (v === '277/480-3ph') return ['277V ①', '480V', '277V ②'];
+    if (v === '120/208-3ph') return ['120V ①', '208V', '120V ②'];
+    return ['120V ①', '240V', '120V ②'];
+  }
+  if (type === 'quad') {
+    if (v === '277/480-3ph') return ['480V A', '480V B'];
+    if (v === '120/208-3ph') return ['208V A', '208V B'];
+    return ['240V A', '240V B'];
+  }
+  return null;
+}
 
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -237,7 +248,7 @@ function renderBreakerBodyHtml(b) {
   }
 
   if (isComplex) {
-    const labels  = SUB_LABELS[b.type] ?? b.circuits.map((_, i) => String(i + 1));
+    const labels  = getSubLabels(b.type) ?? b.circuits.map((_, i) => String(i + 1));
     const subHtml = (b.circuits || []).map((sc, i) => `
       <div class="ps-sub-ckt" data-sub="${i}">
         <span class="ps-sub-tag">${labels[i]}</span>
@@ -364,7 +375,7 @@ function breakerPrintCells(b, circNums, span) {
     desc = 'SPARE';
     amps = `${b.size}A`;
   } else if (b.circuits) {
-    const labels = SUB_LABELS[b.type] ?? b.circuits.map((_, i) => String(i + 1));
+    const labels = getSubLabels(b.type) ?? b.circuits.map((_, i) => String(i + 1));
     desc = b.circuits
       .map((sc, i) => `<b>${labels[i]}:</b> ${esc(sc.label || '—')} ${sc.size}A`)
       .join('<br>');

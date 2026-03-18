@@ -226,7 +226,7 @@
 
 .ps-td-body {
   padding:        5px 7px;
-  vertical-align: top;
+  vertical-align: middle;
   background:     var(--card-bg);
   border-bottom:  1px solid var(--border);
   min-width:      0;
