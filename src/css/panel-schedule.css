@@ -129,11 +129,14 @@
 
 /* ── 5. Circuit number cells ─────────────────────────────────────────────── */
 
+/* Width also set on <col> in the colgroup via table-layout:fixed */
+.ps-table .ps-col-ckt { width: 22px; }
+
 .ps-td-ckt {
-  width:          28px;
-  min-width:      28px;
+  width:          22px;
+  min-width:      22px;
   vertical-align: middle;
-  padding:        0 2px;
+  padding:        0 1px;
   font-size:      0.68rem;
   font-weight:    700;
   color:          var(--accent-teal);
