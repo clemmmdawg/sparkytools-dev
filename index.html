@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="src/css/service-load.css">
     <link rel="stylesheet" href="src/css/transformer.css">
     <link rel="stylesheet" href="src/css/ohms-law.css">
+    <link rel="stylesheet" href="src/css/panel-schedule.css">
 
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 
@@ -824,6 +825,102 @@
 
 
       <!-- ══════════════════════════════════════════════════════════
+           PANEL SCHEDULE CREATOR
+           ══════════════════════════════════════════════════════════ -->
+      <section id="panel-tool" class="card card--teal tool-section" aria-labelledby="panel-schedule-heading">
+
+        <!-- Print-only header -->
+        <div class="ps-print-header">
+          <div class="ps-print-title">
+            <h1 id="ps-print-name">Panel Schedule</h1>
+            <div class="ps-print-meta">
+              <span id="ps-print-address"></span>
+              <span id="ps-print-job"></span>
+            </div>
+          </div>
+          <div class="ps-print-info-grid">
+            <div><strong>Main:</strong> <span id="ps-print-main-type"></span></div>
+            <div><strong>Voltage:</strong> <span id="ps-print-voltage"></span></div>
+            <div><strong>Rating:</strong> <span id="ps-print-rating"></span></div>
+            <div id="ps-print-notes-row"><strong>Notes:</strong> <span id="ps-print-notes"></span></div>
+          </div>
+        </div>
+
+        <header class="card-header">
+          <h2 id="panel-schedule-heading">Panel Schedule Creator</h2>
+        </header>
+        <p class="tool-desc">Build and print a professional electrical panel schedule. Add circuits to the left (odd) and right (even) sides, including 2-pole, 3-pole, tandem, triple, and quad breakers.</p>
+
+        <!-- ── Panel Information ──────────────────────────────────────── -->
+        <fieldset class="ps-fieldset">
+          <legend class="ps-legend">Panel Information</legend>
+          <div class="ps-info-grid">
+            <div class="ps-info-field">
+              <label for="ps-address">Property Address</label>
+              <input type="text" id="ps-address" class="ps-info-input" placeholder="123 Main St">
+            </div>
+            <div class="ps-info-field">
+              <label for="ps-panel-name">Panel Name</label>
+              <input type="text" id="ps-panel-name" class="ps-info-input" value="Panel A" placeholder="Panel A">
+            </div>
+            <div class="ps-info-field">
+              <label for="ps-main-type">Main Type</label>
+              <select id="ps-main-type" class="ps-info-input">
+                <option value="main-breaker">Main Breaker</option>
+                <option value="main-lug">Main Lug</option>
+              </select>
+            </div>
+            <div class="ps-info-field" id="ps-main-size-row">
+              <label for="ps-main-size">Main Breaker Size</label>
+              <select id="ps-main-size" class="ps-info-input"><!-- populated by JS --></select>
+            </div>
+            <div class="ps-info-field">
+              <label for="ps-voltage">Nominal Voltage</label>
+              <select id="ps-voltage" class="ps-info-input"><!-- populated by JS --></select>
+            </div>
+            <div class="ps-info-field">
+              <label for="ps-job-num">Job Number</label>
+              <input type="text" id="ps-job-num" class="ps-info-input" placeholder="e.g. 2024-001">
+            </div>
+            <div class="ps-info-field">
+              <label for="ps-panel-rating">Panel Rating</label>
+              <select id="ps-panel-rating" class="ps-info-input"><!-- populated by JS --></select>
+            </div>
+            <div class="ps-info-field ps-info-field--full">
+              <label for="ps-notes">Notes</label>
+              <textarea id="ps-notes" class="ps-info-input ps-notes" rows="2" placeholder="Additional notes..."></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ── Panel Schedule Grid ──────────────────────────────────── -->
+        <div class="ps-panel-wrap">
+          <div class="ps-panel-head">
+            <div class="ps-head-left">Left — Odd Circuits</div>
+            <div class="ps-head-spine"></div>
+            <div class="ps-head-right">Right — Even Circuits</div>
+          </div>
+          <div class="ps-panel-grid">
+            <div class="ps-side ps-side--left"  id="ps-left"  role="list" aria-label="Left side circuits"></div>
+            <div class="ps-spine"></div>
+            <div class="ps-side ps-side--right" id="ps-right" role="list" aria-label="Right side circuits"></div>
+          </div>
+          <div class="ps-panel-foot">
+            <button class="add-btn" id="ps-add-left"  type="button">+ Add Left Circuit</button>
+            <button class="add-btn" id="ps-add-right" type="button">+ Add Right Circuit</button>
+          </div>
+        </div>
+
+        <!-- ── Actions ───────────────────────────────────────────────── -->
+        <div class="ps-actions">
+          <button class="ps-clear-btn" id="ps-clear-btn" type="button">↺ Clear</button>
+          <button class="ps-print-btn" id="ps-print-btn" type="button">🖨 Print Schedule</button>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
            ABOUT
            ══════════════════════════════════════════════════════════ -->
       <section id="about-tool" class="card tool-section" aria-labelledby="about-heading">
@@ -930,6 +1027,14 @@
               data-label="Ohm's Law"
               data-accent="var(--accent-purple)">
         <span class="drawer-item-icon">⚙️</span>Ohm's Law
+      </button>
+
+      <button class="drawer-item"
+              data-target="panel-tool"
+              data-hash="panel"
+              data-label="Panel Schedule"
+              data-accent="var(--accent-teal)">
+        <span class="drawer-item-icon">📋</span>Panel Schedule
       </button>
 
       <div class="drawer-group-title">App</div>

@@ -38,6 +38,7 @@
   --accent-orange:    #e67e22;   /* Pull Box card accent */
   --accent-red:       #c0392b;   /* Service Load card accent */
   --accent-purple:    #9b59b6;   /* Ohm's Law card accent */
+  --accent-teal:      #00897b;   /* Panel Schedule card accent */
   --danger:           #e74c3c;
   --success:          #27ae60;
 
@@ -260,6 +261,7 @@ body {
 .card--orange { border-top-color: var(--accent-orange); }
 .card--red    { border-top-color: var(--accent-red); }
 .card--purple { border-top-color: var(--accent-purple); }
+.card--teal   { border-top-color: var(--accent-teal);   }
 
 .card-header {
   margin-bottom: 20px;

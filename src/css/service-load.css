@@ -702,7 +702,7 @@ input[type="checkbox"].sl-themed-cb:checked::after {
   .sl-shed-wrap,
   .sl-new-wrap,
   .remove-btn,
-  .tool-section:not(#service-tool),
+  .tool-section:not(.active),
   /* Hide all input fieldsets inside the service tool */
   #service-tool .sl-fieldset,
   #service-tool .tool-desc,
