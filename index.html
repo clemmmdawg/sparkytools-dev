@@ -895,21 +895,33 @@
 
         <!-- ── Panel Schedule Grid ──────────────────────────────────── -->
         <div class="ps-panel-wrap">
-          <div class="ps-panel-head">
-            <div class="ps-head-left">Left — Odd Circuits</div>
-            <div class="ps-head-spine"></div>
-            <div class="ps-head-right">Right — Even Circuits</div>
-          </div>
-          <div class="ps-panel-grid">
-            <div class="ps-side ps-side--left"  id="ps-left"  role="list" aria-label="Left side circuits"></div>
-            <div class="ps-spine"></div>
-            <div class="ps-side ps-side--right" id="ps-right" role="list" aria-label="Right side circuits"></div>
+          <div class="ps-table-wrap">
+            <table class="ps-table" aria-label="Panel circuit schedule">
+              <colgroup>
+                <col class="ps-col-ckt">
+                <col>
+                <col class="ps-col-spine">
+                <col>
+                <col class="ps-col-ckt">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th class="ps-th ps-th--left"  colspan="2">Left — Odd Circuits</th>
+                  <th class="ps-th ps-th--spine"></th>
+                  <th class="ps-th ps-th--right" colspan="2">Right — Even Circuits</th>
+                </tr>
+              </thead>
+              <tbody id="ps-tbody"></tbody>
+            </table>
           </div>
           <div class="ps-panel-foot">
             <button class="add-btn" id="ps-add-left"  type="button">+ Add Left Circuit</button>
             <button class="add-btn" id="ps-add-right" type="button">+ Add Right Circuit</button>
           </div>
         </div>
+
+        <!-- ── Print table (hidden on screen, shown on print) ───────── -->
+        <div class="ps-print-table" id="ps-print-table" aria-hidden="true"></div>
 
         <!-- ── Actions ───────────────────────────────────────────────── -->
         <div class="ps-actions">
