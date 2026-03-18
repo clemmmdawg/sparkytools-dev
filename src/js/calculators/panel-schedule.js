@@ -2,17 +2,16 @@
  * @file panel-schedule.js
  * @description Panel Schedule Creator — build and print electrical panel schedules.
  *
- * Data model is kept flat and serialisable so future enhancements (save/load,
- * export, load calculations) can be added without restructuring.
- *
  * Sections:
  *   1. Constants
  *   2. State & helpers
- *   3. HTML generation
- *   4. Rendering
- *   5. State mutation
- *   6. Event handling
- *   7. Export — init()
+ *   3. HTML generation helpers
+ *   4. Table rendering (interactive)
+ *   5. Print table generation
+ *   6. Panel info rendering
+ *   7. State mutation
+ *   8. Event handling
+ *   9. Export — init()
  */
 
 
@@ -24,11 +23,11 @@
  * Breaker type definitions.
  *   slots       — how many panel spaces the breaker physically occupies
  *   numCircuits — number of independently labelled circuits
- *                 0 = blank space, 1 = standard single circuit,
- *                 2+ = multi-circuit specialty breakers
+ *                 0 = no load circuits (empty/space), 1+ = circuit(s)
  */
 const BREAKER_TYPES = [
-  { value: 'space',  label: '— Space —',   slots: 1, numCircuits: 0 },
+  { value: 'empty',  label: 'Empty',       slots: 1, numCircuits: 0 },
+  { value: 'spare',  label: 'Spare',       slots: 1, numCircuits: 1 },
   { value: '1-pole', label: 'Single Pole', slots: 1, numCircuits: 1 },
   { value: 'tandem', label: 'Tandem',      slots: 1, numCircuits: 2 },
   { value: '2-pole', label: '2 Pole',      slots: 2, numCircuits: 1 },
@@ -93,24 +92,20 @@ function defaultSubCkt(size = 20) {
   return { label: '', size, wireSize: '', conduitSize: '' };
 }
 
-function makeBreaker(type = 'space') {
+function makeBreaker(type = 'empty') {
   const nc = numCircuitsFor(type);
   return {
     id:          uid(),
     type,
     size:        20,
-    label:       '',
+    label:       type === 'spare' ? 'SPARE' : '',
     wireSize:    '',
     conduitSize: '',
-    // circuits is non-null only for multi-circuit specialty breakers
     circuits:    nc > 1 ? Array.from({ length: nc }, () => defaultSubCkt()) : null,
   };
 }
 
-/**
- * Top-level application state.
- * Designed to be JSON-serialisable for future save/load support.
- */
+/** Top-level application state. */
 const state = {
   panelInfo: {
     address:         '',
@@ -127,13 +122,13 @@ const state = {
 };
 
 function initState() {
-  state.left  = Array.from({ length: 10 }, () => makeBreaker('space'));
-  state.right = Array.from({ length: 10 }, () => makeBreaker('space'));
+  state.left  = Array.from({ length: 4 }, () => makeBreaker('empty'));
+  state.right = Array.from({ length: 4 }, () => makeBreaker('empty'));
 }
 
 /**
- * Returns the circuit numbers (1-based, incrementing by 2 per side) that a
- * given breaker occupies, based on the accumulated slot positions before it.
+ * Returns the circuit numbers a given breaker occupies.
+ * Left side: odd numbers (1, 3, 5, …); right side: even (2, 4, 6, …).
  */
 function calcCircNums(arr, idx, side) {
   let slot = 1;
@@ -142,6 +137,22 @@ function calcCircNums(arr, idx, side) {
   return Array.from({ length: slots }, (_, i) =>
     side === 'left' ? 2 * (slot + i) - 1 : 2 * (slot + i)
   );
+}
+
+/**
+ * Builds a flat array of slot entries for one side.
+ * Each "first" slot of a breaker produces { b, circNums, span }.
+ * Continuation slots for multi-slot breakers produce null.
+ */
+function buildSlots(arr, side) {
+  const result = [];
+  arr.forEach((b, idx) => {
+    const circNums = calcCircNums(arr, idx, side);
+    const span     = slotsFor(b.type);
+    result.push({ b, circNums, span });
+    for (let s = 1; s < span; s++) result.push(null);
+  });
+  return result;
 }
 
 
@@ -181,57 +192,51 @@ function conduitOpts(selected) {
   ).join('');
 }
 
+/**
+ * Returns the inner HTML for a breaker body cell (no wrapper <td>).
+ * The delete button is present on ALL breaker types.
+ */
+function renderBreakerBodyHtml(b) {
+  const isEmpty   = b.type === 'empty';
+  const isSpare   = b.type === 'spare';
+  const isComplex = b.circuits !== null;
 
-// ══════════════════════════════════════════════════════════════════════════
-// 4. Rendering
-// ══════════════════════════════════════════════════════════════════════════
+  const delBtn = `<button class="ps-del remove-btn" title="Remove row" aria-label="Remove row">×</button>`;
 
-function renderBreakerHtml(b, circNums, side) {
-  const isLeft    = side === 'left';
-  const isSpace   = b.type === 'space';
-  const isComplex = b.circuits !== null;   // tandem / triple / quad
-  const isSingle  = !isSpace && !isComplex;
-
-  // Circuit number column — single number or stacked for multi-slot
-  const numHtml = `<div class="ps-ckt-num">${circNums.map(n => `<span>${n}</span>`).join('')}</div>`;
-
-  let bodyHtml = '';
-
-  if (isSpace) {
-    bodyHtml = `
+  if (isEmpty) {
+    return `
       <div class="ps-row">
         <select class="ps-type-sel" data-field="type">${typeOpts(b.type)}</select>
-        <span class="ps-space-hint">empty</span>
+        ${delBtn}
       </div>`;
+  }
 
-  } else if (isSingle) {
-    // 1-pole, 2-pole, 3-pole — single circuit
-    bodyHtml = `
-      <div class="ps-row ps-row--main">
+  if (isSpare) {
+    return `
+      <div class="ps-row">
         <select class="ps-type-sel" data-field="type">${typeOpts(b.type)}</select>
-        <input  class="ps-lbl" type="text" placeholder="Label" value="${esc(b.label)}" data-field="label">
         <select class="ps-size-sel" data-field="size">${sizeOpts(b.size)}</select>
-        <button class="ps-del remove-btn" title="Remove circuit">×</button>
+        ${delBtn}
       </div>
       <div class="ps-row ps-row--wire">
         <select class="ps-wire-sel"  data-field="wireSize"   >${wireOpts(b.wireSize)}</select>
         <select class="ps-cond-sel"  data-field="conduitSize">${conduitOpts(b.conduitSize)}</select>
       </div>`;
+  }
 
-  } else {
-    // tandem, triple, quad — multiple labelled sub-circuits
-    const labels   = SUB_LABELS[b.type] ?? b.circuits.map((_, i) => String(i + 1));
-    const subHtml  = (b.circuits || []).map((sc, i) => `
+  if (isComplex) {
+    const labels  = SUB_LABELS[b.type] ?? b.circuits.map((_, i) => String(i + 1));
+    const subHtml = (b.circuits || []).map((sc, i) => `
       <div class="ps-sub-ckt" data-sub="${i}">
         <span class="ps-sub-tag">${labels[i]}</span>
         <input  class="ps-lbl"      type="text" placeholder="Label" value="${esc(sc.label)}" data-field="label">
         <select class="ps-size-sel" data-field="size">${sizeOpts(sc.size)}</select>
       </div>`).join('');
 
-    bodyHtml = `
+    return `
       <div class="ps-row ps-row--main">
         <select class="ps-type-sel" data-field="type">${typeOpts(b.type)}</select>
-        <button class="ps-del remove-btn" title="Remove circuit">×</button>
+        ${delBtn}
       </div>
       ${subHtml}
       <div class="ps-row ps-row--wire">
@@ -240,43 +245,200 @@ function renderBreakerHtml(b, circNums, side) {
       </div>`;
   }
 
-  const cls = [
-    'ps-breaker',
-    `ps-breaker--${b.type}`,
-    isSpace ? 'ps-breaker--space' : '',
-  ].filter(Boolean).join(' ');
-
+  // Single-circuit: 1-pole, 2-pole, 3-pole
   return `
-    <div class="${cls}" data-id="${b.id}" data-side="${side}" style="--ps-slots:${slotsFor(b.type)}" role="listitem">
-      ${isLeft ? numHtml : ''}
-      <div class="ps-breaker-body">${bodyHtml}</div>
-      ${isLeft ? '' : numHtml}
+    <div class="ps-row ps-row--main">
+      <select class="ps-type-sel" data-field="type">${typeOpts(b.type)}</select>
+      <input  class="ps-lbl"      type="text" placeholder="Label" value="${esc(b.label)}" data-field="label">
+      <select class="ps-size-sel" data-field="size">${sizeOpts(b.size)}</select>
+      ${delBtn}
+    </div>
+    <div class="ps-row ps-row--wire">
+      <select class="ps-wire-sel"  data-field="wireSize"   >${wireOpts(b.wireSize)}</select>
+      <select class="ps-cond-sel"  data-field="conduitSize">${conduitOpts(b.conduitSize)}</select>
     </div>`;
 }
 
-function renderSide(side) {
-  const id  = side === 'left' ? 'ps-left' : 'ps-right';
-  const el  = document.getElementById(id);
-  if (!el) return;
-  el.innerHTML = state[side]
-    .map((b, i) => renderBreakerHtml(b, calcCircNums(state[side], i, side), side))
-    .join('');
+
+// ══════════════════════════════════════════════════════════════════════════
+// 4. Table rendering (interactive)
+// ══════════════════════════════════════════════════════════════════════════
+
+function renderTable() {
+  const tbody = document.getElementById('ps-tbody');
+  if (!tbody) return;
+
+  const leftSlots  = buildSlots(state.left,  'left');
+  const rightSlots = buildSlots(state.right, 'right');
+  const totalRows  = Math.max(leftSlots.length, rightSlots.length, 1);
+
+  // Pad shorter side so both arrays have equal length
+  while (leftSlots.length < totalRows)  leftSlots.push({ b: null, circNums: [], span: 1 });
+  while (rightSlots.length < totalRows) rightSlots.push({ b: null, circNums: [], span: 1 });
+
+  let html      = '';
+  let spineDone = false;
+
+  for (let i = 0; i < totalRows; i++) {
+    const L = leftSlots[i];
+    const R = rightSlots[i];
+
+    html += '<tr class="ps-tr">';
+
+    // ── Left: circuit number | body ──────────────────────────────────────
+    if (L === null) {
+      // Row is spanned by a previous multi-slot breaker — omit left cells
+    } else if (L.b) {
+      const numHtml = L.circNums.map(n => `<span>${n}</span>`).join('');
+      html += `<td class="ps-td-ckt ps-td-ckt--left" rowspan="${L.span}">${numHtml}</td>`;
+      html += `<td class="ps-td-body ps-td-body--${L.b.type}" data-id="${L.b.id}" data-side="left" rowspan="${L.span}">`;
+      html += renderBreakerBodyHtml(L.b);
+      html += '</td>';
+    } else {
+      // Padding (right side is taller)
+      html += '<td class="ps-td-ckt ps-td-ckt--left ps-td-pad"></td><td class="ps-td-body ps-td-pad"></td>';
+    }
+
+    // ── Spine ─────────────────────────────────────────────────────────────
+    if (!spineDone) {
+      html += `<td class="ps-td-spine" rowspan="${totalRows}"></td>`;
+      spineDone = true;
+    }
+
+    // ── Right: body | circuit number ──────────────────────────────────────
+    if (R === null) {
+      // Row is spanned — omit right cells
+    } else if (R.b) {
+      html += `<td class="ps-td-body ps-td-body--${R.b.type}" data-id="${R.b.id}" data-side="right" rowspan="${R.span}">`;
+      html += renderBreakerBodyHtml(R.b);
+      html += '</td>';
+      const numHtml = R.circNums.map(n => `<span>${n}</span>`).join('');
+      html += `<td class="ps-td-ckt ps-td-ckt--right" rowspan="${R.span}">${numHtml}</td>`;
+    } else {
+      // Padding
+      html += '<td class="ps-td-body ps-td-pad"></td><td class="ps-td-ckt ps-td-ckt--right ps-td-pad"></td>';
+    }
+
+    html += '</tr>';
+  }
+
+  tbody.innerHTML = html;
 }
 
-function render() {
-  renderSide('left');
-  renderSide('right');
+
+// ══════════════════════════════════════════════════════════════════════════
+// 5. Print table generation
+// ══════════════════════════════════════════════════════════════════════════
+
+function breakerPrintCells(b, circNums, span) {
+  const circStr = circNums.join('–');
+  let desc = '';
+  let amps = '';
+  const wire = [b.wireSize, b.conduitSize].filter(Boolean).join(' / ');
+
+  if (b.type === 'empty') {
+    desc = 'EMPTY';
+    amps = '';
+  } else if (b.type === 'spare') {
+    desc = 'SPARE';
+    amps = `${b.size}A`;
+  } else if (b.circuits) {
+    const labels = SUB_LABELS[b.type] ?? b.circuits.map((_, i) => String(i + 1));
+    desc = b.circuits
+      .map((sc, i) => `<b>${labels[i]}:</b> ${esc(sc.label || '—')} ${sc.size}A`)
+      .join('<br>');
+    amps = '';
+  } else {
+    desc = esc(b.label || '—');
+    amps = `${b.size}A`;
+  }
+
+  return (
+    `<td class="ps-pt-ckt"  rowspan="${span}">${circStr}</td>` +
+    `<td class="ps-pt-desc" rowspan="${span}">${desc}</td>` +
+    `<td class="ps-pt-amp"  rowspan="${span}">${amps}</td>` +
+    `<td class="ps-pt-wire" rowspan="${span}">${esc(wire)}</td>`
+  );
 }
 
-// ── Panel info ─────────────────────────────────────────────────────────────
+function generatePrintTable() {
+  const container = document.getElementById('ps-print-table');
+  if (!container) return;
+
+  const leftSlots  = buildSlots(state.left,  'left');
+  const rightSlots = buildSlots(state.right, 'right');
+  const totalRows  = Math.max(leftSlots.length, rightSlots.length, 1);
+
+  while (leftSlots.length < totalRows)  leftSlots.push({ b: null, circNums: [], span: 1 });
+  while (rightSlots.length < totalRows) rightSlots.push({ b: null, circNums: [], span: 1 });
+
+  let html = `
+    <table class="ps-print-tbl">
+      <thead>
+        <tr>
+          <th colspan="4" class="ps-pt-side-hd">Left — Odd Circuits</th>
+          <th colspan="4" class="ps-pt-side-hd">Right — Even Circuits</th>
+        </tr>
+        <tr>
+          <th class="ps-pt-hd">Ckt</th>
+          <th class="ps-pt-hd">Description</th>
+          <th class="ps-pt-hd">Amps</th>
+          <th class="ps-pt-hd">Wire / Conduit</th>
+          <th class="ps-pt-hd">Ckt</th>
+          <th class="ps-pt-hd">Description</th>
+          <th class="ps-pt-hd">Amps</th>
+          <th class="ps-pt-hd">Wire / Conduit</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  for (let i = 0; i < totalRows; i++) {
+    const L = leftSlots[i];
+    const R = rightSlots[i];
+
+    html += '<tr>';
+
+    if (L === null) {
+      // Spanned — no cells needed
+    } else if (L.b) {
+      html += breakerPrintCells(L.b, L.circNums, L.span);
+    } else {
+      html += '<td></td><td></td><td></td><td></td>';
+    }
+
+    if (R === null) {
+      // Spanned — no cells needed
+    } else if (R.b) {
+      html += breakerPrintCells(R.b, R.circNums, R.span);
+    } else {
+      html += '<td></td><td></td><td></td><td></td>';
+    }
+
+    html += '</tr>';
+  }
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function clearPrintTable() {
+  const container = document.getElementById('ps-print-table');
+  if (container) container.innerHTML = '';
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// 6. Panel info rendering
+// ══════════════════════════════════════════════════════════════════════════
 
 function renderInfo() {
   const info = state.panelInfo;
-
   const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+
   setVal('ps-address',    info.address);
   setVal('ps-panel-name', info.panelName);
   setVal('ps-main-type',  info.mainType);
+  setVal('ps-voltage',    info.voltage);
   setVal('ps-job-num',    info.jobNumber);
   setVal('ps-notes',      info.notes);
 
@@ -310,7 +472,7 @@ function syncMainBreakerRow() {
 }
 
 function syncPrintHeader() {
-  const info     = state.panelInfo;
+  const info      = state.panelInfo;
   const voltLabel = VOLTAGE_OPTIONS.find(o => o.value === info.voltage)?.label ?? info.voltage;
   const mainLabel = info.mainType === 'main-lug'
     ? 'Main Lug'
@@ -331,29 +493,29 @@ function syncPrintHeader() {
 
 
 // ══════════════════════════════════════════════════════════════════════════
-// 5. State mutation
+// 7. State mutation
 // ══════════════════════════════════════════════════════════════════════════
 
 function changeType(side, idx, newType) {
   const b  = state[side][idx];
   b.type   = newType;
   const nc = numCircuitsFor(newType);
-  // Preserve existing size as default for sub-circuits when type changes
   b.circuits = nc > 1
     ? Array.from({ length: nc }, () => defaultSubCkt(b.size))
     : null;
+  if (newType === 'spare' && !b.label) b.label = 'SPARE';
 }
 
 function addBreaker(side) {
-  state[side].push(makeBreaker('space'));
-  renderSide(side);
+  state[side].push(makeBreaker('empty'));
+  renderTable();
 }
 
 function removeBreaker(side, id) {
   const arr = state[side];
   const idx = arr.findIndex(b => b.id === id);
   if (idx !== -1) arr.splice(idx, 1);
-  renderSide(side);
+  renderTable();
 }
 
 function clearAll() {
@@ -361,23 +523,28 @@ function clearAll() {
   render();
 }
 
+function render() {
+  renderTable();
+}
+
 
 // ══════════════════════════════════════════════════════════════════════════
-// 6. Event handling
+// 8. Event handling
 // ══════════════════════════════════════════════════════════════════════════
 
 function handleBreakerEvent(e) {
-  const breakerEl = e.target.closest('.ps-breaker');
-  if (!breakerEl) return;
+  // Find the body cell — carries data-id and data-side
+  const bodyCell = e.target.closest('td[data-id]');
+  if (!bodyCell) return;
 
-  const side = breakerEl.dataset.side;
-  const id   = breakerEl.dataset.id;
+  const side = bodyCell.dataset.side;
+  const id   = bodyCell.dataset.id;
   const arr  = state[side];
   const idx  = arr.findIndex(b => b.id === id);
   if (idx === -1) return;
   const b = arr[idx];
 
-  // Determine target object: top-level breaker or a sub-circuit
+  // Determine target: top-level breaker or a sub-circuit
   const subEl  = e.target.closest('.ps-sub-ckt');
   const subIdx = subEl ? parseInt(subEl.dataset.sub, 10) : null;
   const target = (subIdx !== null && b.circuits) ? b.circuits[subIdx] : b;
@@ -391,14 +558,14 @@ function handleBreakerEvent(e) {
     return;
   }
 
-  // Type change — may alter slot count and sub-circuit structure
+  // Type change
   if (field === 'type' && e.type === 'change') {
     changeType(side, idx, e.target.value);
-    renderSide(side);
+    renderTable();
     return;
   }
 
-  // Field updates (input + change)
+  // Field updates
   if (e.type === 'input' || e.type === 'change') {
     if (field === 'label')       target.label       = e.target.value;
     if (field === 'size')        target.size        = parseInt(e.target.value, 10) || 20;
@@ -433,7 +600,7 @@ function handleInfoEvent(e) {
 
 
 // ══════════════════════════════════════════════════════════════════════════
-// 7. Export — init()
+// 9. Export — init()
 // ══════════════════════════════════════════════════════════════════════════
 
 export function init() {
@@ -452,26 +619,31 @@ export function init() {
     fieldset.addEventListener('change', handleInfoEvent);
   }
 
-  // Circuit grid (event delegation covers all breaker interactions)
-  const grid = section.querySelector('.ps-panel-wrap');
-  if (grid) {
-    grid.addEventListener('click',  handleBreakerEvent);
-    grid.addEventListener('change', handleBreakerEvent);
-    grid.addEventListener('input',  handleBreakerEvent);
+  // Circuit table (event delegation covers all breaker interactions)
+  const table = section.querySelector('.ps-table');
+  if (table) {
+    table.addEventListener('click',  handleBreakerEvent);
+    table.addEventListener('change', handleBreakerEvent);
+    table.addEventListener('input',  handleBreakerEvent);
   }
 
-  // Footer controls
+  // Footer: add circuit buttons
   document.getElementById('ps-add-left')?.addEventListener('click',
     () => addBreaker('left'));
   document.getElementById('ps-add-right')?.addEventListener('click',
     () => addBreaker('right'));
 
+  // Footer: clear and print
   document.getElementById('ps-clear-btn')?.addEventListener('click', () => {
     if (confirm('Clear all panel data?')) clearAll();
   });
 
   document.getElementById('ps-print-btn')?.addEventListener('click', () => {
     syncPrintHeader();
+    generatePrintTable();
     window.print();
   });
+
+  // Clean up generated print table after printing
+  window.addEventListener('afterprint', clearPrintTable);
 }

@@ -2,14 +2,14 @@
    Panel Schedule Creator — panel-schedule.css
    Sections:
      1.  Panel info fieldset
-     2.  Panel grid & spine
-     3.  Breaker blocks
-     4.  Circuit numbers
-     5.  Breaker row internals
-     6.  Sub-circuits (tandem / triple / quad)
-     7.  Space (empty) breakers
+     2.  Table wrapper & header
+     3.  Table columns & rows
+     4.  Circuit number cells
+     5.  Body cells
+     6.  Breaker row internals
+     7.  Sub-circuits (tandem / triple / quad)
      8.  Controls & action buttons
-     9.  Print header (screen: hidden)
+     9.  Print header (screen: hidden) / print table (screen: hidden)
     10.  Responsive overrides (≤480px)
     11.  Print styles
    ══════════════════════════════════════════════════════════════════════════ */
@@ -79,46 +79,120 @@
 }
 
 
-/* ── 2. Panel grid & spine ──────────────────────────────────────────────── */
+/* ── 2. Table wrapper & panel header ─────────────────────────────────────── */
 
 .ps-panel-wrap {
   margin-bottom: 14px;
 }
 
-.ps-panel-head {
-  display:               grid;
-  grid-template-columns: 1fr 12px 1fr;
-  margin-bottom:         2px;
+.ps-table-wrap {
+  border:        1px solid var(--border);
+  border-radius: 8px;
+  overflow:      hidden;
 }
 
-.ps-head-left,
-.ps-head-right {
+/* Column header row (Left / Right labels) */
+.ps-th {
   font-size:      0.7rem;
   font-weight:    700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color:          var(--text-muted);
-  padding:        0 6px 4px;
+  padding:        4px 6px;
+  border-bottom:  1px solid var(--border);
+  background:     var(--surface-inset);
 }
 
-.ps-head-right  { text-align: right; }
-.ps-head-spine  { background: transparent; }
+.ps-th--left  { text-align: left;  }
+.ps-th--right { text-align: right; }
+.ps-th--spine { background: transparent; }
 
-.ps-panel-grid {
-  display:               grid;
-  grid-template-columns: 1fr 12px 1fr;
-  border:                1px solid var(--border);
-  border-radius:         8px;
-  overflow:              hidden;
+.ps-panel-foot {
+  display:   flex;
+  gap:       10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
 }
 
-.ps-side {
-  display:        flex;
-  flex-direction: column;
+
+/* ── 3. Table columns & rows ─────────────────────────────────────────────── */
+
+.ps-table {
+  width:           100%;
+  border-collapse: collapse;
+  table-layout:    fixed;
 }
 
-/* Checkerboard-style spine — alternates border and surface colours every slot */
-.ps-spine {
+/* Fixed column widths */
+.ps-table colgroup col.ps-col-ckt   { width: 26px; }
+.ps-table colgroup col.ps-col-spine { width: 12px; }
+/* body columns fill remaining space */
+
+.ps-tr {
+  /* min-height on <tr> isn't reliable; use cell padding + content to control height */
+}
+
+
+/* ── 4. Circuit number cells ─────────────────────────────────────────────── */
+
+.ps-td-ckt {
+  width:           26px;
+  min-width:       26px;
+  vertical-align:  top;
+  padding-top:     6px;
+  font-size:       0.68rem;
+  font-weight:     700;
+  color:           var(--accent-teal);
+  line-height:     1;
+  background:      var(--card-bg);
+  border-bottom:   1px solid var(--border);
+  text-align:      center;
+  white-space:     nowrap;
+}
+
+.ps-td-ckt span {
+  display:    block;
+  padding:    2px 0;
+  min-height: 34px; /* ensures at least one-slot height */
+}
+
+.ps-td-ckt--left  { border-right: 2px solid var(--border); }
+.ps-td-ckt--right { border-left:  2px solid var(--border); }
+
+/* Muted circuit numbers for empty slots */
+.ps-td-body--empty + .ps-td-ckt,
+.ps-td-ckt:has(+ .ps-td-body--empty) {
+  color:       var(--text-muted);
+  font-weight: 400;
+}
+
+/* Padding rows (one side is taller than the other) */
+.ps-td-pad { background: var(--surface-inset); border-bottom: 1px solid var(--border); }
+
+
+/* ── 5. Body cells ───────────────────────────────────────────────────────── */
+
+.ps-td-body {
+  padding:        6px 8px;
+  vertical-align: top;
+  background:     var(--card-bg);
+  border-bottom:  1px solid var(--border);
+  min-width:      0;
+}
+
+.ps-td-body--empty { background: var(--surface-inset); }
+.ps-td-body--spare { background: var(--surface-row);   }
+
+/* Remove bottom border on the very last rendered row */
+.ps-tr:last-child .ps-td-body,
+.ps-tr:last-child .ps-td-ckt {
+  border-bottom: none;
+}
+
+/* Spine column */
+.ps-td-spine {
+  width:   12px;
+  padding: 0;
   background: repeating-linear-gradient(
     to bottom,
     var(--border)        0px,
@@ -130,78 +204,21 @@
     var(--surface-inset) 40px,
     var(--surface-inset) 78px
   );
-}
-
-.ps-panel-foot {
-  display:         flex;
-  gap:             10px;
-  margin-top:      10px;
-  flex-wrap:       wrap;
+  border-left:  1px solid var(--border);
+  border-right: 1px solid var(--border);
 }
 
 
-/* ── 3. Breaker blocks ──────────────────────────────────────────────────── */
-
-:root { --ps-slot-h: 78px; }
-
-.ps-breaker {
-  display:       flex;
-  min-height:    calc(var(--ps-slots, 1) * var(--ps-slot-h));
-  border-bottom: 1px solid var(--border);
-  background:    var(--card-bg);
-}
-
-.ps-breaker:last-child { border-bottom: none; }
-
-/* Left side: circuit number on the left, body on the right */
-.ps-side--left  .ps-breaker { flex-direction: row; }
-/* Right side: body on the left, circuit number on the right */
-.ps-side--right .ps-breaker { flex-direction: row-reverse; }
-
-.ps-breaker-body {
-  flex:           1;
-  min-width:      0;
-  padding:        6px 8px;
-  display:        flex;
-  flex-direction: column;
-  gap:            4px;
-}
-
-
-/* ── 4. Circuit numbers ─────────────────────────────────────────────────── */
-
-.ps-ckt-num {
-  display:        flex;
-  flex-direction: column;
-  flex-shrink:    0;
-  width:          26px;
-}
-
-.ps-ckt-num span {
-  flex:            1;
-  display:         flex;
-  align-items:     flex-start;
-  justify-content: center;
-  padding-top:     5px;
-  font-size:       0.68rem;
-  font-weight:     700;
-  color:           var(--accent-teal);
-  line-height:     1;
-}
-
-.ps-side--left  .ps-ckt-num { border-right: 2px solid var(--border); }
-.ps-side--right .ps-ckt-num { border-left:  2px solid var(--border); }
-
-
-/* ── 5. Breaker row internals ───────────────────────────────────────────── */
+/* ── 6. Breaker row internals ───────────────────────────────────────────── */
 
 .ps-row {
   display:     flex;
   align-items: center;
   gap:         5px;
+  min-height:  34px;
 }
 
-.ps-row--wire { margin-top: auto; }
+.ps-row--wire { margin-top: 4px; }
 
 /* All select/input controls share base styles */
 .ps-type-sel,
@@ -247,15 +264,8 @@
 
 .ps-del { margin-left: auto; flex-shrink: 0; }
 
-.ps-space-hint {
-  font-size:   0.72rem;
-  color:       var(--text-muted);
-  font-style:  italic;
-  margin-left: 4px;
-}
 
-
-/* ── 6. Sub-circuits (tandem / triple / quad) ───────────────────────────── */
+/* ── 7. Sub-circuits (tandem / triple / quad) ───────────────────────────── */
 
 .ps-sub-ckt {
   display:     flex;
@@ -277,16 +287,6 @@
 }
 
 
-/* ── 7. Space (empty) breakers ──────────────────────────────────────────── */
-
-.ps-breaker--space { background: var(--surface-inset); }
-
-.ps-breaker--space .ps-ckt-num span {
-  color:       var(--text-muted);
-  font-weight: 400;
-}
-
-
 /* ── 8. Controls & action buttons ───────────────────────────────────────── */
 
 .ps-actions {
@@ -296,7 +296,6 @@
   margin-top:      6px;
 }
 
-/* Reuse the service-load button styles — same visual language */
 .ps-print-btn {
   background:    var(--primary);
   color:         var(--card-bg);
@@ -328,9 +327,10 @@
 .ps-clear-btn:hover { opacity: 0.75; }
 
 
-/* ── 9. Print header (hidden on screen) ─────────────────────────────────── */
+/* ── 9. Print header & print table (hidden on screen) ───────────────────── */
 
 .ps-print-header { display: none; }
+.ps-print-table  { display: none; }
 
 
 /* ── 10. Responsive overrides (≤480px) ──────────────────────────────────── */
@@ -342,6 +342,7 @@
   .ps-cond-sel   { max-width: 60px; }
   .ps-lbl        { font-size: 0.78rem; }
   .ps-sub-tag    { min-width: 28px; }
+  .ps-table-wrap { overflow-x: auto; }
 }
 
 
@@ -362,9 +363,16 @@
     --shadow:         none;
   }
 
-  /* Show print header */
+  /* Show print-only elements; hide interactive elements */
+  .ps-print-header  { display: block; }
+  .ps-print-table   { display: block; margin-top: 10pt; }
+  .ps-panel-wrap    { display: none !important; }
+  .ps-fieldset      { display: none !important; }
+  .ps-actions       { display: none !important; }
+  .tool-desc        { display: none !important; }
+
+  /* ── Print header ── */
   .ps-print-header {
-    display:        block;
     margin-bottom:  12pt;
     padding-bottom: 7pt;
     border-bottom:  1.5pt solid #000;
@@ -398,74 +406,40 @@
     color:                 #333;
   }
 
-  /* Hide screen-only elements */
-  .ps-fieldset,
-  .ps-panel-foot,
-  .ps-actions,
-  .ps-del,
-  .ps-space-hint,
-  .tool-desc          { display: none !important; }
-
-  .ps-panel-head      { margin-bottom: 2pt; }
-
-  .ps-head-left,
-  .ps-head-right {
-    font-size:      7.5pt;
-    font-weight:    700;
-    text-transform: uppercase;
-    color:          #333;
-    padding-bottom: 2pt;
+  /* ── Print table ── */
+  .ps-print-tbl {
+    width:           100%;
+    border-collapse: collapse;
+    font-size:       8pt;
+    color:           #000;
   }
 
-  .ps-panel-grid {
-    border:        1pt solid #999;
-    border-radius: 0;
+  .ps-print-tbl th,
+  .ps-print-tbl td {
+    border:  0.5pt solid #999;
+    padding: 2.5pt 4pt;
+    vertical-align: top;
   }
 
-  .ps-breaker {
-    border-bottom-color: #ccc;
-    background:          #fff !important;
+  .ps-pt-side-hd {
+    background:  #e0e0e0;
+    font-weight: 700;
+    font-size:   8pt;
+    text-align:  center;
+    border:      0.5pt solid #888;
   }
 
-  .ps-breaker--space { background: #f5f5f5 !important; }
-
-  .ps-ckt-num span   { color: #333 !important; font-size: 7pt; }
-
-  .ps-side--left  .ps-ckt-num { border-right-color: #999; }
-  .ps-side--right .ps-ckt-num { border-left-color:  #999; }
-
-  .ps-spine {
-    background: repeating-linear-gradient(
-      to bottom,
-      #ccc 0px, #ccc 1px,
-      #eee 1px, #eee 39px,
-      #ddd 39px, #ddd 40px,
-      #eee 40px, #eee 78px
-    );
+  .ps-pt-hd {
+    background:  #f0f0f0;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
-  /* Selects and inputs: remove chrome, show value as plain text */
-  .ps-type-sel,
-  .ps-size-sel,
-  .ps-wire-sel,
-  .ps-cond-sel {
-    border:            none;
-    background:        transparent;
-    font-size:         7.5pt;
-    padding:           0;
-    appearance:        none;
-    -webkit-appearance:none;
-    pointer-events:    none;
-  }
+  .ps-pt-ckt  { width: 28pt; text-align: center; font-weight: 600; }
+  .ps-pt-amp  { width: 30pt; text-align: center; }
+  .ps-pt-wire { width: 60pt; font-size: 7pt; color: #555; }
+  .ps-pt-desc { }
 
-  .ps-lbl {
-    border:         none;
-    background:     transparent;
-    font-size:      8pt;
-    padding:        0;
-    pointer-events: none;
-  }
-
-  .ps-sub-tag  { font-size: 6.5pt; }
-  .ps-sub-ckt  { padding-left: 4pt; }
+  /* Alternate row shading for readability */
+  .ps-print-tbl tbody tr:nth-child(even) td { background: #f8f8f8; }
 }
