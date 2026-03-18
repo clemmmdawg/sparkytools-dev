@@ -107,6 +107,7 @@ const state = {
     voltage:         '120/240-1ph',
     jobNumber:       '',
     panelRating:     200,
+    startCircuit:    1,
     notes:           '',
   },
   left:  [],
@@ -119,12 +120,17 @@ function initState() {
 }
 
 function calcCircNums(arr, idx, side) {
+  // Ensure the base is always an odd number (left side = odd circuits)
+  const raw  = state.panelInfo.startCircuit ?? 1;
+  const base = raw % 2 === 0 ? raw - 1 : raw;
+
   let slot = 1;
   for (let i = 0; i < idx; i++) slot += slotsFor(arr[i].type);
   const slots = slotsFor(arr[idx].type);
-  return Array.from({ length: slots }, (_, i) =>
-    side === 'left' ? 2 * (slot + i) - 1 : 2 * (slot + i)
-  );
+  return Array.from({ length: slots }, (_, i) => {
+    const pos = slot + i - 1; // 0-based slot offset from start
+    return side === 'left' ? base + pos * 2 : base + pos * 2 + 1;
+  });
 }
 
 /**
@@ -273,6 +279,12 @@ function renderBreakerBodyHtml(b) {
 function renderTable() {
   const tbody = document.getElementById('ps-tbody');
   if (!tbody) return;
+
+  // Tag the table with voltage type so CSS can apply NEC wire color coding
+  const table = document.getElementById('ps-table');
+  if (table) {
+    table.dataset.vtype = state.panelInfo.voltage === '277/480-3ph' ? 'hv' : 'lv';
+  }
 
   const leftSlots  = buildSlots(state.left,  'left');
   const rightSlots = buildSlots(state.right, 'right');
@@ -447,8 +459,9 @@ function renderInfo() {
   setVal('ps-address',    info.address);
   setVal('ps-panel-name', info.panelName);
   setVal('ps-main-type',  info.mainType);
-  setVal('ps-job-num',    info.jobNumber);
-  setVal('ps-notes',      info.notes);
+  setVal('ps-job-num',       info.jobNumber);
+  setVal('ps-start-circuit', info.startCircuit);
+  setVal('ps-notes',         info.notes);
 
   const mainSizeEl = document.getElementById('ps-main-size');
   if (mainSizeEl) {
@@ -580,22 +593,23 @@ function handleInfoEvent(e) {
     'ps-main-type':    'mainType',
     'ps-main-size':    'mainBreakerSize',
     'ps-voltage':      'voltage',
-    'ps-job-num':      'jobNumber',
-    'ps-panel-rating': 'panelRating',
-    'ps-notes':        'notes',
+    'ps-job-num':       'jobNumber',
+    'ps-panel-rating':  'panelRating',
+    'ps-start-circuit': 'startCircuit',
+    'ps-notes':         'notes',
   };
 
   const field = fieldMap[e.target.id];
   if (!field) return;
 
-  const numFields = ['mainBreakerSize', 'panelRating'];
+  const numFields = ['mainBreakerSize', 'panelRating', 'startCircuit'];
   state.panelInfo[field] = numFields.includes(field)
-    ? parseInt(e.target.value, 10) || 0
+    ? parseInt(e.target.value, 10) || 1
     : e.target.value;
 
   if (field === 'mainType') syncMainBreakerRow();
-  // Voltage change affects phase labels — re-render the table
-  if (field === 'voltage') renderTable();
+  // These fields affect circuit numbering or phase labels — re-render
+  if (field === 'voltage' || field === 'startCircuit') renderTable();
   syncPrintHeader();
 }
 

@@ -182,22 +182,36 @@
 
 .ps-tr:last-child .ps-td-spine { border-bottom: none; }
 
-/* Phase A — blue */
-.ps-td-spine--A {
-  background: color-mix(in srgb, var(--accent-blue) 18%, var(--card-bg));
-  color:      var(--accent-blue);
+/* Phase colors follow NEC standard wire color coding, keyed by voltage type
+   set via data-vtype on the table element (updated live by JS).
+
+   Low voltage < 600V (120/208/240V):  A=black, B=red,    C=blue
+   High voltage 277/480V:              A=brown, B=orange,  C=yellow        */
+
+.ps-table[data-vtype="lv"] .ps-td-spine--A {
+  background: color-mix(in srgb, #212121 14%, var(--card-bg));
+  color:      #212121;
+}
+.ps-table[data-vtype="lv"] .ps-td-spine--B {
+  background: color-mix(in srgb, #c62828 16%, var(--card-bg));
+  color:      #c62828;
+}
+.ps-table[data-vtype="lv"] .ps-td-spine--C {
+  background: color-mix(in srgb, #1565c0 16%, var(--card-bg));
+  color:      #1565c0;
 }
 
-/* Phase B — orange/amber (L2 for split-phase, Phase B for 3Ø) */
-.ps-td-spine--B {
-  background: color-mix(in srgb, var(--accent-orange) 18%, var(--card-bg));
-  color:      var(--accent-orange);
+.ps-table[data-vtype="hv"] .ps-td-spine--A {
+  background: color-mix(in srgb, #5d4037 18%, var(--card-bg));
+  color:      #5d4037;
 }
-
-/* Phase C — green (3-phase only) */
-.ps-td-spine--C {
-  background: color-mix(in srgb, var(--accent-green) 18%, var(--card-bg));
-  color:      var(--accent-green);
+.ps-table[data-vtype="hv"] .ps-td-spine--B {
+  background: color-mix(in srgb, #e65100 18%, var(--card-bg));
+  color:      #e65100;
+}
+.ps-table[data-vtype="hv"] .ps-td-spine--C {
+  background: color-mix(in srgb, #f9a825 20%, var(--card-bg));
+  color:      #b07d00;
 }
 
 /* tfoot spine — neutral, no phase color */
@@ -313,9 +327,8 @@
 .ps-tfoot-cell {
   padding:    6px 8px;
   border-top: 1px solid var(--border);
+  text-align: center;
 }
-
-.ps-tfoot-cell:last-child { text-align: right; }
 
 
 /* ── 11. Action buttons ─────────────────────────────────────────────────── */
