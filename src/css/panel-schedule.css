@@ -186,33 +186,32 @@
    set via data-vtype on the table element (updated live by JS).
 
    Low voltage < 600V (120/208/240V):  A=black, B=red,    C=blue
-   High voltage 277/480V:              A=brown, B=orange,  C=yellow        */
+   High voltage 277/480V:              A=brown, B=orange,  C=yellow
 
-.ps-table[data-vtype="lv"] .ps-td-spine--A {
-  background: color-mix(in srgb, #212121 14%, var(--card-bg));
-  color:      #212121;
-}
-.ps-table[data-vtype="lv"] .ps-td-spine--B {
-  background: color-mix(in srgb, #c62828 16%, var(--card-bg));
-  color:      #c62828;
-}
-.ps-table[data-vtype="lv"] .ps-td-spine--C {
-  background: color-mix(in srgb, #1565c0 16%, var(--card-bg));
-  color:      #1565c0;
-}
+   Colors are CSS custom properties on the table so spine cells AND sub-tags
+   both inherit them, and dark-mode overrides only touch the problematic
+   near-black / dark-brown / dark-amber values.                             */
 
-.ps-table[data-vtype="hv"] .ps-td-spine--A {
-  background: color-mix(in srgb, #5d4037 18%, var(--card-bg));
-  color:      #5d4037;
+.ps-table[data-vtype="lv"] { --ps-phase-a: #212121; --ps-phase-b: #c62828; --ps-phase-c: #1565c0; }
+.ps-table[data-vtype="hv"] { --ps-phase-a: #5d4037; --ps-phase-b: #e65100; --ps-phase-c: #b07d00; }
+
+/* Dark mode — override near-black and near-dark values for legibility */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ps-table[data-vtype="lv"] { --ps-phase-a: #e0e0e0; }
+  :root:not([data-theme="light"]) .ps-table[data-vtype="hv"] { --ps-phase-a: #bcaaa4; --ps-phase-c: #ffe082; }
 }
-.ps-table[data-vtype="hv"] .ps-td-spine--B {
-  background: color-mix(in srgb, #e65100 18%, var(--card-bg));
-  color:      #e65100;
-}
-.ps-table[data-vtype="hv"] .ps-td-spine--C {
-  background: color-mix(in srgb, #f9a825 20%, var(--card-bg));
-  color:      #b07d00;
-}
+[data-theme="dark"] .ps-table[data-vtype="lv"] { --ps-phase-a: #e0e0e0; }
+[data-theme="dark"] .ps-table[data-vtype="hv"] { --ps-phase-a: #bcaaa4; --ps-phase-c: #ffe082; }
+
+/* Spine cells */
+.ps-td-spine--A { color: var(--ps-phase-a, #212121); background: color-mix(in srgb, var(--ps-phase-a, #212121) 15%, var(--card-bg)); }
+.ps-td-spine--B { color: var(--ps-phase-b, #c62828); background: color-mix(in srgb, var(--ps-phase-b, #c62828) 15%, var(--card-bg)); }
+.ps-td-spine--C { color: var(--ps-phase-c, #1565c0); background: color-mix(in srgb, var(--ps-phase-c, #1565c0) 15%, var(--card-bg)); }
+
+/* Sub-tags inherit the phase color for their position (data-sub index) */
+.ps-sub-ckt[data-sub="0"] .ps-sub-tag { color: var(--ps-phase-a, #212121); }
+.ps-sub-ckt[data-sub="1"] .ps-sub-tag { color: var(--ps-phase-b, #c62828); }
+.ps-sub-ckt[data-sub="2"] .ps-sub-tag { color: var(--ps-phase-c, #1565c0); }
 
 /* tfoot spine — neutral, no phase color */
 .ps-tfoot-row .ps-td-spine {
@@ -269,10 +268,10 @@
   font-family:   inherit;
 }
 
-.ps-type-sel { max-width: 100px; }
-.ps-size-sel { max-width:  64px; }
-.ps-wire-sel { flex: 1; min-width: 0; max-width: 140px; }
-.ps-cond-sel { max-width:  78px; }
+.ps-type-sel { flex: 1; min-width: 0; }
+.ps-size-sel { flex: 0 0 auto; max-width: 64px; }
+.ps-wire-sel { flex: 1; min-width: 0; }
+.ps-cond-sel { flex: 1; min-width: 0; }
 
 .ps-lbl {
   flex:          1;
