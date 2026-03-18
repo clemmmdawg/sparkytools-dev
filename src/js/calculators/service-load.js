@@ -168,7 +168,7 @@ function buildRowHTML(kind) {
   if (kind === 'dryer') return `
     <div class="sl-row-inputs">
       <span class="sl-row-label">Dryer</span>
-      <input type="number" class="sl-watts sl-input" value="5500" min="0" max="15000" step="100" aria-label="Dryer VA">
+      <input type="number" class="sl-watts sl-input" value="5000" min="0" max="15000" step="100" aria-label="Dryer VA">
       <span class="sl-unit">VA</span>
     </div>${controls}`;
 
