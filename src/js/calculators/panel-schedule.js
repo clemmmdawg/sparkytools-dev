@@ -227,10 +227,6 @@ function renderBreakerBodyHtml(b) {
         <select class="ps-type-sel" data-field="type">${typeOpts(b.type)}</select>
         <select class="ps-size-sel" data-field="size">${sizeOpts(b.size)}</select>
         ${delBtn}
-      </div>
-      <div class="ps-row ps-row--wire">
-        <select class="ps-wire-sel"  data-field="wireSize"   >${wireOpts(b.wireSize)}</select>
-        <select class="ps-cond-sel"  data-field="conduitSize">${conduitOpts(b.conduitSize)}</select>
       </div>`;
   }
 

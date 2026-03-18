@@ -406,6 +406,10 @@
   .ps-table.ps-show-right .ps-col-left  { display: none; }
   .ps-table.ps-show-left  .ps-col-right { display: none; }
 
+  /* Switch to auto layout so the visible side expands to fill the screen */
+  .ps-table.ps-show-left,
+  .ps-table.ps-show-right { table-layout: auto; }
+
   /* Smaller controls on mobile */
   .ps-type-sel { max-width: 86px; }
   .ps-wire-sel { max-width: 100px; }
