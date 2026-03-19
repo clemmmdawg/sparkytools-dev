@@ -452,6 +452,8 @@
   .ps-actions      { display: none !important; }
   .ps-side-tabs    { display: none !important; }
   .tool-desc       { display: none !important; }
+  .card-header     { display: none !important; }
+  #panel-tool      { border-top: none !important; }
 
   /* ── Print header ── */
   .ps-print-header { margin-bottom: 10pt; }
@@ -476,7 +478,14 @@
     background:  #e8e8e8;
   }
 
-  .ps-phdr-cell { background: #fff; }
+  .ps-phdr-cell  { background: #fff; }
+
+  .ps-phdr-notes {
+    background:     #fff;
+    vertical-align: top;
+    font-size:      7.5pt;
+    color:          #444;
+  }
 
   /* ── Print table ── */
   .ps-print-tbl {
@@ -525,10 +534,14 @@
   .ps-pt-desc--spare { background: #f5f5f5; }
 
   /* Sub-circuit rows (tandem / triple / quad) */
-  .ps-pt-sub-row   { display: block; line-height: 1.5; }
-  .ps-pt-sub-lbl   { color: #333; }
-  .ps-pt-sub-amp   { color: #222; }
-  .ps-pt-sub-wire  { color: #777; font-size: 6.5pt; }
+  .ps-pt-desc--complex,
+  .ps-pt-amp--complex,
+  .ps-pt-wire--complex,
+  .ps-pt-ckt--complex { padding: 0; vertical-align: top; }
+
+  .ps-pt-sub-row { padding: 2.5pt 4pt; }
+  .ps-pt-sub-row:not(:first-child) { border-top: 0.4pt solid #d8d8d8; }
+  .ps-pt-sub-lbl { color: #555; font-weight: 600; }
 
   .ps-print-tbl tbody tr:nth-child(even) td { background: #f8f8f8; }
   .ps-print-tbl tbody tr:nth-child(even) .ps-pt-desc--empty { background: #f4f4f4; }
