@@ -421,9 +421,6 @@
   .ps-table.ps-show-right { table-layout: auto; }
 
   /* Smaller controls on mobile */
-  .ps-type-sel { max-width: 86px; }
-  .ps-wire-sel { max-width: 100px; }
-  .ps-cond-sel { max-width: 60px; }
   .ps-lbl      { font-size: 0.78rem; }
   .ps-sub-tag  { min-width: 28px; }
   .ps-info-grid { grid-template-columns: 1fr; }
