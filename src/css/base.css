@@ -319,21 +319,23 @@ body {
   position:       absolute;
   left:           50%;
   transform:      translateX(-50%);
+  height:         100%;
+  display:        flex;
+  align-items:    center;
   pointer-events: none;
   max-width:      calc(100% - 120px);
+  border-bottom:  3px solid transparent;
+  box-sizing:     border-box;
+  transition:     border-color 0.2s ease;
 }
 
 #nav-bar-label {
-  display:         block;
-  font-size:       0.9rem;
-  font-weight:     700;
-  color:           var(--primary);
-  white-space:     nowrap;
-  overflow:        hidden;
-  text-overflow:   ellipsis;
-  padding-bottom:  2px;
-  border-bottom:   2px solid transparent;
-  transition:      border-color 0.2s ease;
+  font-size:     0.9rem;
+  font-weight:   700;
+  color:         var(--primary);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
 }
 
 /* Hamburger button */

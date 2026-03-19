@@ -104,11 +104,12 @@ export function initNavigation() {
 }
 
 /**
- * Updates the top-bar label and underline color from a drawer item's dataset.
+ * Updates the top-bar label and accent bar color from a drawer item's dataset.
  */
 function _syncBar(item, labelEl) {
-  labelEl.textContent            = item.dataset.label || '';
-  labelEl.style.borderBottomColor = item.dataset.accent || 'var(--primary)';
+  labelEl.textContent = item.dataset.label || '';
+  labelEl.closest('.nav-bar-title').style.borderBottomColor =
+    item.dataset.accent || 'var(--primary)';
 }
 
 /**
