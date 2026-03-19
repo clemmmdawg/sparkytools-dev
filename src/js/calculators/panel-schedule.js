@@ -81,6 +81,23 @@ function getSubLabels(type) {
   return null;
 }
 
+// Simplified labels for print — voltage only, no A/B/① suffixes
+function getPrintSubLabels(type) {
+  const v = state.panelInfo.voltage;
+  if (type === 'tandem') return ['A', 'B'];
+  if (type === 'triple') {
+    if (v === '277/480-3ph') return ['277V', '480V', '277V'];
+    if (v === '120/208-3ph') return ['120V', '208V', '120V'];
+    return ['120V', '240V', '120V'];
+  }
+  if (type === 'quad') {
+    if (v === '277/480-3ph') return ['480V', '480V'];
+    if (v === '120/208-3ph') return ['208V', '208V'];
+    return ['240V', '240V'];
+  }
+  return null;
+}
+
 
 // ══════════════════════════════════════════════════════════════════════════
 // 2. State & helpers
@@ -374,7 +391,7 @@ function breakerPrintCells(b, circNums, span, side) {
     desc = '<em class="ps-pt-spare">SPARE</em>';
     amps = `${b.size}A`;
   } else if (b.circuits) {
-    const labels = getSubLabels(b.type) ?? b.circuits.map((_, i) => String(i + 1));
+    const labels = getPrintSubLabels(b.type) ?? b.circuits.map((_, i) => String(i + 1));
     const subDesc = b.circuits.map((sc, i) =>
       `<div class="ps-pt-sub-row"><span class="ps-pt-sub-lbl">${labels[i]}:</span> ${esc(sc.label || '—')}</div>`
     ).join('');

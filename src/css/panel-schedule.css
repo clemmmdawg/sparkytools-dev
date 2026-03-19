@@ -537,7 +537,7 @@
   .ps-pt-desc--complex,
   .ps-pt-amp--complex,
   .ps-pt-wire--complex,
-  .ps-pt-ckt--complex { padding: 0; vertical-align: top; }
+  .ps-pt-ckt--complex { padding: 0; vertical-align: middle; }
 
   .ps-pt-sub-row { padding: 2.5pt 4pt; }
   .ps-pt-sub-row:not(:first-child) { border-top: 0.4pt solid #d8d8d8; }
