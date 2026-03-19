@@ -182,7 +182,7 @@ function buildSlots(arr, side) {
     const span     = slotsFor(b.type);
     result.push({ b, circNums, span, slotCircNum: circNums[0] ?? null, isFirst: true });
     for (let s = 1; s < span; s++) {
-      result.push({ b: null, circNums: null, span: 0, slotCircNum: circNums[s] ?? null, isFirst: false });
+      result.push({ b: null, circNums: null, span: 0, slotCircNum: circNums[s] ?? null, isFirst: false, parentIsComplex: !!b.circuits });
     }
   });
   return result;
@@ -403,7 +403,7 @@ function breakerPrintCells(b, circNums, span, side) {
       return `<div class="ps-pt-sub-row">${wireHtml}</div>`;
     }).join('');
 
-    const cktTd  = `<td class="ps-pt-ckt ps-pt-ckt--complex" rowspan="${span}">${circNums.join('<br>')}</td>`;
+    const cktTd  = `<td class="ps-pt-ckt">${circNums[0]}</td>`;
     const descTd = `<td class="ps-pt-desc ps-pt-desc--complex" rowspan="${span}">${subDesc}</td>`;
     const ampsTd = `<td class="ps-pt-amp ps-pt-amp--complex" rowspan="${span}">${subAmps}</td>`;
     const wireTd = `<td class="ps-pt-wire ps-pt-wire--complex" rowspan="${span}">${subWire}</td>`;
@@ -468,7 +468,8 @@ function generatePrintTable() {
     html += '<tr>';
 
     if (!L.isFirst) {
-      // Spanned, skip all left cells
+      if (L.parentIsComplex) html += `<td class="ps-pt-ckt">${L.slotCircNum}</td>`;
+      // else: all cells spanned, nothing to emit
     } else if (L.b) {
       html += breakerPrintCells(L.b, L.circNums, L.span, 'left');
     } else {
@@ -479,7 +480,8 @@ function generatePrintTable() {
     html += `<td class="ps-pt-phase ps-pt-phase--${phase}">${phase}</td>`;
 
     if (!R.isFirst) {
-      // Spanned, skip all right cells
+      if (R.parentIsComplex) html += `<td class="ps-pt-ckt">${R.slotCircNum}</td>`;
+      // else: all cells spanned, nothing to emit
     } else if (R.b) {
       html += breakerPrintCells(R.b, R.circNums, R.span, 'right');
     } else {
