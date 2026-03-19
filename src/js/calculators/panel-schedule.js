@@ -403,7 +403,7 @@ function breakerPrintCells(b, circNums, span, side) {
       return `<div class="ps-pt-sub-row">${wireHtml}</div>`;
     }).join('');
 
-    const cktTd  = `<td class="ps-pt-ckt ps-pt-ckt--complex" rowspan="${span}">${circStr}</td>`;
+    const cktTd  = `<td class="ps-pt-ckt ps-pt-ckt--complex" rowspan="${span}">${circNums.join('<br>')}</td>`;
     const descTd = `<td class="ps-pt-desc ps-pt-desc--complex" rowspan="${span}">${subDesc}</td>`;
     const ampsTd = `<td class="ps-pt-amp ps-pt-amp--complex" rowspan="${span}">${subAmps}</td>`;
     const wireTd = `<td class="ps-pt-wire ps-pt-wire--complex" rowspan="${span}">${subWire}</td>`;
