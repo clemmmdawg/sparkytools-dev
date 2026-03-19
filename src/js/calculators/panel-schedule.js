@@ -399,8 +399,8 @@ function breakerPrintCells(b, circNums, span, side) {
       `<div class="ps-pt-sub-row">${sc.size}A</div>`
     ).join('');
     const subWire = b.circuits.map(sc => {
-      const w = [sc.wireSize, sc.conduitSize].filter(Boolean).join(' / ');
-      return `<div class="ps-pt-sub-row">${esc(w)}</div>`;
+      const wireHtml = [sc.wireSize, sc.conduitSize].filter(Boolean).map(esc).join('<br>');
+      return `<div class="ps-pt-sub-row">${wireHtml}</div>`;
     }).join('');
 
     const cktTd  = `<td class="ps-pt-ckt ps-pt-ckt--complex" rowspan="${span}">${circStr}</td>`;
@@ -413,13 +413,13 @@ function breakerPrintCells(b, circNums, span, side) {
   } else {
     desc = esc(b.label || '—');
     amps = `${b.size}A`;
-    wire = [b.wireSize, b.conduitSize].filter(Boolean).join(' / ');
+    wire = [b.wireSize, b.conduitSize].filter(Boolean).map(esc).join('<br>');
   }
 
   const cktTd  = `<td class="ps-pt-ckt"  rowspan="${span}">${circStr}</td>`;
   const descTd = `<td class="ps-pt-desc ps-pt-desc--${b.type}" rowspan="${span}">${desc}</td>`;
   const ampsTd = `<td class="ps-pt-amp"  rowspan="${span}">${amps}</td>`;
-  const wireTd = `<td class="ps-pt-wire" rowspan="${span}">${esc(wire)}</td>`;
+  const wireTd = `<td class="ps-pt-wire" rowspan="${span}">${wire}</td>`;
 
   return side === 'left'
     ? cktTd + descTd + ampsTd + wireTd

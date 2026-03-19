@@ -518,7 +518,7 @@
 
   .ps-pt-ckt       { width: 22pt; text-align: center; font-weight: 600; }
   .ps-pt-amp       { width: 26pt; text-align: center; }
-  .ps-pt-wire      { width: 52pt; font-size: 7pt; color: #555; }
+  .ps-pt-wire      { width: 64pt; font-size: 7pt; color: #555; white-space: nowrap; }
 
   /* Phase column */
   .ps-pt-phase-hd  { width: 14pt; padding: 2.5pt 2pt; }
