@@ -26,7 +26,6 @@ export function initNavigation() {
   const overlay     = document.getElementById('drawer-overlay');
   const drawer      = document.getElementById('nav-drawer');
   const barLabel    = document.getElementById('nav-bar-label');
-  const accentDot   = document.getElementById('nav-accent-dot');
   const sections    = document.querySelectorAll('.tool-section');
   const items       = document.querySelectorAll('.drawer-item:not(.theme-toggle)');
 
@@ -36,7 +35,7 @@ export function initNavigation() {
     const targetId = item.dataset.target;
     items.forEach(i => i.classList.remove('active'));
     item.classList.add('active');
-    _syncBar(item, barLabel, accentDot);
+    _syncBar(item, barLabel);
     _syncActiveBorder(item);
     sections.forEach(s => s.classList.toggle('active', s.id === targetId));
   }
@@ -55,7 +54,7 @@ export function initNavigation() {
   } else {
     const initialActive = document.querySelector('.drawer-item.active');
     if (initialActive) {
-      _syncBar(initialActive, barLabel, accentDot);
+      _syncBar(initialActive, barLabel);
       _syncActiveBorder(initialActive);
     }
   }
@@ -105,11 +104,11 @@ export function initNavigation() {
 }
 
 /**
- * Updates the top-bar label and accent dot from a drawer item's dataset.
+ * Updates the top-bar label and underline color from a drawer item's dataset.
  */
-function _syncBar(item, labelEl, dotEl) {
-  labelEl.textContent    = item.dataset.label || '';
-  dotEl.style.background = item.dataset.accent || 'var(--primary)';
+function _syncBar(item, labelEl) {
+  labelEl.textContent            = item.dataset.label || '';
+  labelEl.style.borderBottomColor = item.dataset.accent || 'var(--primary)';
 }
 
 /**
