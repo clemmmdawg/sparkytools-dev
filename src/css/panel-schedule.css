@@ -124,7 +124,7 @@
 
 .ps-th--left  { text-align: left;  }
 .ps-th--right { text-align: right; }
-.ps-th--spine { background: transparent; width: 20px; padding: 0; }
+.ps-th--spine { width: 20px; padding: 4px 0; }
 
 
 /* ── 5. Circuit number cells ─────────────────────────────────────────────── */
@@ -174,9 +174,7 @@
   font-size:      0.6rem;
   font-weight:    800;
   letter-spacing: 0.04em;
-  border-bottom:  1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  border-left:    1px solid var(--border);
-  border-right:   1px solid var(--border);
+  border-bottom:  1px solid var(--border);
   user-select:    none;
 }
 
@@ -208,17 +206,10 @@
 .ps-td-spine--B { color: var(--ps-phase-b, #c62828); background: color-mix(in srgb, var(--ps-phase-b, #c62828) 15%, var(--card-bg)); }
 .ps-td-spine--C { color: var(--ps-phase-c, #1565c0); background: color-mix(in srgb, var(--ps-phase-c, #1565c0) 15%, var(--card-bg)); }
 
-/* Sub-tags inherit the phase color for their position (data-sub index) */
-.ps-sub-ckt[data-sub="0"] .ps-sub-tag { color: var(--ps-phase-a, #212121); }
-.ps-sub-ckt[data-sub="1"] .ps-sub-tag { color: var(--ps-phase-b, #c62828); }
-.ps-sub-ckt[data-sub="2"] .ps-sub-tag { color: var(--ps-phase-c, #1565c0); }
-
 /* tfoot spine — neutral, no phase color */
 .ps-tfoot-row .ps-td-spine {
-  background:  var(--surface-inset);
-  border-top:  1px solid var(--border);
-  border-left: 1px solid var(--border);
-  border-right:1px solid var(--border);
+  background: var(--surface-inset);
+  border-top: 1px solid var(--border);
 }
 
 
@@ -300,12 +291,19 @@
 /* ── 9. Sub-circuits (tandem / triple / quad) ───────────────────────────── */
 
 .ps-sub-ckt {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+  padding:        2px 0 2px 6px;
+  border-left:    2px solid var(--border);
+  margin-left:    2px;
+}
+
+.ps-sub-main,
+.ps-sub-wire {
   display:     flex;
   align-items: center;
   gap:         4px;
-  padding:     2px 0 2px 6px;
-  border-left: 2px solid var(--border);
-  margin-left: 2px;
 }
 
 .ps-sub-tag {

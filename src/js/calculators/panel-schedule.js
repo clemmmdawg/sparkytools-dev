@@ -251,9 +251,15 @@ function renderBreakerBodyHtml(b) {
     const labels  = getSubLabels(b.type) ?? b.circuits.map((_, i) => String(i + 1));
     const subHtml = (b.circuits || []).map((sc, i) => `
       <div class="ps-sub-ckt" data-sub="${i}">
-        <span class="ps-sub-tag">${labels[i]}</span>
-        <input  class="ps-lbl"      type="text" placeholder="Label" value="${esc(sc.label)}" data-field="label">
-        <select class="ps-size-sel" data-field="size">${sizeOpts(sc.size)}</select>
+        <div class="ps-sub-main">
+          <span class="ps-sub-tag">${labels[i]}</span>
+          <input  class="ps-lbl"      type="text" placeholder="Label" value="${esc(sc.label)}" data-field="label">
+          <select class="ps-size-sel" data-field="size">${sizeOpts(sc.size)}</select>
+        </div>
+        <div class="ps-sub-wire">
+          <select class="ps-wire-sel"  data-field="wireSize"   >${wireOpts(sc.wireSize)}</select>
+          <select class="ps-cond-sel"  data-field="conduitSize">${conduitOpts(sc.conduitSize)}</select>
+        </div>
       </div>`).join('');
 
     return `
@@ -261,11 +267,7 @@ function renderBreakerBodyHtml(b) {
         <select class="ps-type-sel" data-field="type">${typeOpts(b.type)}</select>
         ${delBtn}
       </div>
-      ${subHtml}
-      <div class="ps-row ps-row--wire">
-        <select class="ps-wire-sel"  data-field="wireSize"   >${wireOpts(b.wireSize)}</select>
-        <select class="ps-cond-sel"  data-field="conduitSize">${conduitOpts(b.conduitSize)}</select>
-      </div>`;
+      ${subHtml}`;
   }
 
   // Single-circuit: 1-pole, 2-pole, 3-pole
@@ -377,7 +379,11 @@ function breakerPrintCells(b, circNums, span) {
   } else if (b.circuits) {
     const labels = getSubLabels(b.type) ?? b.circuits.map((_, i) => String(i + 1));
     desc = b.circuits
-      .map((sc, i) => `<b>${labels[i]}:</b> ${esc(sc.label || '—')} ${sc.size}A`)
+      .map((sc, i) => {
+        const scWire = [sc.wireSize, sc.conduitSize].filter(Boolean).join(' / ');
+        return `<b>${labels[i]}:</b> ${esc(sc.label || '—')} ${sc.size}A` +
+          (scWire ? ` <span style="color:#777">${esc(scWire)}</span>` : '');
+      })
       .join('<br>');
     amps = '';
   } else {
