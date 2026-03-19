@@ -364,39 +364,38 @@ function renderTable() {
 // 5. Print table generation
 // ══════════════════════════════════════════════════════════════════════════
 
-function breakerPrintCells(b, circNums, span) {
+function breakerPrintCells(b, circNums, span, side) {
   const circStr = circNums.join('–');
-  let desc = '';
-  let amps = '';
-  const wire = [b.wireSize, b.conduitSize].filter(Boolean).join(' / ');
+  let desc = '', amps = '', wire = '';
 
   if (b.type === 'empty') {
-    desc = 'EMPTY';
-    amps = '';
+    desc = '<em class="ps-pt-empty">EMPTY</em>';
   } else if (b.type === 'spare') {
-    desc = 'SPARE';
+    desc = '<em class="ps-pt-spare">SPARE</em>';
     amps = `${b.size}A`;
   } else if (b.circuits) {
     const labels = getSubLabels(b.type) ?? b.circuits.map((_, i) => String(i + 1));
-    desc = b.circuits
-      .map((sc, i) => {
-        const scWire = [sc.wireSize, sc.conduitSize].filter(Boolean).join(' / ');
-        return `<b>${labels[i]}:</b> ${esc(sc.label || '—')} ${sc.size}A` +
-          (scWire ? ` <span style="color:#777">${esc(scWire)}</span>` : '');
-      })
-      .join('<br>');
-    amps = '';
+    desc = b.circuits.map((sc, i) => {
+      const scWire = [sc.wireSize, sc.conduitSize].filter(Boolean).join(' / ');
+      return `<span class="ps-pt-sub-row"><b class="ps-pt-sub-lbl">${labels[i]}:</b> ` +
+        `${esc(sc.label || '—')} <span class="ps-pt-sub-amp">${sc.size}A</span>` +
+        (scWire ? ` <span class="ps-pt-sub-wire">${esc(scWire)}</span>` : '') +
+        `</span>`;
+    }).join('');
   } else {
     desc = esc(b.label || '—');
     amps = `${b.size}A`;
+    wire = [b.wireSize, b.conduitSize].filter(Boolean).join(' / ');
   }
 
-  return (
-    `<td class="ps-pt-ckt"  rowspan="${span}">${circStr}</td>` +
-    `<td class="ps-pt-desc" rowspan="${span}">${desc}</td>` +
-    `<td class="ps-pt-amp"  rowspan="${span}">${amps}</td>` +
-    `<td class="ps-pt-wire" rowspan="${span}">${esc(wire)}</td>`
-  );
+  const cktTd  = `<td class="ps-pt-ckt"  rowspan="${span}">${circStr}</td>`;
+  const descTd = `<td class="ps-pt-desc ps-pt-desc--${b.type}" rowspan="${span}">${desc}</td>`;
+  const ampsTd = `<td class="ps-pt-amp"  rowspan="${span}">${amps}</td>`;
+  const wireTd = `<td class="ps-pt-wire" rowspan="${span}">${esc(wire)}</td>`;
+
+  return side === 'left'
+    ? cktTd + descTd + ampsTd + wireTd
+    : wireTd + ampsTd + descTd + cktTd;
 }
 
 function generatePrintTable() {
@@ -415,17 +414,19 @@ function generatePrintTable() {
       <thead>
         <tr>
           <th colspan="4" class="ps-pt-side-hd">Left — Odd Circuits</th>
+          <th class="ps-pt-side-hd ps-pt-phase-hd">Ph</th>
           <th colspan="4" class="ps-pt-side-hd">Right — Even Circuits</th>
         </tr>
         <tr>
-          <th class="ps-pt-hd">Ckt</th>
+          <th class="ps-pt-hd ps-pt-ckt">Ckt</th>
           <th class="ps-pt-hd">Description</th>
-          <th class="ps-pt-hd">Amps</th>
-          <th class="ps-pt-hd">Wire / Conduit</th>
-          <th class="ps-pt-hd">Ckt</th>
+          <th class="ps-pt-hd ps-pt-amp">Amps</th>
+          <th class="ps-pt-hd ps-pt-wire">Wire / Conduit</th>
+          <th class="ps-pt-hd ps-pt-phase">Ph</th>
+          <th class="ps-pt-hd ps-pt-wire">Wire / Conduit</th>
+          <th class="ps-pt-hd ps-pt-amp">Amps</th>
           <th class="ps-pt-hd">Description</th>
-          <th class="ps-pt-hd">Amps</th>
-          <th class="ps-pt-hd">Wire / Conduit</th>
+          <th class="ps-pt-hd ps-pt-ckt">Ckt</th>
         </tr>
       </thead>
       <tbody>`;
@@ -433,21 +434,26 @@ function generatePrintTable() {
   for (let i = 0; i < totalRows; i++) {
     const L = leftSlots[i];
     const R = rightSlots[i];
+    const slotNum = i + 1;
+    const phase   = getPhaseLabel(slotNum);
 
     html += '<tr>';
 
     if (!L.isFirst) {
       // Spanned, skip all left cells
     } else if (L.b) {
-      html += breakerPrintCells(L.b, L.circNums, L.span);
+      html += breakerPrintCells(L.b, L.circNums, L.span, 'left');
     } else {
       html += '<td></td><td></td><td></td><td></td>';
     }
 
+    // Phase column — one cell per slot row
+    html += `<td class="ps-pt-phase ps-pt-phase--${phase}">${phase}</td>`;
+
     if (!R.isFirst) {
       // Spanned, skip all right cells
     } else if (R.b) {
-      html += breakerPrintCells(R.b, R.circNums, R.span);
+      html += breakerPrintCells(R.b, R.circNums, R.span, 'right');
     } else {
       html += '<td></td><td></td><td></td><td></td>';
     }
@@ -513,20 +519,17 @@ function syncPrintHeader() {
   const info      = state.panelInfo;
   const voltLabel = VOLTAGE_OPTIONS.find(o => o.value === info.voltage)?.label ?? info.voltage;
   const mainLabel = info.mainType === 'main-lug'
-    ? 'Main Lug'
-    : `Main Breaker — ${info.mainBreakerSize}A`;
+    ? 'MLO'
+    : `${info.mainBreakerSize}A`;
 
   const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   setText('ps-print-name',      info.panelName || 'Panel Schedule');
-  setText('ps-print-address',   info.address);
-  setText('ps-print-job',       info.jobNumber ? `Job #${info.jobNumber}` : '');
+  setText('ps-print-address',   info.address   || '—');
+  setText('ps-print-job',       info.jobNumber  || '—');
   setText('ps-print-main-type', mainLabel);
   setText('ps-print-voltage',   voltLabel);
   setText('ps-print-rating',    `${info.panelRating}A`);
-  setText('ps-print-notes',     info.notes);
-
-  const notesRow = document.getElementById('ps-print-notes-row');
-  if (notesRow) notesRow.style.display = info.notes ? '' : 'none';
+  setText('ps-print-notes',     info.notes     || '—');
 }
 
 

@@ -830,19 +830,21 @@
 
         <!-- Print-only header -->
         <div class="ps-print-header">
-          <div class="ps-print-title">
-            <h1 id="ps-print-name">Panel Schedule</h1>
-            <div class="ps-print-meta">
-              <span id="ps-print-address"></span>
-              <span id="ps-print-job"></span>
-            </div>
-          </div>
-          <div class="ps-print-info-grid">
-            <div><strong>Main:</strong> <span id="ps-print-main-type"></span></div>
-            <div><strong>Voltage:</strong> <span id="ps-print-voltage"></span></div>
-            <div><strong>Rating:</strong> <span id="ps-print-rating"></span></div>
-            <div id="ps-print-notes-row"><strong>Notes:</strong> <span id="ps-print-notes"></span></div>
-          </div>
+          <table class="ps-print-hdr-tbl">
+            <tbody>
+              <tr>
+                <td class="ps-phdr-name" rowspan="2"><span id="ps-print-name">Panel Schedule</span></td>
+                <td class="ps-phdr-cell"><strong>Address:</strong> <span id="ps-print-address"></span></td>
+                <td class="ps-phdr-cell"><strong>Voltage:</strong> <span id="ps-print-voltage"></span></td>
+                <td class="ps-phdr-cell"><strong>Main CB:</strong> <span id="ps-print-main-type"></span></td>
+              </tr>
+              <tr>
+                <td class="ps-phdr-cell"><strong>Job #:</strong> <span id="ps-print-job"></span></td>
+                <td class="ps-phdr-cell"><strong>Rating:</strong> <span id="ps-print-rating"></span></td>
+                <td class="ps-phdr-cell"><strong>Notes:</strong> <span id="ps-print-notes"></span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <header class="card-header">
