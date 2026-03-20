@@ -204,9 +204,8 @@
 
 /* Shed rows */
 .sl-steps-table tr.is-shed-row td {
-  opacity:         0.45;
-  text-decoration: line-through;
-  color:           var(--text-muted);
+  opacity: 0.45;
+  color:   var(--text-muted);
 }
 
 .sl-shed-tag {

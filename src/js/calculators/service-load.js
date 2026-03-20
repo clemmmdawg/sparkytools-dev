@@ -302,6 +302,7 @@ function runCalc(inputs, d, excludeShed) {
 function runStandard(inputs, d, ex) {
   const steps = [];
   let total = 0;
+  let cookDryerDemandVA = 0;
 
   // 1. Lighting / SA / Laundry → Table 220.42 demand
   const lightVA   = inputs.sqft * d.lightingVAPerSqFt;
@@ -329,6 +330,7 @@ function runStandard(inputs, d, ex) {
         note: getRangeDemandNote(cookKW, d.rangeBreakpoints),
       });
       total += demandVA;
+      cookDryerDemandVA += demandVA;
     }
     inputs.cookingLoads.forEach((load, i) => {
       const name = escapeHTML(load.type === 'Custom' && load.name ? load.name : (load.type || 'Appliance'));
@@ -351,6 +353,7 @@ function runStandard(inputs, d, ex) {
       note: ex(load) ? 'Load shed — excluded' : load.watts < d.dryerMinVA ? `< ${d.dryerMinVA.toLocaleString()} VA minimum; using minimum` : 'At nameplate',
     });
     total += demVA;
+    cookDryerDemandVA += demVA;
   });
 
   // 4. Fixed appliances — 220.53 (washers + fixed rows; 75% when ≥4 active)
@@ -383,7 +386,7 @@ function runStandard(inputs, d, ex) {
     total += va;
   });
 
-  return finalize(steps, total, necData.serviceLoad);
+  return finalize(steps, total, necData.serviceLoad, cookDryerDemandVA);
 }
 
 // ── Optional Method ────────────────────────────────────────────────────────────
@@ -448,7 +451,13 @@ function runOptional(inputs, d, ex) {
   const hvac = computeHVACOptional(inputs.hvacLoads, ex);
   hvac.steps.forEach(s => steps.push(s));
 
-  return finalize(steps, generalDemand + hvac.totalVA, necData.serviceLoad);
+  // Neutral basis for 220.61(B)(1): cooking/dryer nameplate VA scaled to their
+  // proportional share of the post-demand-factor general load total.
+  const cookDryerRawVA = activeCooking.reduce((s, l) => s + l.watts, 0)
+    + inputs.dryerLoads.filter(l => !ex(l)).reduce((s, l) => s + Math.max(l.watts, d.dryerMinVA), 0);
+  const cookDryerDemandVA = subtotal > 0 ? (cookDryerRawVA / subtotal) * generalDemand : 0;
+
+  return finalize(steps, generalDemand + hvac.totalVA, necData.serviceLoad, cookDryerDemandVA);
 }
 
 // ── HVAC — Optional Method 220.82(C) ──────────────────────────────────────────
@@ -587,11 +596,30 @@ function buildFixedList(inputs) {
 
 // ── Finalization ───────────────────────────────────────────────────────────────
 
-function finalize(steps, totalVA, d) {
+function finalize(steps, totalVA, d, cookDryerDemandVA = 0) {
   const totalAmps   = totalVA / d.systemVoltage;
   const serviceSize = recommendServiceSize(totalAmps, d.standardSizes);
   const conductor   = d.conductorSizes.find(c => c.amps === serviceSize);
-  return { steps, totalVA, totalAmps, serviceSize, conductorLabel: conductor?.awg || '—' };
+
+  // ── Neutral conductor sizing — NEC 220.61 ─────────────────────────────────
+  // 220.61(B)(1): for services supplying household ranges, ovens, cooktops,
+  // or clothes dryers, the neutral demand for those loads is permitted to be
+  // 70% of the demand calculated by Table 220.55 / 220.54.
+  const neutralVA   = totalVA - cookDryerDemandVA * 0.30;  // swap 100% → 70%
+  const neutralAmps = neutralVA / d.systemVoltage;
+  const neutralConductor = d.conductorSizes.find(c => c.amps >= neutralAmps);
+  const neutralLabel     = neutralConductor?.awg ?? conductor?.awg ?? '—';
+
+  // ── Grounding electrode conductor sizing — NEC 250.66, Table 250.66 ──────
+  const gecEntry = d.gecSizes?.find(g => g.amps === serviceSize);
+  const gecLabel = gecEntry?.awg ?? '—';
+
+  return {
+    steps, totalVA, totalAmps, serviceSize,
+    conductorLabel: conductor?.awg ?? '—',
+    neutralAmps, neutralLabel, hasCookDryer: cookDryerDemandVA > 0,
+    gecLabel,
+  };
 }
 
 // ── NEC helpers ────────────────────────────────────────────────────────────────
@@ -788,6 +816,17 @@ function serviceCard(result, shedResult, d) {
     <div class="sl-conductor-rec">
       Service entrance conductors: <strong>${result.conductorLabel}</strong>
       (THHN/THWN-2 or XHHW-2, 75°C terminal rating — Table 310.16)
+    </div>
+    <div class="sl-conductor-rec">
+      Neutral conductor: <strong>${result.neutralLabel}</strong> —
+      ${fmtAmps(result.neutralAmps)} calculated neutral load
+      ${result.hasCookDryer
+        ? `(cooking/dryer demand at 70% per NEC 220.61(B)(1) — Table 310.16)`
+        : `(NEC 220.61 — Table 310.16)`}
+    </div>
+    <div class="sl-conductor-rec">
+      Grounding electrode conductor: <strong>${result.gecLabel}</strong>
+      (NEC 250.66, Table 250.66)
     </div>
     ${genHtml}
   </div>`;

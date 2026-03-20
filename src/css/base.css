@@ -316,28 +316,26 @@ body {
 }
 
 .nav-bar-title {
-  display:     flex;
-  align-items: center;
-  gap:         10px;
-  font-size:   0.9rem;
-  font-weight: 700;
-  color:       var(--primary);
-  min-width:   0;        /* allow text truncation */
+  position:       absolute;
+  left:           50%;
+  transform:      translateX(-50%);
+  height:         100%;
+  display:        flex;
+  align-items:    center;
+  pointer-events: none;
+  max-width:      calc(100% - 120px);
+  border-bottom:  3px solid transparent;
+  box-sizing:     border-box;
+  transition:     border-color 0.2s ease;
 }
 
-.nav-bar-title span:last-child {
+#nav-bar-label {
+  font-size:     0.9rem;
+  font-weight:   700;
+  color:         var(--primary);
   white-space:   nowrap;
   overflow:      hidden;
   text-overflow: ellipsis;
-}
-
-.nav-accent-dot {
-  width:        9px;
-  height:       9px;
-  border-radius: 50%;
-  flex-shrink:  0;
-  background:   var(--accent-red);
-  transition:   background 0.2s ease;
 }
 
 /* Hamburger button */
