@@ -192,7 +192,7 @@
 /* Adjustment/demand factor rows */
 .sl-steps-table tr.is-adjustment td {
   font-style: italic;
-  color:      var(--text-muted);
+  color:      var(--text);
   background: color-mix(in srgb, var(--accent-red) 4%, transparent);
 }
 
@@ -204,9 +204,8 @@
 
 /* Shed rows */
 .sl-steps-table tr.is-shed-row td {
-  opacity:         0.45;
-  text-decoration: line-through;
-  color:           var(--text-muted);
+  opacity: 0.45;
+  color:   var(--text-muted);
 }
 
 .sl-shed-tag {
