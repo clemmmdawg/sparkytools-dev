@@ -45,6 +45,7 @@ Electricians, electrical contractors, inspectors, apprentices, and engineers who
 - **Result panel status colors** — green/yellow/red on conduit fill and box fill status pills (partially done via `.status-pill`; formalize the thresholds)
 - **Calculator tab icons** — emoji or SVG icon already in drawer; ensure consistent iconography across all views
 - **Copy Result button** — clipboard API to copy formatted calculation output as plain text
+- **Ohm's Law / Power Wheel** — ✅ Complete (see P2 entry below)
 
 ---
 
@@ -53,20 +54,27 @@ Electricians, electrical contractors, inspectors, apprentices, and engineers who
 ### ✅ Residential Service Load (NEC 220)
 Standard Method (220.40–220.53) and Optional Method (220.82/220.83). Dynamic rows for cooking, dryers, fixed appliances, HVAC, and custom loads. Load shedding with generator sizing. Existing service adequacy check. Print layout.
 
+**Added in v10.9.0:**
+- Neutral conductor sizing per NEC 220.61(A)/(B)(1) — cooking/dryer demand at 70% per Table 220.55/220.54; conductor from Table 310.16.
+- Grounding electrode conductor per NEC 250.66, Table 250.66 — sized to the recommended service amperage.
+
+**Planned additions (future revision):**
+- System bonding jumper (250.28) and equipment grounding conductor (T250.122).
+
 ### ✅ Transformer Calculator (NEC 450, 310, 240.21)
 Single-phase and three-phase transformer sizing. Primary/secondary FLA, turns ratio, OCPD per T450.3(B), conductor sizing per T310.16 (75°C Cu THWN). Secondary tap rule per NEC 240.21(C) with four options. Live SVG line diagram. L-N secondary voltages handled correctly.
 
 **Planned additions (future revision):**
-- Grounding electrode conductor (T250.66) and system bonding jumper (250.28) — also planned for the Service Load calculator
-- Equipment grounding conductor (T250.122)
-- Delta/wye winding configuration selector with schematic
+- Grounding electrode conductor (T250.66), system bonding jumper (250.28), EGC (T250.122).
+- Delta/wye winding configuration selector with schematic.
 
-### Ohm's Law / Power Wheel
-Solve for any one of **P, I, E, R** given any two known values. DC and single-phase AC. The classic "power wheel" reference every apprentice memorizes — fast to build, constantly useful.
+### ✅ Ohm's Law / Power Wheel
+Solve for any one of **P, I, E, R** given any two known values. DC and single-phase AC. The classic "power wheel" reference every apprentice memorizes.
 
-Inputs: any two of voltage (V), current (A), resistance (Ω), power (W)
-Outputs: the remaining two values
 Reference: Ohm's Law (V = IR), Power Law (P = IV)
+
+### ✅ Panel Schedule
+Document and analyze a residential or light-commercial loadcenter. Circuit types: standard, tandem, complex (3- and 4-pole), Empty, Spare. Per-slot circuit numbers, phase (A/B/C) spine, wire/conduit per slot. Mobile tab layout (left/right sides). Full print layout.
 
 ### Ampacity Calculator (NEC 310.16)
 Adjusted ampacity for a conductor given load and installation conditions.
@@ -80,12 +88,6 @@ Full motor circuit sizing in one tool — more useful than FLA alone.
 
 Inputs: motor HP, voltage, phase (1Ø / 3Ø), service factor
 Outputs: FLA (Tables 430.248/430.250), minimum conductor size (430.22, 125% FLA), max OCPD size (430.52, Table 430.52), overload protection size (430.32)
-
-### Grounding Electrode Conductor (NEC 250.66)
-Simple table lookup based on service conductor size.
-
-Inputs: service entrance conductor size (AWG/kcmil), material (CU/AL)
-Output: minimum GEC size per Table 250.66
 
 ### Conduit Bend Calculator
 Field layout math for offsets and saddles.
@@ -109,12 +111,6 @@ Room-by-room checklist of where AFCI and GFCI protection is required per the 202
 
 Inputs: room/location type
 Output: required protection type with NEC reference
-
-### Panel Schedule / Load Summary
-Add branch circuits and track running total against service capacity. Natural companion to the Service Load calculator.
-
-Inputs: branch circuit loads (VA, amps), service size
-Output: panel load summary, remaining capacity, % utilization
 
 ### NEC Version Support
 Data layer support for NEC 2020 and NEC 2023 (2026 when published). Version selector in the UI loads the appropriate dataset. Most useful for jurisdictions still on older editions.

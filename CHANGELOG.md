@@ -4,6 +4,46 @@ All notable changes to SparkyTools are documented in this file.
 
 ---
 
+## [10.9.0] - 2026-03-20 - Service Load Conductor Sizing & UI Polish
+
+### Added
+- **Neutral conductor sizing (NEC 220.61)** — The service card now shows the recommended neutral conductor size alongside the calculated neutral load in amps.
+  - Neutral demand computed per 220.61(A) as the maximum unbalanced load.
+  - When the service supplies household ranges, ovens, cooktops, or dryers, the neutral demand for those loads is reduced to 70% per **NEC 220.61(B)(1)** (cooking/dryer demand is 70% of the Table 220.55 / 220.54 demand, because the neutral only carries the imbalanced 120 V portion). The citation changes to `220.61(B)(1)` when the reduction applies.
+  - Standard method: uses the exact Table 220.55 cooking demand and 220.54 dryer demand figures.
+  - Optional method: extracts cooking/dryer loads proportionally from the post-demand-factor general load total.
+  - Neutral conductor looked up from the same Table 310.16 / 75 °C table used for service entrance conductors.
+- **Grounding electrode conductor sizing (NEC 250.66)** — The service card now shows the recommended GEC size (copper/aluminum) per **Table 250.66**, keyed to the recommended service size. 600 A services note the paralleled-conductor area calculation requirement per 250.66(A) Note.
+- **`gecSizes` table** added to `data-loader.js` inline NEC data, mapping each standard service amperage to the correct GEC size per Table 250.66.
+
+### Fixed
+- **Incorrect neutral reduction logic** — Prior implementation applied a 70% reduction to the portion of neutral current exceeding 200 A, which is the 220.61(B)(2) rule for electric discharge lighting (not applicable to residential). Corrected to the proper 220.61(B)(1) rule.
+- **GEC not populating** — `gecSizes` was added to `service-load.json` but the app uses inlined data in `data-loader.js`; the table was missing from the inline object and always returned `'—'`. Added to the inline data.
+- **Stale PWA cache** — Service worker cache version bumped from `sparkytools-v0.9.0` → `sparkytools-v0.9.1` to force users to receive updated `service-load.js` and `data-loader.js`.
+
+### Changed
+- **Steps table — shed rows** — Removed `text-decoration: line-through` from `.sl-steps-table tr.is-shed-row td`; reduced opacity alone is sufficient to indicate exclusion.
+- **Steps table — adjustment rows** — Changed text color on `.sl-steps-table tr.is-adjustment td` from `var(--text-muted)` to `var(--text)` for better readability against the tinted background.
+
+---
+
+## [10.8.0] - 2026-03-17 - Panel Schedule & Ohm's Law
+
+### Added
+- **Panel Schedule** — New calculator for documenting and analyzing a residential or light-commercial loadcenter.
+  - Add circuits by type: standard single-pole/double-pole, tandem, complex (3- and 4-pole), Empty, and Spare.
+  - Per-slot circuit numbers displayed alongside phase (A/B/C) spine.
+  - Wire type and conduit type fields per circuit slot.
+  - Dedicated mobile tab layout with left/right side views.
+  - Full print layout: bordered header table with panel info, mirrored left/right circuit columns, phase column, main CB/rating row.
+  - Print improvements across multiple revisions: per-slot circuit number cells for complex breakers, wire/conduit on separate lines, widened wire column, vertical centering.
+- **Ohm's Law / Power Wheel** — New self-contained calculator. Solve for any one of **P, I, E, R** given any two known values. DC and single-phase AC. No NEC tables required.
+
+### Changed
+- **Nav bar** — Top bar title centered; accent dot replaced with a tool-color thick bottom border under the title container.
+
+---
+
 ## [10.7.0] - 2026-03-15 - Transformer Calculator
 
 ### Added
