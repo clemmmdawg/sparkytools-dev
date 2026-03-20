@@ -42,5 +42,16 @@
     { "awg": "350 kcmil CU / 500 kcmil AL", "amps": 320 },
     { "awg": "500 kcmil CU / 750 kcmil AL", "amps": 400 },
     { "awg": "Multiple paralleled sets", "amps": 600 }
+  ],
+
+  "gecSizes": [
+    { "amps": 100, "awg": "#8 AWG Cu / #6 AWG Al" },
+    { "amps": 125, "awg": "#8 AWG Cu / #6 AWG Al" },
+    { "amps": 150, "awg": "#6 AWG Cu / #4 AWG Al" },
+    { "amps": 200, "awg": "#4 AWG Cu / #2 AWG Al" },
+    { "amps": 225, "awg": "#2 AWG Cu / #1/0 AWG Al" },
+    { "amps": 320, "awg": "#2 AWG Cu / #1/0 AWG Al" },
+    { "amps": 400, "awg": "#1/0 AWG Cu / #3/0 AWG Al" },
+    { "amps": 600, "awg": "Per 250.66(A) Note (paralleled sets)" }
   ]
 }

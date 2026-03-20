@@ -383,7 +383,7 @@ function runStandard(inputs, d, ex) {
     total += va;
   });
 
-  return finalize(steps, total, necData.serviceLoad);
+  return finalize(steps, total, necData.serviceLoad, inputs);
 }
 
 // ── Optional Method ────────────────────────────────────────────────────────────
@@ -448,7 +448,7 @@ function runOptional(inputs, d, ex) {
   const hvac = computeHVACOptional(inputs.hvacLoads, ex);
   hvac.steps.forEach(s => steps.push(s));
 
-  return finalize(steps, generalDemand + hvac.totalVA, necData.serviceLoad);
+  return finalize(steps, generalDemand + hvac.totalVA, necData.serviceLoad, inputs);
 }
 
 // ── HVAC — Optional Method 220.82(C) ──────────────────────────────────────────
@@ -587,11 +587,36 @@ function buildFixedList(inputs) {
 
 // ── Finalization ───────────────────────────────────────────────────────────────
 
-function finalize(steps, totalVA, d) {
+function finalize(steps, totalVA, d, inputs) {
   const totalAmps   = totalVA / d.systemVoltage;
   const serviceSize = recommendServiceSize(totalAmps, d.standardSizes);
   const conductor   = d.conductorSizes.find(c => c.amps === serviceSize);
-  return { steps, totalVA, totalAmps, serviceSize, conductorLabel: conductor?.awg || '—' };
+
+  // ── Neutral conductor sizing — NEC 220.61 ─────────────────────────────────
+  // 220.61(B)(1): 70% reduction on portion over 200 A when service supplies
+  // ranges, ovens, cooktops, or clothes dryers.
+  const hasCookOrDryer = inputs
+    ? (inputs.cookingLoads.length > 0 || inputs.dryerLoads.length > 0)
+    : false;
+  let neutralAmps    = totalAmps;
+  let neutralReduced = false;
+  if (hasCookOrDryer && neutralAmps > 200) {
+    neutralAmps    = 200 + (neutralAmps - 200) * 0.70;
+    neutralReduced = true;
+  }
+  const neutralConductor = d.conductorSizes.find(c => c.amps >= neutralAmps);
+  const neutralLabel     = neutralConductor?.awg ?? conductor?.awg ?? '—';
+
+  // ── Grounding electrode conductor sizing — NEC 250.66, Table 250.66 ──────
+  const gecEntry = d.gecSizes?.find(g => g.amps === serviceSize);
+  const gecLabel = gecEntry?.awg ?? '—';
+
+  return {
+    steps, totalVA, totalAmps, serviceSize,
+    conductorLabel: conductor?.awg ?? '—',
+    neutralAmps, neutralLabel, neutralReduced,
+    gecLabel,
+  };
 }
 
 // ── NEC helpers ────────────────────────────────────────────────────────────────
@@ -788,6 +813,17 @@ function serviceCard(result, shedResult, d) {
     <div class="sl-conductor-rec">
       Service entrance conductors: <strong>${result.conductorLabel}</strong>
       (THHN/THWN-2 or XHHW-2, 75°C terminal rating — Table 310.16)
+    </div>
+    <div class="sl-conductor-rec">
+      Neutral conductor: <strong>${result.neutralLabel}</strong> —
+      ${fmtAmps(result.neutralAmps)} calculated neutral load
+      ${result.neutralReduced
+        ? `(70% applied to portion over 200 A — NEC 220.61(B)(1), Table 310.16)`
+        : `(NEC 220.61, Table 310.16)`}
+    </div>
+    <div class="sl-conductor-rec">
+      Grounding electrode conductor: <strong>${result.gecLabel}</strong>
+      (NEC 250.66, Table 250.66)
     </div>
     ${genHtml}
   </div>`;
