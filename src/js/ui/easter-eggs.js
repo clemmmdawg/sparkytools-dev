@@ -3,8 +3,9 @@
  * @description Fun easter eggs for SparkyTools
  *
  * Trigger: type "420.69" into any number input on any calculator.
- * Effect:  Page shakes, Mike Holt crashes in from the bottom, holds 2–3 s,
- *          then retreats. Click / tap anywhere dismisses early.
+ * Effect:  Page shakes while Mike Holt slides up from the bottom (same
+ *          frame), fills the width of the active tool section, holds
+ *          2.5 s, then retreats. Click / tap anywhere dismisses early.
  */
 
 const TRIGGER_VALUE = "420.69";
@@ -34,30 +35,27 @@ body.ee-shaking {
 }
 
 @keyframes ee-slide-in {
-  from { bottom: -120%; }
+  from { bottom: -110%; }
   to   { bottom: 0; }
 }
 
 @keyframes ee-slide-out {
   from { bottom: 0; }
-  to   { bottom: -120%; }
+  to   { bottom: -110%; }
 }
 
 #ee-holt {
-  position:   fixed;
-  left:       50%;
-  bottom:     -120%;
-  transform:  translateX(-50%);
-  z-index:    9999;
-  cursor:     pointer;
-  max-width:  min(380px, 80vw);
-  width:      min(380px, 80vw);
+  position:       fixed;
+  bottom:         -110%;
+  z-index:        9999;
+  cursor:         pointer;
   pointer-events: auto;
-  filter:     drop-shadow(0 -8px 24px rgba(0,0,0,0.55));
+  filter:         drop-shadow(0 -8px 32px rgba(0,0,0,0.6));
+  display:        block;
 }
 
 #ee-holt.ee-entering {
-  animation: ee-slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: ee-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 #ee-holt.ee-exiting {
@@ -68,8 +66,15 @@ body.ee-shaking {
 }
 
 /* ── State ───────────────────────────────────────────────────────── */
-let active     = false;
-let holdTimer  = null;
+let active    = false;
+let holdTimer = null;
+
+/* ── Measure the active tool section ────────────────────────────── */
+function getSectionRect() {
+  const section = document.querySelector(".tool-section.active")
+               || document.querySelector(".tool-section");
+  return section ? section.getBoundingClientRect() : null;
+}
 
 /* ── Animation sequence ─────────────────────────────────────────── */
 function triggerSmash() {
@@ -78,25 +83,39 @@ function triggerSmash() {
 
   injectStyles();
 
-  // Create image element
+  const rect = getSectionRect();
+
+  // Create image element — position & size match the active section
   const img = document.createElement("img");
   img.id  = "ee-holt";
   img.src = "img/holtsmash.png";
   img.alt = "Mike Holt Smash!";
+
+  if (rect) {
+    img.style.left  = `${rect.left}px`;
+    img.style.width = `${rect.width}px`;
+  } else {
+    // Fallback: center at 80vw
+    img.style.left      = "50%";
+    img.style.width     = "80vw";
+    img.style.transform = "translateX(-50%)";
+  }
+
   document.body.appendChild(img);
 
-  // Shake the page
+  // Force a reflow so the browser commits the off-screen start position,
+  // then start shake + slide-in on the very same frame.
+  // eslint-disable-next-line no-unused-expressions
+  img.offsetHeight;
+
   document.body.classList.add("ee-shaking");
+  img.classList.add("ee-entering");
+
   document.body.addEventListener(
     "animationend",
-    () => document.body.classList.remove("ee-shaking"),
+    (e) => { if (e.target === document.body) document.body.classList.remove("ee-shaking"); },
     { once: true }
   );
-
-  // Slide in
-  requestAnimationFrame(() => {
-    img.classList.add("ee-entering");
-  });
 
   img.addEventListener("animationend", onSlideInEnd, { once: true });
 
@@ -107,24 +126,17 @@ function triggerSmash() {
 function onSlideInEnd() {
   const img = document.getElementById("ee-holt");
   if (!img) return;
-  // Remove slide-in class so the element stays visible at bottom:0
   img.classList.remove("ee-entering");
   img.style.bottom = "0";
-
-  // Auto-dismiss after hold period
   holdTimer = setTimeout(retreat, HOLD_MS);
 }
 
 function dismissEarly() {
-  if (holdTimer) {
-    clearTimeout(holdTimer);
-    holdTimer = null;
-  }
+  if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
   retreat();
 }
 
 function retreat() {
-  // Remove the early-dismiss listener if still pending
   document.removeEventListener("pointerdown", dismissEarly);
 
   const img = document.getElementById("ee-holt");
@@ -134,10 +146,7 @@ function retreat() {
   img.classList.add("ee-exiting");
   img.addEventListener(
     "animationend",
-    () => {
-      img.remove();
-      active = false;
-    },
+    () => { img.remove(); active = false; },
     { once: true }
   );
 }
@@ -146,9 +155,7 @@ function retreat() {
 function onInput(e) {
   const el = e.target;
   if (el.tagName !== "INPUT" || el.type !== "number") return;
-  if (el.value === TRIGGER_VALUE) {
-    triggerSmash();
-  }
+  if (el.value === TRIGGER_VALUE) triggerSmash();
 }
 
 /* ── Public API ──────────────────────────────────────────────────── */
