@@ -37,7 +37,51 @@
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none';">
 
     <title>SparkyTools — NEC Electrical Calculators</title>
-    <meta name="description" content="Free, open-source NEC electrical calculators: conduit fill, voltage drop, box fill, and pull box sizing. No account required. Works offline.">
+    <meta name="description" content="Free, open-source NEC electrical calculators for electricians: conduit fill, voltage drop, box fill, pull box sizing, service load, transformer sizing, Ohm's Law, and panel schedule. No account. Works offline.">
+
+    <!-- TODO: replace https://sparkytools.app with the production domain before launch -->
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="https://sparkytools.app/">
+    <meta property="og:title"       content="SparkyTools — NEC Electrical Calculators">
+    <meta property="og:description" content="Free, open-source NEC electrical calculators for electricians: conduit fill, voltage drop, box fill, pull box sizing, service load, transformer sizing, Ohm's Law, and panel schedule. No account. Works offline.">
+    <meta property="og:image"       content="https://sparkytools.app/img/bolt.png">
+    <meta property="og:site_name"   content="SparkyTools">
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary">
+    <meta name="twitter:title"       content="SparkyTools — NEC Electrical Calculators">
+    <meta name="twitter:description" content="Free, open-source NEC electrical calculators for electricians: conduit fill, voltage drop, box fill, pull box sizing, service load, transformer sizing, Ohm's Law, and panel schedule. No account. Works offline.">
+    <meta name="twitter:image"       content="https://sparkytools.app/img/bolt.png">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SparkyTools",
+      "url": "https://sparkytools.app/",
+      "description": "Free, open-source NEC electrical calculators for electricians. Conduit fill, voltage drop, box fill, pull box sizing, service load, transformer sizing, Ohm's Law, and panel schedule. No account required. Works offline.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Conduit Fill Calculator (NEC Chapter 9)",
+        "Voltage Drop Calculator (NEC 210.19)",
+        "Box Fill Calculator (NEC 314.16)",
+        "Pull Box Sizing Calculator (NEC 314.28)",
+        "Service Load Calculator (NEC 220.82/220.83)",
+        "Transformer Sizing Calculator (NEC 450.3)",
+        "Ohm's Law / Power Wheel Calculator",
+        "Panel Schedule Calculator"
+      ],
+      "codeRepository": "https://github.com/clemmmdawg/sparkytools",
+      "license": "https://www.gnu.org/licenses/agpl-3.0.html"
+    }
+    </script>
   </head>
   <body>
 
@@ -45,7 +89,7 @@
 
       <!-- ── Site Header ── -->
       <header class="site-header">
-        <h1>Sparky ⚡ Tools</h1>
+        <h1>Sparky <span aria-hidden="true">⚡</span> Tools</h1>
         <p>Free tools for electricians.</p>
       </header>
 
