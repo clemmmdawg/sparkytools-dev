@@ -3,9 +3,8 @@
  * @description Fun easter eggs for SparkyTools
  *
  * Trigger: type "420.69" into any number input on any calculator.
- * Effect:  Page shakes while Mike Holt slides up from the bottom (same
- *          frame), fills the width of the active tool section, holds
- *          2.5 s, then retreats. Click / tap anywhere dismisses early.
+ * Effect:  Mike Holt slams onto the screen from below, holds 2.5 s,
+ *          then retreats. Click / tap anywhere dismisses early.
  */
 
 const TRIGGER_VALUE = "420.69";
@@ -17,26 +16,12 @@ function injectStyles() {
   const style = document.createElement("style");
   style.id = "ee-styles";
   style.textContent = `
-@keyframes ee-shake {
-  0%,100% { transform: translate(0,0) rotate(0deg); }
-  10%      { transform: translate(-6px, 3px) rotate(-1.5deg); }
-  20%      { transform: translate(6px, -3px) rotate(1.5deg); }
-  30%      { transform: translate(-5px, 5px) rotate(-1deg); }
-  40%      { transform: translate(5px, -2px) rotate(1deg); }
-  50%      { transform: translate(-4px, 4px) rotate(-0.5deg); }
-  60%      { transform: translate(4px, -4px) rotate(0.5deg); }
-  70%      { transform: translate(-3px, 2px) rotate(-0.5deg); }
-  80%      { transform: translate(3px, -3px) rotate(0deg); }
-  90%      { transform: translate(-2px, 2px) rotate(0deg); }
-}
-
-body.ee-shaking {
-  animation: ee-shake 0.55s ease-in-out;
-}
-
-@keyframes ee-slide-in {
-  from { bottom: -110%; }
-  to   { bottom: 0; }
+@keyframes ee-slam {
+  0%   { bottom: -110%; transform-origin: bottom center; transform: scaleX(1)   scaleY(1);   }
+  62%  { bottom: 0;     transform-origin: bottom center; transform: scaleX(1.06) scaleY(0.9); }
+  76%  { bottom: 0;     transform-origin: bottom center; transform: scaleX(0.97) scaleY(1.04); }
+  88%  { bottom: 0;     transform-origin: bottom center; transform: scaleX(1.01) scaleY(0.98); }
+  100% { bottom: 0;     transform-origin: bottom center; transform: scaleX(1)   scaleY(1);   }
 }
 
 @keyframes ee-slide-out {
@@ -55,7 +40,7 @@ body.ee-shaking {
 }
 
 #ee-holt.ee-entering {
-  animation: ee-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: ee-slam 0.5s cubic-bezier(0.15, 0, 0.2, 1) forwards;
 }
 
 #ee-holt.ee-exiting {
@@ -85,7 +70,6 @@ function triggerSmash() {
 
   const rect = getSectionRect();
 
-  // Create image element — position & size match the active section
   const img = document.createElement("img");
   img.id  = "ee-holt";
   img.src = "img/holtsmash.png";
@@ -95,7 +79,6 @@ function triggerSmash() {
     img.style.left  = `${rect.left}px`;
     img.style.width = `${rect.width}px`;
   } else {
-    // Fallback: center at 80vw
     img.style.left      = "50%";
     img.style.width     = "80vw";
     img.style.transform = "translateX(-50%)";
@@ -103,27 +86,17 @@ function triggerSmash() {
 
   document.body.appendChild(img);
 
-  // Force a reflow so the browser commits the off-screen start position,
-  // then start shake + slide-in on the very same frame.
+  // Force reflow so the browser commits the off-screen start position
   // eslint-disable-next-line no-unused-expressions
   img.offsetHeight;
 
-  document.body.classList.add("ee-shaking");
   img.classList.add("ee-entering");
+  img.addEventListener("animationend", onSlamEnd, { once: true });
 
-  document.body.addEventListener(
-    "animationend",
-    (e) => { if (e.target === document.body) document.body.classList.remove("ee-shaking"); },
-    { once: true }
-  );
-
-  img.addEventListener("animationend", onSlideInEnd, { once: true });
-
-  // Click/tap to dismiss early
   document.addEventListener("pointerdown", dismissEarly, { once: true });
 }
 
-function onSlideInEnd() {
+function onSlamEnd() {
   const img = document.getElementById("ee-holt");
   if (!img) return;
   img.classList.remove("ee-entering");
