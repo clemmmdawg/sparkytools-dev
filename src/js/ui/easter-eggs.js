@@ -133,5 +133,6 @@ function onInput(e) {
 
 /* ── Public API ──────────────────────────────────────────────────── */
 export function init() {
+  new Image().src = "img/holtsmash.png";
   document.addEventListener("input", onInput);
 }
