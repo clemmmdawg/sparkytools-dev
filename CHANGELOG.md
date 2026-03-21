@@ -4,7 +4,7 @@ All notable changes to SparkyTools are documented in this file.
 
 ---
 
-## [10.9.0] - 2026-03-20 - Service Load Conductor Sizing & UI Polish
+## [1.0.0] - 2026-03-21 - Service Load Conductor Sizing & UI Polish
 
 ### Added
 - **Neutral conductor sizing (NEC 220.61)** — The service card now shows the recommended neutral conductor size alongside the calculated neutral load in amps.
@@ -27,7 +27,7 @@ All notable changes to SparkyTools are documented in this file.
 
 ---
 
-## [10.8.0] - 2026-03-17 - Panel Schedule & Ohm's Law
+## [0.8.0] - 2026-03-17 - Panel Schedule & Ohm's Law
 
 ### Added
 - **Panel Schedule** — New calculator for documenting and analyzing a residential or light-commercial loadcenter.
@@ -44,7 +44,7 @@ All notable changes to SparkyTools are documented in this file.
 
 ---
 
-## [10.7.0] - 2026-03-15 - Transformer Calculator
+## [0.7.0] - 2026-03-15 - Transformer Calculator
 
 ### Added
 - **Transformer Calculator** — New calculator module (`src/js/calculators/transformer.js`) for single-phase and three-phase dry-type transformer sizing per the NEC.
@@ -66,7 +66,7 @@ All notable changes to SparkyTools are documented in this file.
 
 ---
 
-## [10.6.0] - 2026-03-15 - Drawer Navigation & About Page
+## [0.6.0] - 2026-03-15 - Drawer Navigation & About Page
 
 ### Added
 - **Slide-in drawer navigation** — Replaced the horizontal pill-strip nav with a sticky top bar + right-side drawer pattern (Option C from `test-nav.html` prototype).

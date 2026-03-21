@@ -1,7 +1,7 @@
 # AGENTS.md — SparkyTools AI Agent Guide
 
 Welcome to SparkyTools. Read this document in full before touching any code.
-It reflects the actual current state of the project as of v10.9.0.
+It reflects the actual current state of the project as of v1.0.0.
 
 > **Supersedes:** `AGENT_GUIDE.md` and `REPO_STRUCTURE.md` (both outdated — ignore them).
 
@@ -335,7 +335,7 @@ Top candidates for the next calculator build:
 - **Transformer:** Grounding electrode conductor (T250.66), system bonding jumper (250.28), EGC
   (T250.122), and delta/wye winding configuration selector.
 - **Service Load:** System bonding jumper (250.28) and equipment grounding conductor (T250.122).
-  Neutral and GEC sizing (NEC 220.61 / 250.66) are already implemented as of v10.9.0.
+  Neutral and GEC sizing (NEC 220.61 / 250.66) are already implemented as of v1.0.0.
 
 See `ROADMAP.md` for full priority list and scope notes.
 
