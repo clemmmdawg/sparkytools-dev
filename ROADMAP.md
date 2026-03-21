@@ -54,7 +54,7 @@ Electricians, electrical contractors, inspectors, apprentices, and engineers who
 ### ✅ Residential Service Load (NEC 220)
 Standard Method (220.40–220.53) and Optional Method (220.82/220.83). Dynamic rows for cooking, dryers, fixed appliances, HVAC, and custom loads. Load shedding with generator sizing. Existing service adequacy check. Print layout.
 
-**Added in v10.9.0:**
+**Added in v1.0.0:**
 - Neutral conductor sizing per NEC 220.61(A)/(B)(1) — cooking/dryer demand at 70% per Table 220.55/220.54; conductor from Table 310.16.
 - Grounding electrode conductor per NEC 250.66, Table 250.66 — sized to the recommended service amperage.
 
