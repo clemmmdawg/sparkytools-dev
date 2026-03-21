@@ -1,7 +1,7 @@
 # AGENTS.md — SparkyTools AI Agent Guide
 
 Welcome to SparkyTools. Read this document in full before touching any code.
-It reflects the actual current state of the project as of v10.7.0.
+It reflects the actual current state of the project as of v10.9.0.
 
 > **Supersedes:** `AGENT_GUIDE.md` and `REPO_STRUCTURE.md` (both outdated — ignore them).
 
@@ -46,8 +46,10 @@ sparkytools/
 │       │   ├── voltage-drop.js
 │       │   ├── box-fill.js
 │       │   ├── pull-box.js
-│       │   ├── service-load.js # Largest calculator; Standard + Optional NEC 220 methods
-│       │   └── transformer.js
+│       │   ├── service-load.js  # Largest calculator; Standard + Optional NEC 220 methods
+│       │   ├── transformer.js
+│       │   ├── ohms-law.js      # Ohm's Law / Power Wheel; self-contained, no NEC tables
+│       │   └── panel-schedule.js
 │       │
 │       ├── ui/
 │       │   ├── navigation.js   # Drawer open/close, active state, top-bar sync
@@ -320,20 +322,20 @@ print), edit that block — don't create a second print block elsewhere.
 
 Top candidates for the next calculator build:
 
-1. **Ohm's Law / Power Wheel** — P1 priority; small, self-contained, no NEC tables required.
-   Solve for any of P / I / E / R given any two known values.
-
-2. **Ampacity Calculator (NEC 310.16)** — Given conductor size, material, insulation, ambient
+1. **Ampacity Calculator (NEC 310.16)** — Given conductor size, material, insulation, ambient
    temp, and number of CCC in raceway, output adjusted ampacity with correction factors.
 
-3. **Motor Circuit Calculator (NEC 430)** — HP, voltage, phase → FLA, minimum conductor,
+2. **Motor Circuit Calculator (NEC 430)** — HP, voltage, phase → FLA, minimum conductor,
    max OCPD, overload protection size.
+
+3. **Conduit Bend Calculator** — Offset height + bend angle → distance between bends, shrink.
 
 **Planned additions to existing calculators:**
 
 - **Transformer:** Grounding electrode conductor (T250.66), system bonding jumper (250.28), EGC
   (T250.122), and delta/wye winding configuration selector.
-- **Service Load:** Same grounding/bonding additions.
+- **Service Load:** System bonding jumper (250.28) and equipment grounding conductor (T250.122).
+  Neutral and GEC sizing (NEC 220.61 / 250.66) are already implemented as of v10.9.0.
 
 See `ROADMAP.md` for full priority list and scope notes.
 
@@ -347,8 +349,9 @@ See `ROADMAP.md` for full priority list and scope notes.
 | Voltage Drop | 210.19(A)(1) Informational Note |
 | Box Fill | 314.16, T314.16(B) |
 | Pull Box | 314.28 |
-| Service Load | 220.12, 220.40–220.53, 220.52, 220.54–220.55, 220.60, 220.82, 220.83 |
+| Service Load | 220.12, 220.40–220.53, 220.52, 220.54–220.55, 220.60, 220.61, 220.82, 220.83, T310.16, T250.66 |
 | Transformer | T450.3(B), T310.16, 240.6(A), 240.21(C) |
+| Ohm's Law | Ohm's Law (V = IR), Power Law (P = IV) — no NEC section |
+| Panel Schedule | 220.40, general load documentation |
 | (Planned) Ampacity | T310.16, T310.15(B)(1), T310.15(C)(1) |
 | (Planned) Motor | T430.248, T430.250, 430.22, 430.52, T430.52, 430.32 |
-| (Planned) GEC | T250.66, T250.122, 250.28 |

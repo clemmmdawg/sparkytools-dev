@@ -10,6 +10,7 @@
 
 import { initNavigation, initTooltips } from './ui/navigation.js';
 import { initTheme } from './ui/theme.js';
+import { init as initEasterEggs } from './ui/easter-eggs.js';
 import * as ConduitFill from './calculators/conduit-fill.js';
 import * as VoltageDrop from './calculators/voltage-drop.js';
 import * as BoxFill from './calculators/box-fill.js';
@@ -29,6 +30,7 @@ async function init() {
     initNavigation();
     initTooltips();
     initTheme();
+    initEasterEggs();
 
     // Load NEC data (defaults to 2023)
     const necData = await NECDataLoader.loadNECData("2023");
