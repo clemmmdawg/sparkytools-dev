@@ -75,14 +75,9 @@ function triggerSmash() {
   img.src = "img/holtsmash.png";
   img.alt = "Mike Holt Smash!";
 
-  if (rect) {
-    img.style.left  = `${rect.left}px`;
-    img.style.width = `${rect.width}px`;
-  } else {
-    img.style.left      = "50%";
-    img.style.width     = "80vw";
-    img.style.transform = "translateX(-50%)";
-  }
+  const bodyRect = document.body.getBoundingClientRect();
+  img.style.left  = `${bodyRect.left}px`;
+  img.style.width = `${bodyRect.width}px`;
 
   document.body.appendChild(img);
 
