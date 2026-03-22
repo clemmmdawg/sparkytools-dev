@@ -12,7 +12,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION   = 'sparkytools-v1.0.0';
+const CACHE_VERSION   = 'sparkytools-v1.1.0';
 const FONTS_CACHE     = 'sparkytools-fonts-v1';
 
 /**
@@ -24,36 +24,37 @@ const APP_ASSETS = [
 
   // Styles
   '/src/css/base.css',
-  '/src/css/conduit-fill.css',
+  '/src/css/ampacity.css',
   '/src/css/box-fill.css',
+  '/src/css/conduit-fill.css',
+  '/src/css/ohms-law.css',
+  '/src/css/panel-schedule.css',
   '/src/css/pull-box.css',
   '/src/css/service-load.css',
+  '/src/css/transformer.css',
 
   // Core JS
   '/src/js/app.js',
   '/src/js/data-loader.js',
 
   // Calculators
+  '/src/js/calculators/ampacity.js',
   '/src/js/calculators/box-fill.js',
   '/src/js/calculators/conduit-fill.js',
+  '/src/js/calculators/ohms-law.js',
+  '/src/js/calculators/panel-schedule.js',
   '/src/js/calculators/pull-box.js',
+  '/src/js/calculators/service-load.js',
+  '/src/js/calculators/transformer.js',
   '/src/js/calculators/voltage-drop.js',
 
   // UI modules
+  '/src/js/ui/easter-eggs.js',
   '/src/js/ui/navigation.js',
   '/src/js/ui/theme.js',
 
   // Utilities
   '/src/js/utils/formatting.js',
-
-  // NEC 2023 data tables (bundled JS + original JSON fallback files)
-  '/src/data/2023/nec-data.js',
-  '/src/data/2023/boxfill.json',
-  '/src/data/2023/conduit.json',
-  '/src/data/2023/conductors.json',
-  '/src/data/2023/pullbox.json',
-  '/src/data/2023/service-load.json',
-  '/src/js/calculators/service-load.js',
 
   // PWA assets
   '/pwa/manifest.json',
