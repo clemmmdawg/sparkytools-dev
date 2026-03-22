@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="src/css/transformer.css">
     <link rel="stylesheet" href="src/css/ohms-law.css">
     <link rel="stylesheet" href="src/css/panel-schedule.css">
+    <link rel="stylesheet" href="src/css/ampacity.css">
 
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 
@@ -994,6 +995,91 @@
 
 
       <!-- ══════════════════════════════════════════════════════════
+           AMPACITY CALCULATOR
+           Reference: NEC Table 310.15(B)(16)
+           Derating: NEC 310.15(B)(1) temp correction + NEC Table 310.15(C)(1) bundling
+           ══════════════════════════════════════════════════════════ -->
+      <section id="ampacity-tool" class="card card--indigo tool-section" aria-labelledby="ampacity-heading">
+        <header class="card-header">
+          <h2 id="ampacity-heading">Ampacity Calculator</h2>
+        </header>
+
+        <p class="tool-desc">Find the allowable ampacity of a conductor per NEC Table 310.15(B)(16), then apply ambient temperature and bundling derating factors automatically.</p>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="amp-material"
+                   data-tip="Copper is the most common. Aluminum is lighter and less expensive but requires larger sizes and AL-rated terminations.">
+              Material
+            </label>
+            <select id="amp-material">
+              <option value="CU">Copper (CU)</option>
+              <option value="AL">Aluminum (AL)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="amp-size"
+                   data-tip="Wire size from NEC Table 310.15(B)(16). Larger AWG numbers = smaller wire. 250–1000 are in kcmil (thousand circular mils).">
+              Wire Size
+            </label>
+            <select id="amp-size">
+              <!-- populated by JS -->
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="amp-temp"
+                   data-tip="The temperature rating printed on the wire insulation jacket. Most modern THHN/THWN wire is dual-rated 75°C/90°C. Terminations typically limit you to 75°C per NEC 110.14(C).">
+              Insulation Rating
+            </label>
+            <select id="amp-temp">
+              <option value="60">60°C (140°F) — TW, UF</option>
+              <option value="75" selected>75°C (167°F) — THW, THWN, XHHW</option>
+              <option value="90">90°C (194°F) — THHN, THWN-2, XHHW-2</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label for="amp-ambient"
+                   data-tip="The temperature of the air (or surrounding environment) where the wire is installed. NEC base ampacity assumes 86°F (30°C). Hotter locations require derating per NEC 310.15(B)(1).">
+              Ambient Temp (°F)
+            </label>
+            <input type="number" id="amp-ambient" value="86" min="32" max="185" step="1">
+          </div>
+          <div class="input-group">
+            <label for="amp-ccc"
+                   data-tip="Count only current-carrying conductors (hot and neutral if carrying unbalanced load). Equipment grounding conductors do NOT count. More than 3 conductors in a raceway requires derating per NEC Table 310.15(C)(1).">
+              Current-Carrying Conductors
+            </label>
+            <input type="number" id="amp-ccc" value="3" min="1" max="100" step="1">
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="stats stats--boxed stats--2x2">
+          <div class="stat-box">
+            <span class="label">Base Ampacity</span>
+            <span id="amp-base" class="value" aria-live="polite">--</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Temp Correction Factor</span>
+            <span id="amp-temp-factor" class="value" aria-live="polite">--</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Bundling Factor</span>
+            <span id="amp-bundle-factor" class="value" aria-live="polite">--</span>
+          </div>
+          <div class="stat-box">
+            <span class="label">Derated Ampacity</span>
+            <span id="amp-final" class="value" aria-live="polite">--</span>
+          </div>
+        </div>
+        <div id="amp-status" class="status-pill" role="status" aria-live="polite">--</div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════
            ABOUT
            ══════════════════════════════════════════════════════════ -->
       <section id="about-tool" class="card tool-section" aria-labelledby="about-heading">
@@ -1108,6 +1194,13 @@
               data-label="Panel Schedule"
               data-accent="var(--accent-teal)">
         <span class="drawer-item-icon">📋</span>Panel Schedule
+      </button>
+      <button class="drawer-item"
+              data-target="ampacity-tool"
+              data-hash="ampacity"
+              data-label="Ampacity"
+              data-accent="var(--accent-indigo)">
+        <span class="drawer-item-icon">🌡️</span>Ampacity
       </button>
 
       <div class="drawer-group-title">App</div>

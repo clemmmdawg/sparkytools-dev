@@ -1,0 +1,34 @@
+/* ── Ampacity Calculator ─────────────────────────────────────────────────── */
+
+/* Derating breakdown table */
+.amp-breakdown {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.amp-breakdown th,
+.amp-breakdown td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--divider);
+}
+
+.amp-breakdown th {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.amp-breakdown td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+/* Final derated ampacity — larger value */
+#amp-final {
+  font-size: 2rem;
+}
