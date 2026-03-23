@@ -39,6 +39,7 @@
   --accent-red:       #c0392b;   /* Service Load card accent */
   --accent-purple:    #9b59b6;   /* Ohm's Law card accent */
   --accent-teal:      #00897b;   /* Panel Schedule card accent */
+  --accent-indigo:    #5c6bc0;   /* Ampacity card accent */
   --danger:           #e74c3c;
   --success:          #27ae60;
 
@@ -262,6 +263,7 @@ body {
 .card--red    { border-top-color: var(--accent-red); }
 .card--purple { border-top-color: var(--accent-purple); }
 .card--teal   { border-top-color: var(--accent-teal);   }
+.card--indigo { border-top-color: var(--accent-indigo); }
 
 .card-header {
   margin-bottom: 20px;
