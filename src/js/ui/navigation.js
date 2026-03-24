@@ -108,7 +108,9 @@ export function initNavigation() {
   document.addEventListener('touchstart', e => {
     _swipeStartX = e.touches[0].clientX;
     _swipeStartY = e.touches[0].clientY;
-  }, { passive: true });
+    // Prevent browser back-gesture when touch starts at the left edge
+    if (_swipeStartX < 30) e.preventDefault();
+  }, { passive: false });
 
   document.addEventListener('touchend', e => {
     if (drawer.classList.contains('open')) return;
@@ -124,7 +126,7 @@ export function initNavigation() {
  */
 function _syncBar(item, labelEl) {
   labelEl.textContent = item.dataset.label || '';
-  labelEl.closest('.nav-bar-title').style.borderBottomColor =
+  labelEl.closest('.nav-bar').style.borderBottomColor =
     item.dataset.accent || 'var(--primary)';
 }
 

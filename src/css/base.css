@@ -166,12 +166,13 @@
 }
 
 body {
-  font-family:   "Inter", "Segoe UI", system-ui, sans-serif;
-  background:    var(--bg);
-  color:         var(--primary);
-  margin:        0;
-  padding:       56px 16px 48px; /* top: fixed app-bar height */
-  touch-action:  manipulation; /* prevents double-tap zoom on mobile */
+  font-family:         "Inter", "Segoe UI", system-ui, sans-serif;
+  background:          var(--bg);
+  color:               var(--primary);
+  margin:              0;
+  padding:             56px 16px 48px; /* top: fixed app-bar height */
+  touch-action:        manipulation; /* prevents double-tap zoom on mobile */
+  overscroll-behavior-x: none;       /* prevents browser back-swipe gesture */
 }
 
 
@@ -289,17 +290,19 @@ body {
 
 /* App bar: fixed to top of viewport, full viewport width */
 .nav-bar {
-  position:   fixed;
-  top:        0;
-  left:       0;
-  right:      0;
-  z-index:    100;
-  display:    flex;
-  align-items: center;
-  background: var(--nav-bg);
-  height:     56px;
-  padding:    0 16px 0 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+  position:      fixed;
+  top:           0;
+  left:          0;
+  right:         0;
+  z-index:       100;
+  display:       flex;
+  align-items:   center;
+  background:    var(--nav-bg);
+  height:        56px;
+  padding:       0 16px 0 8px;
+  box-shadow:    0 2px 8px rgba(0, 0, 0, 0.10);
+  border-bottom: 4px solid var(--primary);
+  transition:    border-color 0.2s ease;
 }
 
 .nav-bar-title {
@@ -317,9 +320,7 @@ body {
   font-size:      0.88rem;
   font-weight:    500;
   color:          var(--primary);
-  border-bottom:  3px solid transparent;
   box-sizing:     border-box;
-  transition:     border-color 0.2s ease;
 }
 
 #nav-bar-label {
