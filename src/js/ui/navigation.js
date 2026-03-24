@@ -97,10 +97,26 @@ export function initNavigation() {
       }
 
       closeDrawer();
-      const header = document.querySelector('.site-header');
-      window.scrollTo({ top: header ? header.offsetTop + header.offsetHeight : 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
+
+  // ── Swipe from left edge to open drawer (mobile) ─────────────────────────
+  let _swipeStartX = 0;
+  let _swipeStartY = 0;
+
+  document.addEventListener('touchstart', e => {
+    _swipeStartX = e.touches[0].clientX;
+    _swipeStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (drawer.classList.contains('open')) return;
+    const dx = e.changedTouches[0].clientX - _swipeStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - _swipeStartY);
+    // Trigger: started within 30px of left edge, swiped right ≥60px, not a vertical scroll
+    if (_swipeStartX < 30 && dx > 60 && dy < 80) openDrawer();
+  }, { passive: true });
 }
 
 /**

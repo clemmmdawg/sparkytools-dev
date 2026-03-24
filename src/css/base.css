@@ -170,7 +170,7 @@ body {
   background:    var(--bg);
   color:         var(--primary);
   margin:        0;
-  padding:       20px 16px 48px;
+  padding:       56px 16px 48px; /* top: fixed app-bar height */
   touch-action:  manipulation; /* prevents double-tap zoom on mobile */
 }
 
@@ -191,23 +191,8 @@ body {
 }
 
 
-/* ── 4. Site header ── */
-.site-header {
-  text-align: center;
-  padding:    8px 0 4px;
-}
-
-.site-header h1 {
-  margin:         0 0 4px;
-  font-size:      2rem;
-  letter-spacing: -0.5px;
-}
-
-.site-header p {
-  margin:    0;
-  opacity:   0.6;
-  font-size: 0.9rem;
-}
+/* ── 4. Site header (hidden — content moved into fixed app bar) ── */
+.site-header { display: none; }
 
 
 /* ── 5. Site footer ── */
@@ -300,21 +285,21 @@ body {
 }
 
 
-/* ── 7. Tool navigation — sticky top bar + slide-in drawer ── */
+/* ── 7. Tool navigation — fixed app bar + slide-in drawer ── */
 
-/* Top bar: shows active tool name + hamburger button */
+/* App bar: fixed to top of viewport, full viewport width */
 .nav-bar {
-  display:         flex;
-  align-items:     center;
-  justify-content: space-between;
-  background:      var(--nav-bg);
-  border-radius:   12px;
-  padding:         0 16px 0 4px;
-  height:          52px;
-  box-shadow:      0 4px 12px rgba(0, 0, 0, 0.08);
-  position:        sticky;
-  top:             10px;
-  z-index:         100;
+  position:   fixed;
+  top:        0;
+  left:       0;
+  right:      0;
+  z-index:    100;
+  display:    flex;
+  align-items: center;
+  background: var(--nav-bg);
+  height:     56px;
+  padding:    0 16px 0 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
 }
 
 .nav-bar-title {
@@ -325,19 +310,20 @@ body {
   display:        flex;
   align-items:    center;
   pointer-events: none;
-  max-width:      calc(100% - 120px);
+  max-width:      calc(100% - 100px);
+  white-space:    nowrap;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  font-size:      0.88rem;
+  font-weight:    500;
+  color:          var(--primary);
   border-bottom:  3px solid transparent;
   box-sizing:     border-box;
   transition:     border-color 0.2s ease;
 }
 
 #nav-bar-label {
-  font-size:     0.9rem;
-  font-weight:   700;
-  color:         var(--primary);
-  white-space:   nowrap;
-  overflow:      hidden;
-  text-overflow: ellipsis;
+  font-weight: 700;
 }
 
 /* Hamburger button */
@@ -948,7 +934,7 @@ input[type="text"]:focus {
 
 /* ── 21. Responsive overrides (≤480px) ── */
 @media (max-width: 480px) {
-  body  { padding: 12px 10px 40px; }
+  body  { padding: 56px 10px 40px; } /* preserve top offset for fixed app bar */
   .card { padding: 18px 14px; }
 
   /*
