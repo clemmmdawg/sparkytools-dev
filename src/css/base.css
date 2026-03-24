@@ -178,7 +178,7 @@ body {
 /* ── 3. Page layout ── */
 .container {
   max-width:      720px;
-  margin:         0 auto;
+  margin:         24px auto 0 auto;
   display:        flex;
   flex-direction: column;
   gap:            24px;
