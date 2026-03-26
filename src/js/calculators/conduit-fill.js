@@ -164,7 +164,7 @@ function updateConduitVisualizer(conduitArea, wireEntries) {
   wires.sort((a, b) => b.r - a.r);
 
   const placed = [];
-  const ANGLE_STEP = 0.35;
+  const ANGLE_STEP = 0.1;
   const MIN_DIST_STEP = 0.5;
   const MAX_ITERATIONS = 9000;
 
@@ -181,9 +181,9 @@ function updateConduitVisualizer(conduitArea, wireEntries) {
       const y = cy + dist * Math.sin(angle);
 
       const fromCenter = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-      const withinConduit = fromCenter + wire.r <= svgRadius - 0.5;
+      const withinConduit = fromCenter + wire.r <= svgRadius;
       const noOverlap = placed.every(
-        p => Math.sqrt((x - p.x) ** 2 + (y - p.y) ** 2) >= wire.r + p.r + 0.5
+        p => Math.sqrt((x - p.x) ** 2 + (y - p.y) ** 2) >= wire.r + p.r
       );
 
       if (withinConduit && noOverlap) {
