@@ -927,6 +927,11 @@ input[type="text"]:focus {
   color:         var(--warn-text);
   margin-top:    20px;
 }
+.about-disclaimer--ai {
+  background: color-mix(in srgb, var(--primary) 8%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--primary) 25%, transparent);
+  color: var(--text);
+}
 
 @media (max-width: 480px) {
   .about-grid { grid-template-columns: 1fr; }
