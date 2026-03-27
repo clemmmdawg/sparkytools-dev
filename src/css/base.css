@@ -938,32 +938,6 @@ input[type="text"]:focus {
   body  { padding: 56px 10px 40px; } /* preserve top offset for fixed app bar */
   .card { padding: 18px 14px; }
 
-  /*
-    On very small screens the conduit fill wire header is hidden — the inputs
-    are self-labeling via aria-label and visual context. Rows reflow to two lines.
-  */
-  .wire-header { display: none; }
-
-  .wire-row {
-    grid-template-columns: 24px 1fr 1fr 36px;
-    grid-template-rows:    auto auto;
-    gap:                   6px;
-    background:            var(--surface-row);
-    padding:               8px;
-    border-radius:         6px;
-    margin-bottom:         10px;
-  }
-
-  /* Row 1: swatch | type | quantity | remove */
-  .wire-row .color-swatch { grid-row: 1; grid-column: 1; }
-  .wire-row .w-type       { grid-row: 1; grid-column: 2; }
-  .wire-row .w-qty        { grid-row: 1; grid-column: 3; }
-  .wire-row .remove-btn   { grid-row: 1; grid-column: 4; }
-
-  /* Row 2: (empty) | construction | size */
-  .wire-row .w-const { grid-row: 2; grid-column: 2; }
-  .wire-row .w-size  { grid-row: 2; grid-column: 3; }
-
   /* Box fill rows: tighten column widths on small screens */
   .box-header,
   .box-wire-row {
