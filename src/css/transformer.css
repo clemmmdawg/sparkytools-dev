@@ -361,11 +361,62 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 480px) {
-  /* Stack primary/secondary input columns vertically */
+@media (max-width: 540px) {
+  /* Stack input columns vertically */
   .tc-vis-ctrl { grid-template-columns: 1fr; }
 
-  /* Allow the one-line diagram to scroll horizontally rather than squish */
-  .tc-visual { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .tc-vis-row { min-width: 280px; }
+  /* Switch to a vertical one-line diagram — no horizontal scroll needed */
+  .tc-visual { overflow-x: visible; }
+
+  .tc-vis-row {
+    flex-direction: column;
+    align-items:    stretch;
+    min-width:      0;
+    min-height:     0;
+  }
+
+  /* OCPD: horizontal pill spanning full width */
+  .tc-vis-ocpd {
+    flex-direction:  row;
+    justify-content: space-between;
+    align-items:     center;
+    align-self:      stretch;
+    min-width:       0;
+    padding:         7px 14px;
+    gap:             8px;
+    border-radius:   6px;
+  }
+  .tc-vis-ocpd-val { flex: 1; text-align: center; }
+
+  /* Wire section: rotate the center line to vertical; labels flank left / right */
+  .tc-vis-wire {
+    flex-direction: row;
+    align-self:     stretch;
+    min-height:     52px;
+  }
+  .tc-vis-wire::before {
+    /* override: draw a vertical line down the center instead of horizontal */
+    top:       0;
+    bottom:    0;
+    left:      50%;
+    right:     auto;
+    width:     2px;
+    height:    auto;
+    transform: translateX(-50%);
+  }
+  /* Wire size + required amps → left half, right-aligned */
+  .tc-vis-wire-above {
+    align-items:     flex-end;
+    justify-content: center;
+    padding:         4px 10px 4px 4px;
+  }
+  /* FLA label → right half, left-aligned */
+  .tc-vis-wire-below {
+    align-items:     flex-start;
+    justify-content: center;
+    padding:         4px 4px 4px 10px;
+  }
+
+  /* Transformer symbol: centered horizontally */
+  .tc-vis-xfmr { align-self: center; }
 }
