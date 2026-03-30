@@ -12,7 +12,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION   = 'sparkytools-v1.1.0';
+const CACHE_VERSION   = 'sparkytools-v1.2.0';
 const FONTS_CACHE     = 'sparkytools-fonts-v1';
 
 /**
@@ -31,6 +31,7 @@ const APP_ASSETS = [
   '/src/css/panel-schedule.css',
   '/src/css/pull-box.css',
   '/src/css/service-load.css',
+  '/src/css/motor.css',
   '/src/css/transformer.css',
 
   // Core JS
@@ -45,6 +46,7 @@ const APP_ASSETS = [
   '/src/js/calculators/panel-schedule.js',
   '/src/js/calculators/pull-box.js',
   '/src/js/calculators/service-load.js',
+  '/src/js/calculators/motor.js',
   '/src/js/calculators/transformer.js',
   '/src/js/calculators/voltage-drop.js',
 

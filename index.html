@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="src/css/ohms-law.css">
     <link rel="stylesheet" href="src/css/panel-schedule.css">
     <link rel="stylesheet" href="src/css/ampacity.css">
+    <link rel="stylesheet" href="src/css/motor.css">
 
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 
@@ -634,6 +635,139 @@
 
 
       <!-- ══════════════════════════════════════════════════════════
+           MOTOR CIRCUIT CALCULATOR
+           ══════════════════════════════════════════════════════════ -->
+      <section id="motor-tool" class="card card--orange tool-section" aria-labelledby="motor-heading">
+        <header class="card-header">
+          <h2 id="motor-heading">Motor Circuit Calculator</h2>
+        </header>
+        <p class="tool-desc">NEC 430 — Select motor specs to size the branch-circuit conductor, OCPD, and overload relay.</p>
+
+        <hr class="divider">
+
+        <!-- ── Inputs ── -->
+        <div class="mc-grid">
+          <div class="mc-field">
+            <label class="mc-label" for="mc-phase">Phase</label>
+            <select id="mc-phase" class="mc-select">
+              <option value="3">3Ø Three-Phase</option>
+              <option value="1">1Ø Single-Phase</option>
+            </select>
+          </div>
+          <div class="mc-field">
+            <label class="mc-label" for="mc-voltage">Voltage</label>
+            <select id="mc-voltage" class="mc-select"><!-- populated by JS --></select>
+          </div>
+          <div class="mc-field">
+            <label class="mc-label" for="mc-hp">HP Rating</label>
+            <select id="mc-hp" class="mc-select"><!-- populated by JS --></select>
+          </div>
+          <div class="mc-field">
+            <label class="mc-label" for="mc-motor-type">
+              Motor Type
+              <span class="mc-nec-ref" data-tip="Squirrel-cage is the most common induction motor type. Wound-rotor motors have accessible rotor windings and use lower OCPD percentages per NEC T430.52.">NEC T430.52</span>
+            </label>
+            <select id="mc-motor-type" class="mc-select">
+              <option value="SC">Squirrel-Cage (default)</option>
+              <option value="WR">Wound-Rotor</option>
+            </select>
+          </div>
+          <div class="mc-field">
+            <label class="mc-label" for="mc-ocpd-type">
+              OCPD Type
+              <span class="mc-nec-ref" data-tip="Non-time delay fuses: 300% max. Dual-element (time-delay) fuses: 175% max. Instantaneous trip CB: 800% max. Inverse time CB: 250% max. All per NEC T430.52 for squirrel-cage motors.">NEC T430.52</span>
+            </label>
+            <select id="mc-ocpd-type" class="mc-select">
+              <option value="NTD">Non-Time Delay Fuse</option>
+              <option value="DE">Dual Element (TD) Fuse</option>
+              <option value="ITC">Instantaneous Trip CB</option>
+              <option value="ITB">Inverse Time CB</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ── FLA Banner ── -->
+        <div class="mc-fla-banner">
+          <div class="mc-fla-main">
+            <span class="mc-fla-val" id="mc-fla">—</span>
+            <span class="mc-fla-unit">FLA</span>
+          </div>
+          <span class="mc-fla-sub">Full-Load Amps — NEC T430.248 / T430.250</span>
+        </div>
+
+        <!-- ── Results ── -->
+        <div id="mc-results" class="mc-results">
+
+          <!-- Conductor -->
+          <p class="mc-section-title">NEC 430.22 — Branch-Circuit Conductor</p>
+          <div class="mc-card">
+            <div class="mc-card-title">🟢 Conductor Sizing (125% × FLA)</div>
+            <div class="mc-metrics">
+              <div class="mc-metric">
+                <div class="mc-metric-value mc-metric-value--lg" id="mc-cond-wire">—</div>
+                <div class="mc-metric-label">Min. Conductor</div>
+              </div>
+              <div class="mc-metric">
+                <div class="mc-metric-value" id="mc-cond-rated">—</div>
+                <div class="mc-metric-label">Ampacity (75°C)</div>
+              </div>
+              <div class="mc-metric">
+                <div class="mc-metric-value" id="mc-cond-req">—</div>
+                <div class="mc-metric-label">Min. Required</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OCPD -->
+          <p class="mc-section-title">NEC T430.52 — Overcurrent Protection Device</p>
+          <div class="mc-card mc-card--ocpd">
+            <div class="mc-card-title">🔴 OCPD Sizing</div>
+            <div class="mc-metrics">
+              <div class="mc-metric">
+                <div class="mc-metric-value mc-metric-value--lg" id="mc-ocpd-val">—</div>
+                <div class="mc-metric-label">Max OCPD Rating</div>
+              </div>
+              <div class="mc-metric">
+                <div class="mc-metric-value" id="mc-ocpd-type-label">—</div>
+                <div class="mc-metric-label">OCPD Type</div>
+              </div>
+              <div class="mc-metric">
+                <div class="mc-metric-value" id="mc-ocpd-calc">—</div>
+                <div class="mc-metric-label">Calculated (before rounding)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overload -->
+          <p class="mc-section-title">NEC 430.32 — Overload Protection</p>
+          <div class="mc-card mc-card--overload">
+            <div class="mc-card-title">🟡 Overload Relay — Max Trip Setting</div>
+            <div class="mc-metrics">
+              <div class="mc-metric">
+                <div class="mc-metric-value mc-metric-value--lg" id="mc-ol-125">—</div>
+                <div class="mc-metric-label">SF ≥ 1.15 or ≤ 40°C rise (125% FLA)</div>
+              </div>
+              <div class="mc-metric-divider"></div>
+              <div class="mc-metric">
+                <div class="mc-metric-value mc-metric-value--lg" id="mc-ol-115">—</div>
+                <div class="mc-metric-label">All others — SF &lt; 1.15 (115% FLA)</div>
+              </div>
+            </div>
+          </div>
+
+          <p class="mc-assumptions">
+            📋 <strong>Assumptions:</strong> FLA from <strong>NEC T430.248/250</strong>.
+            Conductors sized per <strong>NEC T310.16, 75°C Cu THWN</strong>, single conductor, no derating — apply 310.15 factors for bundling or high temps.
+            OCPD rounded up to next standard size per <strong>NEC 240.6(A)</strong>.
+            Overload per <strong>NEC 430.32</strong> — check motor nameplate for actual service factor.
+            Always verify with the current NEC and a licensed electrician.
+          </p>
+
+        </div><!-- /#mc-results -->
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
            OHM'S LAW CALCULATOR
            ══════════════════════════════════════════════════════════ -->
       <section id="ohms-tool" class="card card--purple tool-section" aria-labelledby="ohms-law-heading">
@@ -1113,6 +1247,10 @@
           ⚠️ <strong>Disclaimer:</strong> Always verify calculations with a licensed electrician and the current edition of the National Electrical Code (NEC). This tool is provided for reference only and does not constitute engineering or legal advice.
         </div>
 
+        <div class="about-disclaimer about-disclaimer--ai">
+          🤖 <strong>Built with AI:</strong> Sparky Tools was built almost entirely by AI (Claude by Anthropic) — which means it <em>probably</em> knows what a #12 THWN is, but it has never once touched a wire nut. The NEC tables are sourced carefully, but AI can and does make mistakes. Double-check anything safety-critical. When in doubt, crack open the actual codebook. <strong>Don't get shocked.</strong>
+        </div>
+
       </section>
 
     </div><!-- /.container -->
@@ -1145,6 +1283,13 @@
               data-label="Transformer"
               data-accent="var(--accent-blue)">
         <span class="drawer-item-icon">🔄</span>Transformer
+      </button>
+      <button class="drawer-item"
+              data-target="motor-tool"
+              data-hash="motor"
+              data-label="Motor Circuit"
+              data-accent="var(--accent-orange)">
+        <span class="drawer-item-icon">⚙️</span>Motor Circuit
       </button>
       <button class="drawer-item"
               data-target="conduit-tool"

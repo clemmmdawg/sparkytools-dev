@@ -226,13 +226,21 @@ export function addWireRow() {
 
   row.innerHTML = `
     <input type="color" class="color-swatch" value="${color}" aria-label="Pick conductor color" title="Click to change color">
-    <select class="w-type" aria-label="Wire type">${typeOptions}</select>
-    <select class="w-const" aria-label="Construction">
-      <option value="stranded">Stranded</option>
-      <option value="solid">Solid</option>
-    </select>
-    <select class="w-size" aria-label="Wire size"></select>
-    <input type="number" class="w-qty" value="3" min="1" aria-label="Quantity">
+    <div class="wire-field" data-field="type" data-label="Type">
+      <select class="w-type" aria-label="Wire type">${typeOptions}</select>
+    </div>
+    <div class="wire-field" data-field="const" data-label="Construction">
+      <select class="w-const" aria-label="Construction">
+        <option value="stranded">Stranded</option>
+        <option value="solid">Solid</option>
+      </select>
+    </div>
+    <div class="wire-field" data-field="size" data-label="Size">
+      <select class="w-size" aria-label="Wire size"></select>
+    </div>
+    <div class="wire-field" data-field="qty" data-label="Qty">
+      <input type="number" class="w-qty" value="3" min="1" aria-label="Quantity">
+    </div>
     <button class="remove-btn" title="Remove conductor" aria-label="Remove conductor">×</button>
   `;
 

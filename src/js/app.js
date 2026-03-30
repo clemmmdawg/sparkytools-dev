@@ -20,6 +20,7 @@ import * as Transformer from './calculators/transformer.js';
 import * as OhmsLaw from './calculators/ohms-law.js';
 import * as PanelSchedule from './calculators/panel-schedule.js';
 import * as Ampacity from './calculators/ampacity.js';
+import * as Motor from './calculators/motor.js';
 
 /**
  * Main initialization function
@@ -46,6 +47,7 @@ async function init() {
     OhmsLaw.init(necData);
     PanelSchedule.init();
     Ampacity.init(necData);
+    Motor.init(necData);
     
     console.log("⚡ SparkyTools initialized successfully");
 
