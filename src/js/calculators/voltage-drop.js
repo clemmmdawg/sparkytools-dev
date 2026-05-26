@@ -1,111 +1,223 @@
 /**
  * @file voltage-drop.js
- * @description Voltage Drop Calculator - NEC 210.19(A)(1) Informational Note
- * 
+ * @description Voltage Drop Calculator — NEC 210.19(A)(1) Informational Note
+ *
  * Formula: VD = (K × I × D × M) / CM
- * Recommendation: ≤3% for branch circuits
+ * Thresholds: ≤3% branch circuit, ≤5% combined branch + feeder
+ *
+ * Circuit settings (voltage, phase, amps) are shared.
+ * Each wire run has its own material, size, and distance.
+ * Results always shown as a table; always starts with one run.
  */
 
-import { setStatus, getEl, formatNumber } from '../utils/formatting.js';
+import { getEl, formatNumber } from '../utils/formatting.js';
 
 let necData = null;
 
-/**
- * Initializes the voltage drop calculator with NEC data
- * @param {Object} data - NEC data object
- */
+// All wire runs — always at least one entry
+const runs = [{ material: 'CU', size: '12', distance: 100 }];
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+
 export function init(data) {
   necData = data;
 
-  const vdMaterial = getEl("vd-material");
-  const vdSize = getEl("vd-size");
+  document.querySelectorAll('#vd-voltage, #vd-phase, #vd-amps')
+    .forEach(el => el.addEventListener('input', update));
 
-  if (vdMaterial && vdSize) {
-    const populateVdSizes = () => {
-      const isAL = vdMaterial.value === "AL";
-      vdSize.innerHTML = "";
-      necData.conductors.wireSizeOrder.forEach(s => {
-        // Skip #14 for aluminum (not valid for most circuits)
-        if (isAL && s === "14") return;
-        vdSize.add(new Option(`#${s}`, s));
-      });
-      // Default to common branch-circuit size
-      vdSize.value = isAL ? "10" : "12";
-      calculate();
-    };
+  const addBtn = getEl('vdr-add-btn');
+  if (addBtn) addBtn.addEventListener('click', addRun);
 
-    vdMaterial.addEventListener("change", populateVdSizes);
-    document.querySelectorAll("#vd-size, #vd-voltage, #vd-phase, #vd-amps, #vd-dist")
-      .forEach(el => el.addEventListener("input", calculate));
-    populateVdSizes();
-  }
+  renderRuns();
+  update();
 }
 
-/**
- * Main calculation function for voltage drop
- */
-export function calculate() {
-  const materialEl = getEl("vd-material");
-  const sizeEl = getEl("vd-size");
-  const voltageEl = getEl("vd-voltage");
-  const phaseEl = getEl("vd-phase");
-  const ampsEl = getEl("vd-amps");
-  const distEl = getEl("vd-dist");
-  if (!materialEl || !sizeEl || !voltageEl || !phaseEl || !ampsEl || !distEl) return;
+// ── Run management ────────────────────────────────────────────────────────────
 
-  const material = materialEl.value;
-  const size = sizeEl.value;
-  const voltage = parseFloat(voltageEl.value);
-  const M = necData.conductors.phaseMultiplier[phaseEl.value];
-  const amps = parseFloat(ampsEl.value) || 0;
-  const dist = parseFloat(distEl.value) || 0;
+function addRun() {
+  runs.push({ material: 'CU', size: '12', distance: 100 });
+  renderRuns();
+  update();
+}
 
-  const K = necData.conductors.kFactors[material];
-  const CM = necData.conductors.circularMils[size];
-  if (!CM || !M) return;
+function removeRun(index) {
+  if (runs.length <= 1) return;
+  runs.splice(index, 1);
+  renderRuns();
+  update();
+}
 
-  // Calculate voltage drop
-  const drop = (M * K * amps * dist) / CM;
-  const dropPercent = voltage ? (drop / voltage) * 100 : 0;
+// ── DOM rendering ─────────────────────────────────────────────────────────────
 
-  const totalEl = getEl("vd-total");
-  const percentEl = getEl("vd-percent");
-  const statusEl = getEl("vd-status");
+function buildSizeOptions(material, selectedSize) {
+  const isAL = material === 'AL';
+  const frag = document.createDocumentFragment();
+  necData.conductors.wireSizeOrder.forEach(s => {
+    if (isAL && s === '14') return;
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = `#${s}`;
+    if (s === selectedSize) opt.selected = true;
+    frag.appendChild(opt);
+  });
+  return frag;
+}
 
-  if (totalEl) totalEl.textContent = `${formatNumber(drop)} V`;
-  if (percentEl) percentEl.textContent = `${formatNumber(dropPercent)}%`;
-  setStatus(statusEl, dropPercent > 3, "WITHIN NEC RECOMMENDATION (≤3%)", "EXCEEDS 3% RECOMMENDATION");
+function renderRuns() {
+  const list = getEl('vdr-list');
+  if (!list) return;
+  list.innerHTML = '';
 
-  // Max length at ≤3% drop
-  const maxLengthEl = getEl("vd-max-length");
-  if (maxLengthEl) {
-    if (amps > 0 && voltage > 0) {
-      const maxLen = (0.03 * voltage * CM) / (M * K * amps);
-      maxLengthEl.textContent = `${Math.floor(maxLen)} ft`;
-    } else {
-      maxLengthEl.textContent = "-- ft";
-    }
-  }
+  runs.forEach((run, i) => {
+    const row = document.createElement('div');
+    row.className = 'vdr-row';
 
-  // Recommended wire size
-  const recSizeEl = getEl("vd-rec-size");
-  if (recSizeEl) {
-    if (amps > 0 && dist > 0 && voltage > 0) {
-      const cmMin = (M * K * amps * dist) / (0.03 * voltage);
-      const isAL = material === "AL";
+    // Run number label
+    const lbl = document.createElement('span');
+    lbl.className = 'vdr-seg-label';
+    lbl.textContent = `#${i + 1}`;
+    row.appendChild(lbl);
 
-      const rec = necData.conductors.wireSizeOrder.find(s => {
-        if (isAL && s === "14") return false;
-        return (necData.conductors.circularMils[s] ?? 0) >= cmMin;
-      });
+    // Material select
+    const matGrp = document.createElement('div');
+    matGrp.className = 'input-group';
+    const matLbl = document.createElement('label');
+    matLbl.textContent = 'Material';
+    const matSel = document.createElement('select');
+    matSel.setAttribute('aria-label', `Run ${i + 1} material`);
+    ['CU', 'AL'].forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m === 'CU' ? 'Copper (CU)' : 'Aluminum (AL)';
+      if (m === run.material) opt.selected = true;
+      matSel.appendChild(opt);
+    });
+    matSel.addEventListener('change', () => {
+      run.material = matSel.value;
+      if (run.material === 'AL' && run.size === '14') run.size = '12';
+      sizeSel.innerHTML = '';
+      sizeSel.appendChild(buildSizeOptions(run.material, run.size));
+      run.size = sizeSel.value;
+      update();
+    });
+    matGrp.appendChild(matLbl);
+    matGrp.appendChild(matSel);
+    row.appendChild(matGrp);
 
-      recSizeEl.textContent = rec ? `#${rec}` : "Too large";
-      const selectedIdx = necData.conductors.wireSizeOrder.indexOf(size);
-      const recommendIdx = rec ? necData.conductors.wireSizeOrder.indexOf(rec) : Infinity;
-      recSizeEl.style.color = recommendIdx > selectedIdx ? "var(--danger)" : "var(--success)";
-    } else {
-      recSizeEl.textContent = "--";
-      recSizeEl.style.color = "";
-    }
+    // Size select
+    const sizeGrp = document.createElement('div');
+    sizeGrp.className = 'input-group';
+    const sizeLbl = document.createElement('label');
+    sizeLbl.textContent = 'Wire Size';
+    const sizeSel = document.createElement('select');
+    sizeSel.setAttribute('aria-label', `Run ${i + 1} wire size`);
+    sizeSel.appendChild(buildSizeOptions(run.material, run.size));
+    sizeSel.addEventListener('change', () => {
+      run.size = sizeSel.value;
+      update();
+    });
+    sizeGrp.appendChild(sizeLbl);
+    sizeGrp.appendChild(sizeSel);
+    row.appendChild(sizeGrp);
+
+    // Distance input
+    const distGrp = document.createElement('div');
+    distGrp.className = 'input-group';
+    const distLbl = document.createElement('label');
+    distLbl.textContent = 'Distance (ft)';
+    const distIn = document.createElement('input');
+    distIn.type = 'number';
+    distIn.min = '0';
+    distIn.step = '1';
+    distIn.value = run.distance;
+    distIn.setAttribute('aria-label', `Run ${i + 1} one-way distance in feet`);
+    distIn.addEventListener('input', () => {
+      run.distance = parseFloat(distIn.value) || 0;
+      update();
+    });
+    distGrp.appendChild(distLbl);
+    distGrp.appendChild(distIn);
+    row.appendChild(distGrp);
+
+    // Remove button — dimmed when only one run remains
+    const rmBtn = document.createElement('button');
+    rmBtn.className = 'remove-btn';
+    rmBtn.type = 'button';
+    rmBtn.textContent = '×';
+    rmBtn.setAttribute('aria-label', `Remove run ${i + 1}`);
+    rmBtn.disabled = runs.length === 1;
+    rmBtn.style.opacity = runs.length === 1 ? '0.3' : '';
+    rmBtn.addEventListener('click', () => removeRun(i));
+    row.appendChild(rmBtn);
+
+    list.appendChild(row);
+  });
+}
+
+// ── Calculation and results ───────────────────────────────────────────────────
+
+// NEC 210.19(A)(1): ≤3% branch circuit, ≤5% combined branch + feeder
+function update() {
+  const tbody = getEl('vdr-tbody');
+  const tfoot = getEl('vdr-tfoot');
+  const statusEl = getEl('vd-status');
+  if (!tbody || !tfoot || !statusEl) return;
+
+  const voltage = parseFloat(getEl('vd-voltage')?.value) || 120;
+  const M = necData.conductors.phaseMultiplier[getEl('vd-phase')?.value ?? '1'];
+  const amps = parseFloat(getEl('vd-amps')?.value) || 0;
+
+  let runningVolts = 0;
+  let totalDist = 0;
+  tbody.innerHTML = '';
+
+  runs.forEach((run, i) => {
+    const K = necData.conductors.kFactors[run.material];
+    const CM = necData.conductors.circularMils[run.size];
+    const drop = (CM && M && amps > 0) ? (M * K * amps * run.distance) / CM : 0;
+    const pct = voltage ? (drop / voltage) * 100 : 0;
+
+    runningVolts += drop;
+    totalDist += run.distance;
+    const runPct = voltage ? (runningVolts / voltage) * 100 : 0;
+
+    const tr = document.createElement('tr');
+    if (runPct > 3) tr.classList.add('vdr-table-row--over');
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${run.material}</td>
+      <td>#${run.size}</td>
+      <td>${run.distance} ft</td>
+      <td>${formatNumber(drop)} V</td>
+      <td>${formatNumber(pct)}%</td>
+      <td>${formatNumber(runPct)}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const totalPct = voltage ? (runningVolts / voltage) * 100 : 0;
+
+  tfoot.innerHTML = `
+    <tr>
+      <td colspan="3">Total</td>
+      <td>${totalDist} ft</td>
+      <td>${formatNumber(runningVolts)} V</td>
+      <td>${formatNumber(totalPct)}%</td>
+      <td>${formatNumber(totalPct)}%</td>
+    </tr>
+  `;
+
+  if (totalPct <= 3) {
+    statusEl.textContent = 'WITHIN NEC RECOMMENDATION (≤3%)';
+    statusEl.style.background = 'var(--status-ok-bg)';
+    statusEl.style.color = 'var(--status-ok-text)';
+  } else if (totalPct <= 5) {
+    statusEl.textContent = 'EXCEEDS 3% — WITHIN 5% COMBINED LIMIT';
+    statusEl.style.background = 'color-mix(in srgb, var(--accent-yellow) 20%, var(--card-bg))';
+    statusEl.style.color = 'color-mix(in srgb, var(--accent-yellow) 70%, #000)';
+  } else {
+    statusEl.textContent = 'EXCEEDS 5% COMBINED RECOMMENDATION';
+    statusEl.style.background = 'var(--status-err-bg)';
+    statusEl.style.color = 'var(--status-err-text)';
   }
 }

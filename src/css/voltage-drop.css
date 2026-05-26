@@ -1,0 +1,109 @@
+/* voltage-drop.css — Wire run list and results table
+   Namespace: vdr- (voltage drop run)
+   ----------------------------------------------------------------- */
+
+/* ── Run list spacing ── */
+#vdr-list {
+  margin-top: 10px;
+}
+
+#vdr-add-btn {
+  margin-top: 4px;
+}
+
+/* ── Individual run input rows ── */
+.vdr-row {
+  display:       flex;
+  align-items:   flex-end;
+  gap:           8px;
+  margin-bottom: 6px;
+  flex-wrap:     wrap;
+}
+
+.vdr-row .vdr-seg-label {
+  font-size:   0.75rem;
+  font-weight: 600;
+  color:       var(--text-muted);
+  white-space: nowrap;
+  align-self:  center;
+  min-width:   28px;
+  text-align:  center;
+}
+
+.vdr-row .input-group {
+  flex:      1;
+  min-width: 80px;
+}
+
+.vdr-row .input-group label {
+  font-size: 0.78rem;
+}
+
+/* ── Results table ── */
+#vdr-results {
+  margin-top: 14px;
+}
+
+.vdr-table {
+  width:           100%;
+  border-collapse: collapse;
+  font-size:       0.82rem;
+  background:      var(--surface-inset);
+  border:          1px solid var(--divider);
+  border-radius:   var(--radius);
+  overflow:        hidden;
+}
+
+.vdr-table th,
+.vdr-table td {
+  padding:       8px 10px;
+  text-align:    right;
+  border-bottom: 1px solid var(--divider);
+  white-space:   nowrap;
+}
+
+.vdr-table th:first-child,
+.vdr-table td:first-child {
+  text-align: center;
+}
+
+.vdr-table th {
+  background:     var(--surface-row);
+  font-size:      0.75rem;
+  font-weight:    700;
+  color:          var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vdr-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Highlight row when running total exceeds 3% at that point */
+.vdr-table-row--over td {
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+
+/* Totals footer */
+.vdr-table tfoot td {
+  font-weight:   700;
+  border-top:    2px solid var(--divider);
+  border-bottom: none;
+  background:    var(--surface-row);
+}
+
+/* ── Mobile: keep run rows from overflowing at 360px ── */
+@media (max-width: 420px) {
+  .vdr-row {
+    display:               grid;
+    grid-template-columns: auto 1fr 1fr 1fr auto;
+    align-items:           end;
+  }
+
+  .vdr-table th,
+  .vdr-table td {
+    padding:   6px 5px;
+    font-size: 0.72rem;
+  }
+}

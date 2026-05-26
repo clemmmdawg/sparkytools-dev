@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="src/css/ohms-law.css">
     <link rel="stylesheet" href="src/css/panel-schedule.css">
     <link rel="stylesheet" href="src/css/ampacity.css">
+    <link rel="stylesheet" href="src/css/voltage-drop.css">
 
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 
@@ -185,21 +186,10 @@
           <h2 id="voltage-drop-heading">Voltage Drop Calculator</h2>
         </header>
 
-        <p class="tool-desc">Enter wire details and one-way run length to check voltage drop against the NEC-recommended 3% limit. Also shows the minimum wire size to keep the run within limits.</p>
+        <p class="tool-desc">Set the circuit voltage, phase, and load. Add one run or many — each can use a different conductor size or material. Results update live.</p>
 
+        <!-- Circuit settings shared across all runs -->
         <div class="input-row">
-          <div class="input-group">
-            <label for="vd-material">Material</label>
-            <select id="vd-material">
-              <option value="CU">Copper (CU)</option>
-              <option value="AL">Aluminum (AL)</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label for="vd-size">Wire Size</label>
-            <select id="vd-size">
-            </select>
-          </div>
           <div class="input-group">
             <label for="vd-voltage">Voltage</label>
             <select id="vd-voltage">
@@ -217,37 +207,36 @@
               <option value="3">3-Phase</option>
             </select>
           </div>
-        </div>
-
-        <div class="input-row">
           <div class="input-group">
             <label for="vd-amps">Load (Amps)</label>
             <input type="number" id="vd-amps" value="20" min="0" step="1">
           </div>
-          <div class="input-group">
-            <label for="vd-dist">Length (One-way ft)</label>
-            <input type="number" id="vd-dist" value="100" min="0" step="1">
-          </div>
         </div>
 
-        <div class="stats stats--boxed stats--2x2">
-          <div class="stat-box">
-            <span class="label">Voltage Loss</span>
-            <span id="vd-total" class="value" aria-live="polite">0.00 V</span>
-          </div>
-          <div class="stat-box">
-            <span class="label">Percentage</span>
-            <span id="vd-percent" class="value" aria-live="polite">0.00%</span>
-          </div>
-          <div class="stat-box">
-            <span class="label">Max Length (≤3%)</span>
-            <span id="vd-max-length" class="value" aria-live="polite">-- ft</span>
-          </div>
-          <div class="stat-box">
-            <span class="label">Rec. Wire Size</span>
-            <span id="vd-rec-size" class="value" aria-live="polite">--</span>
-          </div>
+        <!-- Wire run rows (rendered by voltage-drop.js; always ≥1) -->
+        <div id="vdr-list"></div>
+
+        <button id="vdr-add-btn" class="add-btn" type="button">+ Add Run</button>
+
+        <!-- Results table — always visible -->
+        <div id="vdr-results">
+          <table class="vdr-table" aria-label="Voltage drop by run">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Material</th>
+                <th>Size</th>
+                <th>Distance</th>
+                <th>VD (V)</th>
+                <th>VD (%)</th>
+                <th>Running %</th>
+              </tr>
+            </thead>
+            <tbody id="vdr-tbody"></tbody>
+            <tfoot id="vdr-tfoot"></tfoot>
+          </table>
         </div>
+
         <div id="vd-status" class="status-pill" role="status" aria-live="polite">--</div>
       </section>
 
